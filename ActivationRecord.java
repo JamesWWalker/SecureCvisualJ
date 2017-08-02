@@ -9,6 +9,12 @@ public class ActivationRecord {
   }
 
 
+  // copy constructor
+  public ActivationRecord(ActivationRecord ar) {
+    this(ar.function);
+  }
+
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

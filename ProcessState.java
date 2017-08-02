@@ -3,10 +3,9 @@ import java.util.*;
 public class ProcessState {
 
   public int sourceLine;
-  public String assemblyCode;
   public TreeMap<String, String> registers;
   public TreeMap<String, VariableDelta> variables;
-  public ArrayList<ActivationRecord> stack;
+  public List<ActivationRecord> stack; // Important note: stack is complete for each state, not a delta.
 
 
   public ProcessState() {
@@ -18,16 +17,31 @@ public class ProcessState {
 
   public ProcessState(
     int sourceLineIn,
-    String assemblyCodeIn,
     TreeMap<String, String> registersIn,
     TreeMap<String, VariableDelta> variablesIn,
-    ArrayList<ActivationRecord> stackIn)
+    List<ActivationRecord> stackIn)
   {
     sourceLine = sourceLineIn;
-    assemblyCode = assemblyCodeIn;
     registers = registersIn;
     variables = variablesIn;
     stack = stackIn;
+  }
+
+
+  // Copy constructor
+  public static ProcessState newInstance(ProcessState state) {
+    TreeMap<String, String> copyRegisters = new TreeMap<>();
+    Set<String> registerKeys = state.registers.keySet();
+    for (String key : registerKeys) copyRegisters.put(key, state.registers.get(key));
+
+    TreeMap<String, VariableDelta> copyVariables = new TreeMap<>();
+    Set<String> variableKeys = state.variables.keySet();
+    for (String key : variableKeys) copyVariables.put(key, new VariableDelta(state.variables.get(key)));
+
+    List<ActivationRecord> copyStack = new ArrayList<>();;
+    for (ActivationRecord ar : state.stack) copyStack.add(new ActivationRecord(ar));
+
+    return new ProcessState(state.sourceLine, copyRegisters, copyVariables, copyStack);
   }
 
 
@@ -54,7 +68,6 @@ public class ProcessState {
     for (String key : regKeys) target.registers.put(key, delta.registers.get(key));
 
     target.sourceLine = delta.sourceLine;
-    target.assemblyCode = delta.assemblyCode;
 
     while (target.stack.size() > delta.stack.size()) target.stack.remove(target.stack.size()-1);
     if (target.stack.size() < delta.stack.size()) {

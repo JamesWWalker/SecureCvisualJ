@@ -1,0 +1,91 @@
+function_invocation~!~0|10|simple`_start
+function_invocation~!~0|10|libc.so.6`__libc_start_main(main=(simple
+function_invocation~!~0|10|simple`main
+variable_access~!~0|10|main|0x00007fffffffde78|char *|words|0x0000000000000000
+register~!~0|10|rax|0x0000000000400571
+register~!~0|10|rbx|0x0000000000000000
+register~!~0|10|rcx|0x0000000000000000
+register~!~0|10|rdx|0x00007fffffffdf78
+register~!~0|10|rdi|0x0000000000000001
+register~!~0|10|rsi|0x00007fffffffdf68
+register~!~0|10|rbp|0x00007fffffffde80
+register~!~0|10|rsp|0x00007fffffffde70
+register~!~0|10|r8|0x0000000000400640
+register~!~0|10|r9|0x00007ffff7de7ab0
+register~!~0|10|r10|0x0000000000000846
+register~!~0|10|r11|0x00007ffff7a2d740
+register~!~0|10|r12|0x0000000000400470
+register~!~0|10|r13|0x00007fffffffdf60
+register~!~0|10|r14|0x0000000000000000
+register~!~0|10|r15|0x0000000000000000
+register~!~0|10|rip|0x0000000000400579
+register~!~0|10|rflags|0x0000000000000202
+register~!~0|10|cs|0x0000000000000033
+register~!~0|10|fs|0x0000000000000000
+register~!~0|10|gs|0x0000000000000000
+register~!~0|10|ss|0x000000000000002b
+register~!~0|10|ds|0x0000000000000000
+register~!~0|10|es|0x0000000000000000
+assembly~!~10|0x400579 <+8>:  movl   $0x0, %eax
+assembly~!~10|0x40057e <+13>: callq  0x400566                  ; assignSize at simple.c:5
+assembly~!~10|0x400583 <+18>: movq   %rax, %rdi
+assembly~!~10|0x400586 <+21>: callq  0x400450                  ; ??? + 48
+assembly~!~10|0x40058b <+26>: movq   %rax, -0x8(%rbp)
+function_invocation~!~1|6|simple`assignSize
+register~!~1|6|rax|0x0000000000000000
+register~!~1|6|rbp|0x00007fffffffde60
+register~!~1|6|rsp|0x00007fffffffde60
+register~!~1|6|rip|0x000000000040056a
+assembly~!~6|0x40056a <+4>: movl   $0xe, %eax
+register~!~2|7|rax|0x000000000000000e
+register~!~2|7|rip|0x000000000040056f
+assembly~!~7|0x40056f <+9>:  popq   %rbp
+assembly~!~7|0x400570 <+10>: retq
+return
+register~!~3|10|rbp|0x00007fffffffde80
+register~!~3|10|rsp|0x00007fffffffde70
+register~!~3|10|rip|0x0000000000400583
+assembly~!~10|0x400579 <+8>:  movl   $0x0, %eax
+assembly~!~10|0x40057e <+13>: callq  0x400566                  ; assignSize at simple.c:5
+assembly~!~10|0x400583 <+18>: movq   %rax, %rdi
+assembly~!~10|0x400586 <+21>: callq  0x400450                  ; ??? + 48
+assembly~!~10|0x40058b <+26>: movq   %rax, -0x8(%rbp)
+variable_access~!~4|14|main|0x00007fffffffde78|char *|words|0x0000000000602010|""
+register~!~4|14|rax|0x0000000000602010
+register~!~4|14|rcx|0x00007ffff7dd1b20
+register~!~4|14|rdx|0x0000000000602010
+register~!~4|14|rdi|0x00007ffff7dd1b20
+register~!~4|14|rsi|0x0000000000602020
+register~!~4|14|r8|0x0000000000602000
+register~!~4|14|r9|0x000000000000000d
+register~!~4|14|r10|0x00007ffff7dd1b78
+register~!~4|14|r11|0x0000000000000000
+register~!~4|14|rip|0x000000000040058f
+assembly~!~14|0x40058f <+30>: movq   -0x8(%rbp), %rax
+assembly~!~14|0x400593 <+34>: movabsq $0x41206e6170706152, %rdx ; imm = 0x41206E6170706152
+assembly~!~14|0x40059d <+44>: movq   %rdx, (%rax)
+assembly~!~14|0x4005a0 <+47>: movl   $0x6b756874, 0x8(%rax)    ; imm = 0x6B756874
+assembly~!~14|0x4005a7 <+54>: movw   $0xa, 0xc(%rax)
+variable_access~!~5|15|main|0x00007fffffffde78|char *|words|0x0000000000602010|"Rappan Athuk\n"
+register~!~5|15|rdx|0x41206e6170706152
+register~!~5|15|rip|0x00000000004005ad
+assembly~!~15|0x4005ad <+60>: movq   -0x8(%rbp), %rax
+assembly~!~15|0x4005b1 <+64>: movq   %rax, %rsi
+assembly~!~15|0x4005b4 <+67>: movl   $0x400654, %edi           ; imm = 0x400654
+assembly~!~15|0x4005b9 <+72>: movl   $0x0, %eax
+assembly~!~15|0x4005be <+77>: callq  0x400430                  ; ??? + 16
+register~!~6|16|rax|0x000000000000000d
+register~!~6|16|rcx|0x000000007ffffff2
+register~!~6|16|rdx|0x00007ffff7dd3780
+register~!~6|16|rdi|0x00007ffff7dd2620
+register~!~6|16|rsi|0x0000000000000000
+register~!~6|16|r8|0x0000000000000000
+register~!~6|16|r10|0x000000000000000d
+register~!~6|16|r11|0x0000000000000246
+register~!~6|16|rip|0x00000000004005c3
+assembly~!~16|0x4005c3 <+82>: movl   $0x0, %eax
+register~!~7|17|rax|0x0000000000000000
+register~!~7|17|rip|0x00000000004005c8
+assembly~!~17|0x4005c8 <+87>: leave
+assembly~!~17|0x4005c9 <+88>: retq
+return

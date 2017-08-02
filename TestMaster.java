@@ -6,6 +6,7 @@ public class TestMaster {
     String report = "";
     report += TestVariable.runTest();
     report += TestProcessState.runTest();
+    report += TestProcessRun.runTest();
 
     // TODO: Add tests here
 

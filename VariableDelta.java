@@ -6,7 +6,6 @@ public class VariableDelta {
   public String name;
   public String value;
   public long address;
-  public long pointsTo;
 
 
   public VariableDelta(
@@ -14,21 +13,19 @@ public class VariableDelta {
     String scopeIn,
     String nameIn,
     String valueIn,
-    long addressIn,
-    long pointsToIn)
+    long addressIn)
   {
     type = typeIn;
     scope = scopeIn;
     name = nameIn;
     value = valueIn;
     address = addressIn;
-    pointsTo = pointsToIn;
   }
 
 
   // Copy constructor
   public VariableDelta(VariableDelta delta) {
-    this(delta.type, delta.scope, delta.name, delta.value, delta.address, delta.pointsTo);
+    this(delta.type, delta.scope, delta.name, delta.value, delta.address);
   }
 
 
@@ -44,7 +41,6 @@ public class VariableDelta {
     if (type != null ? !type.equals(delta.type) : delta.type != null) return false;
     if (value != null ? !value.equals(delta.value) : delta.value != null) return false;
     if (address != delta.address) return false;
-    if (pointsTo != delta.pointsTo) return false;
 
     return true;
   }
@@ -69,7 +65,6 @@ public class VariableDelta {
     target.name = delta.name;
     target.value = delta.value;
     target.address = delta.address;
-    target.pointsTo = delta.pointsTo;
   }
 
 } // VariableDelta class
