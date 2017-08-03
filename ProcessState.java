@@ -72,11 +72,21 @@ public class ProcessState {
     while (target.stack.size() > delta.stack.size()) target.stack.remove(target.stack.size()-1);
     if (target.stack.size() < delta.stack.size()) {
       for (int n = target.stack.size(); n < delta.stack.size(); ++n) {
-        target.stack.add(delta.stack.get(n));
+        target.stack.add(new ActivationRecord(delta.stack.get(n)));
       }
     }
 
   } // applyDelta()
+
+
+  @Override
+  public String toString() {
+    return "" + sourceLine + System.lineSeparator() +
+           registers + System.lineSeparator() +
+           variables + System.lineSeparator() +
+           stack + System.lineSeparator();
+  }
+
 
 
 }

@@ -6,6 +6,7 @@ public class VariableDelta {
   public String name;
   public String value;
   public long address;
+  public long pointsTo;
 
 
   public VariableDelta(
@@ -20,12 +21,30 @@ public class VariableDelta {
     name = nameIn;
     value = valueIn;
     address = addressIn;
+    pointsTo = -1;
+  }
+
+
+  public VariableDelta(
+    String typeIn,
+    String scopeIn,
+    String nameIn,
+    String valueIn,
+    long addressIn,
+    long pointsToIn)
+  {
+    type = typeIn;
+    scope = scopeIn;
+    name = nameIn;
+    value = valueIn;
+    address = addressIn;
+    pointsTo = pointsToIn;
   }
 
 
   // Copy constructor
   public VariableDelta(VariableDelta delta) {
-    this(delta.type, delta.scope, delta.name, delta.value, delta.address);
+    this(delta.type, delta.scope, delta.name, delta.value, delta.address, delta.pointsTo);
   }
 
 

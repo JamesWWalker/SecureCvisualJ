@@ -1,17 +1,19 @@
 
 public class ActivationRecord {
 
+  public String file;
   public String function;
 
 
-  public ActivationRecord(String functionIn) {
+  public ActivationRecord(String fileIn, String functionIn) {
+    file = fileIn;
     function = functionIn;
   }
 
 
   // copy constructor
   public ActivationRecord(ActivationRecord ar) {
-    this(ar.function);
+    this(ar.file, ar.function);
   }
 
 
@@ -22,9 +24,16 @@ public class ActivationRecord {
 
     ActivationRecord ar = (ActivationRecord) o;
 
+    if (file != null ? !file.equals(ar.file) : ar.file != null) return false;
     if (function != null ? !function.equals(ar.function) : ar.function != null) return false;
 
     return true;
+  }
+
+
+  @Override
+  public String toString() {
+    return file + "," + function;
   }
 
 }
