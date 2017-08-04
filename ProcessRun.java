@@ -5,15 +5,20 @@ import java.util.stream.*;
 public class ProcessRun {
 
   String programName;
-  ArrayList<ProcessState> runSequenceForward;
-  ArrayList<ProcessState> runSequenceReverse;
+  ArrayList<ProcessState> runSequence;
   int index;
   ProcessState current;
   HashMap<Integer, String> assembly;
+  HashMap<Integer, ProcessState> seedStates;
 
 
   public ProcessRun(String filename) {
-    loadRun(filename);
+    loadRun(filename, 100);
+  }
+
+
+  public ProcessRun(String filename, int seedDistance) {
+    loadRun(filename, seedDistance);
   }
 
 
@@ -55,18 +60,18 @@ public class ProcessRun {
 
 
   public void jumpToEvent(int jump) {
-    if (jump < 0 || jump >= runSequenceForward.size()) {
-      System.err.println("Illegal jump to " + jump + " (size " + runSequenceForward.size() + ").");
+    if (jump < 0 || jump >= runSequence.size()) {
+      System.err.println("Illegal jump to " + jump + " (size " + runSequence.size() + ").");
       return;
     }
-    while (jump > index) ProcessState.applyDelta(current, runSequenceForward.get(++index));
-    while (jump < index) ProcessState.applyDelta(current, runSequenceReverse.get(--index));
+    while (jump > index+1) next();
+    while (jump < index-1) previous();
   }
 
 
   public boolean next() {
-    if (index+1 < runSequenceForward.size()) {
-      ProcessState.applyDelta(current, runSequenceForward.get(++index));
+    if (index+1 < runSequence.size()) {
+      ProcessState.applyDelta(current, runSequence.get(++index));
       return true;
     }
     return false;
@@ -75,7 +80,11 @@ public class ProcessRun {
 
   public boolean previous() {
     if (index-1 >= 0) {
-      ProcessState.applyDelta(current, runSequenceReverse.get(--index));
+      int seedIndex = getClosestSeedIndex(index-1);
+      ProcessState seedState = ProcessState.newInstance(seedStates.get(seedIndex));
+      while (seedIndex+1 < index-1) ProcessState.applyDelta(seedState, runSequence.get(++seedIndex));
+      current = seedState;
+      --index;
       return true;
     }
     return false;
@@ -83,16 +92,28 @@ public class ProcessRun {
 
 
   public void jumpToEnd() {
-    while (index < runSequenceForward.size()-1) ProcessState.applyDelta(current, runSequenceForward.get(++index));
+    while (index < runSequence.size()-1) next();
   }
 
 
   public void jumpToBeginning() {
-    while (index > 0) ProcessState.applyDelta(current, runSequenceReverse.get(--index));
+    index = 0;
+    current = new ProcessState();
+    ProcessState.applyDelta(current, runSequence.get(index));
   }
 
 
-  public void loadRun(String filename) {
+  Integer getClosestSeedIndex(int target) {
+    Set<Integer> seeds = seedStates.keySet();
+    Integer closest = 0;
+    for (Integer i : seeds) {
+      if (i > closest && i < target) closest = i;
+    }
+    return closest;
+  }
+
+
+  public void loadRun(String filename, int seedDistance) {
     ArrayList<String> contents = new ArrayList<>();
     try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filename))) {
       String line = null;
@@ -107,8 +128,7 @@ public class ProcessRun {
     programName = fn.contains(".") ? fn.substring(0, fn.lastIndexOf('.')) : fn;
     programName = programName.substring(0, programName.length()-7); // get rid of -output
 
-    runSequenceForward = new ArrayList<>();
-    runSequenceReverse = new ArrayList<>();
+    runSequence = new ArrayList<>();
     index = 0;
     current = new ProcessState();
     assembly = new HashMap<>();
@@ -124,7 +144,7 @@ public class ProcessRun {
 
     try {
 
-      // We need to make deltas forwards and backwards so that we can navigate in both directions
+      // Make forward deltas
       for (int n = 0; n < contents.size(); ++n) {
         line = contents.get(n);
         String[] typeAndParameters = line.split("~!~");
@@ -135,46 +155,49 @@ public class ProcessRun {
 
         if (currentEvent != previousEvent) {
           previousEvent = currentEvent;
-          addProcessState(runningStack, stateToAdd, false, n);
+          addProcessState(runningStack, stateToAdd);
           stateToAdd = new ProcessState();
         }
 
-        parseAnalysisLine(contents, type, parameters, n, line, stateToAdd, runningStack,
-                          variableTypes, false);
-      }
-
-      stateToAdd = new ProcessState();
-
-      for (int n = contents.size()-1; n >= 0; --n) {
-        line = contents.get(n);
-        String[] typeAndParameters = line.split("~!~");
-        String type = typeAndParameters[0];
-        String[] parameters = typeAndParameters[1].split("\\|");
-
-        if (!type.equals("assembly")) currentEvent = Integer.parseInt(parameters[0]);
-
-        if (currentEvent != previousEvent) {
-          previousEvent = currentEvent;
-          addProcessState(runningStack, stateToAdd, true, n);
-          stateToAdd = new ProcessState();
+        if (type.equals("function_invocation")) parseFunctionInvocation(stateToAdd, runningStack, parameters);
+        else if (type.equals("return")) runningStack.remove(runningStack.size()-1);
+        else if (type.equals("variable_access")) parseVariableAccess(stateToAdd, variableTypes, parameters);
+        else if (type.equals("register")) stateToAdd.registers.put(parameters[2], parameters[3]);
+        else if (type.equals("assembly")) parseAssembly(parameters);
+        else {
+          System.err.println("Unrecognized event type " + type + ". Terminating parse.");
+          return;
         }
 
-        parseAnalysisLine(contents, type, parameters, n, line, stateToAdd, runningStack,
-                          variableTypes, true);
+        if (n == contents.size()-1) addProcessState(runningStack, stateToAdd);
+
+      } // Done making forward deltas
+
+      // We need to navigate in both directions.
+      // Correctly making reverse deltas turns out to be incredibly hard, so what we're actually
+      // going to do is seed the run sequence with periodic complete state information; and when
+      // traveling backwards, we start from the nearest seed that's "behind" us and apply deltas
+      // forward from that point until we reach the desired index. This will serve as a compromise
+      // between time and space.
+
+      seedStates = new HashMap<>();
+      int seedIndex = 0;
+      ProcessState seedState = new ProcessState();
+      assert index == 0;
+      ProcessState.applyDelta(seedState, runSequence.get(index));
+      seedStates.put(0, ProcessState.newInstance(seedState));
+
+      while (seedIndex + seedDistance < runSequence.size()) {
+        int targetIndex = seedIndex + seedDistance;
+        while (seedIndex <= targetIndex) {
+          ++seedIndex;
+          ProcessState.applyDelta(seedState, runSequence.get(seedIndex));
+        }
+        seedStates.put(seedIndex, ProcessState.newInstance(seedState));
       }
 
-      Collections.reverse(runSequenceReverse);
-
-      // Since each state has complete call stack info (not a delta), set all the reverse equal to the forward
-      for (int n = 0; n < runSequenceForward.size(); ++n) {
-        ProcessState forwardState = runSequenceForward.get(n);
-        ProcessState reverseState = runSequenceReverse.get(n);
-        for (ActivationRecord ar : forwardState.stack) reverseState.stack.add(new ActivationRecord(ar));
-      }
-
-      assert runSequenceForward.size() == runSequenceReverse.size();
-
-      ProcessState.applyDelta(current, runSequenceForward.get(index));
+      // Done: initialize "current" state
+      ProcessState.applyDelta(current, runSequence.get(index));
 
     } catch (Exception ex) {
       System.err.println("Analysis parsing failure on line: " + line);
@@ -184,48 +207,9 @@ public class ProcessRun {
   } // loadRun()
 
 
-  void parseAnalysisLine(ArrayList<String> contents,
-                         String type,
-                         String[] parameters,
-                         int n,
-                         String line,
-                         ProcessState stateToAdd,
-                         List<ActivationRecord> runningStack,
-                         HashMap<String, String> variableTypes,
-                         boolean reverse) throws Exception
-  {
-    if (type.equals("function_invocation")) {
-      if (!reverse) parseFunctionInvocation(stateToAdd, runningStack, parameters);
-    }
-    else if (type.equals("return")) {
-      if (!reverse) runningStack.remove(runningStack.size()-1);
-    }
-    else if (type.equals("variable_access")) parseVariableAccess(stateToAdd, variableTypes, parameters);
-    else if (type.equals("register")) stateToAdd.registers.put(parameters[2], parameters[3]);
-    else if (type.equals("assembly")) {
-      if (!reverse) parseAssembly(parameters);
-    }
-    else {
-      System.err.println("Unrecognized event type " + type + ". Terminating parse.");
-      return;
-    }
-
-    if (!reverse && n == contents.size()-1) addProcessState(runningStack, stateToAdd, reverse, n);
-    else if (reverse && n == 0) addProcessState(runningStack, stateToAdd, reverse, n);
-
-  } // parseAnalysisLine()
-
-
-  void addProcessState(List<ActivationRecord> runningStack,
-                       ProcessState stateToAdd,
-                       boolean reverse,
-                       int n)
-  {
-    if (!reverse) {
-      for (ActivationRecord ar : runningStack) stateToAdd.stack.add(new ActivationRecord(ar));
-      runSequenceForward.add(ProcessState.newInstance(stateToAdd));
-    }
-    else runSequenceReverse.add(ProcessState.newInstance(stateToAdd));
+  void addProcessState(List<ActivationRecord> runningStack, ProcessState stateToAdd) {
+    for (ActivationRecord ar : runningStack) stateToAdd.stack.add(new ActivationRecord(ar));
+    runSequence.add(ProcessState.newInstance(stateToAdd));
   }
 
 

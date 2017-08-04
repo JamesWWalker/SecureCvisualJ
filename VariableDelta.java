@@ -65,6 +65,12 @@ public class VariableDelta {
   }
 
 
+  @Override
+  public String toString() {
+    return "[" + scope + "," + name + "]=" + value + System.lineSeparator();
+  }
+
+
   public boolean isSameVariable(VariableDelta o) {
     return type.equals(o.type) &&
            scope.equals(o.scope) &&

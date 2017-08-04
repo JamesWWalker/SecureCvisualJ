@@ -1,0 +1,79 @@
+function_invocation~!~0|12|simple2`_start
+function_invocation~!~0|12|libc.so.6`__libc_start_main(main=(simple2
+function_invocation~!~0|12|simple2`main
+variable_access~!~0|12|main|0x00007fffffffde74|int|a|32767
+variable_access~!~0|12|main|0x00007fffffffde78|int|b|0
+variable_access~!~0|12|main|0x00007fffffffde7c|int|c|0
+register~!~0|12|rax|0x00000000004004f6
+register~!~0|12|rbx|0x0000000000000000
+register~!~0|12|rcx|0x0000000000000000
+register~!~0|12|rdx|0x00007fffffffdf78
+register~!~0|12|rdi|0x0000000000000001
+register~!~0|12|rsi|0x00007fffffffdf68
+register~!~0|12|rbp|0x00007fffffffde80
+register~!~0|12|rsp|0x00007fffffffde70
+register~!~0|12|r8|0x00000000004005a0
+register~!~0|12|r9|0x00007ffff7de7ab0
+register~!~0|12|r10|0x0000000000000846
+register~!~0|12|r11|0x00007ffff7a2d740
+register~!~0|12|r12|0x00000000004003e0
+register~!~0|12|r13|0x00007fffffffdf60
+register~!~0|12|r14|0x0000000000000000
+register~!~0|12|r15|0x0000000000000000
+register~!~0|12|rip|0x00000000004004fe
+register~!~0|12|rflags|0x0000000000000202
+register~!~0|12|cs|0x0000000000000033
+register~!~0|12|fs|0x0000000000000000
+register~!~0|12|gs|0x0000000000000000
+register~!~0|12|ss|0x000000000000002b
+register~!~0|12|ds|0x0000000000000000
+register~!~0|12|es|0x0000000000000000
+assembly~!~12|0x4004fe <+8>: movl   $0x2, -0xc(%rbp)
+variable_access~!~1|13|main|0x00007fffffffde74|int|a|2
+register~!~1|13|rip|0x0000000000400505
+assembly~!~13|0x400505 <+15>: movl   $0x8, -0x8(%rbp)
+variable_access~!~2|14|main|0x00007fffffffde78|int|b|8
+register~!~2|14|rip|0x000000000040050c
+assembly~!~14|0x40050c <+22>: movl   $0x0, %eax
+assembly~!~14|0x400511 <+27>: callq  0x4004d6                  ; subFunc at simple2.c:5
+function_invocation~!~3|6|simple2`subFunc
+variable_access~!~3|6|subFunc|0x00007fffffffde54|int|x|0
+variable_access~!~3|6|subFunc|0x00007fffffffde58|int|y|0
+variable_access~!~3|6|subFunc|0x00007fffffffde5c|int|z|0
+register~!~3|6|rax|0x0000000000000000
+register~!~3|6|rbp|0x00007fffffffde60
+register~!~3|6|rsp|0x00007fffffffde60
+register~!~3|6|rip|0x00000000004004da
+assembly~!~6|0x4004da <+4>: movl   $0x4, -0xc(%rbp)
+variable_access~!~4|7|subFunc|0x00007fffffffde54|int|x|4
+register~!~4|7|rip|0x00000000004004e1
+assembly~!~7|0x4004e1 <+11>: movl   $0x3, -0x8(%rbp)
+variable_access~!~5|8|subFunc|0x00007fffffffde58|int|y|3
+register~!~5|8|rip|0x00000000004004e8
+assembly~!~8|0x4004e8 <+18>: movl   -0xc(%rbp), %edx
+assembly~!~8|0x4004eb <+21>: movl   -0x8(%rbp), %eax
+assembly~!~8|0x4004ee <+24>: addl   %edx, %eax
+assembly~!~8|0x4004f0 <+26>: movl   %eax, -0x4(%rbp)
+variable_access~!~6|9|subFunc|0x00007fffffffde5c|int|z|7
+register~!~6|9|rax|0x0000000000000007
+register~!~6|9|rdx|0x0000000000000004
+register~!~6|9|rip|0x00000000004004f3
+assembly~!~9|0x4004f3 <+29>: nop
+assembly~!~9|0x4004f4 <+30>: popq   %rbp
+assembly~!~9|0x4004f5 <+31>: retq
+return~!~8
+register~!~8|15|rbp|0x00007fffffffde80
+register~!~8|15|rsp|0x00007fffffffde70
+register~!~8|15|rip|0x0000000000400516
+assembly~!~15|0x400516 <+32>: movl   -0xc(%rbp), %edx
+assembly~!~15|0x400519 <+35>: movl   -0x8(%rbp), %eax
+assembly~!~15|0x40051c <+38>: addl   %edx, %eax
+assembly~!~15|0x40051e <+40>: movl   %eax, -0x4(%rbp)
+assembly~!~15|0x400521 <+43>: movl   $0x0, %eax
+variable_access~!~9|16|main|0x00007fffffffde7c|int|c|10
+register~!~9|16|rax|0x0000000000000000
+register~!~9|16|rdx|0x0000000000000002
+register~!~9|16|rip|0x0000000000400526
+register~!~9|16|rflags|0x0000000000000206
+assembly~!~16|0x400527 <+49>: retq
+return~!~11

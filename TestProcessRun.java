@@ -8,7 +8,7 @@ public class TestProcessRun {
 
     try {
 
-      ProcessRun run = new ProcessRun("./simple-output.txt");
+      ProcessRun run = new ProcessRun("./simple-output.txt", 3);
 
       // Easy check: Current source line should be 10
       if (run.getSourceLine() != 10) errors += "  LINE ERROR 0: [10] and [" + run.getSourceLine() +
@@ -104,7 +104,7 @@ public class TestProcessRun {
         errors += "  REGISTER ERROR 11: [rip] value is [" + registers.get("rip") +
                   "] which is wrong." + System.lineSeparator();
 
-      // Next event: value of 'words' should have changed
+      // value of 'words' should have changed
       run.next(); // at index 4
 
       variables = run.getVariables();
@@ -169,7 +169,7 @@ public class TestProcessRun {
 
       checkStack.add(new ActivationRecord("simple", "assignSize"));
       stack = run.getStack(DetailLevel.NOVICE);
-      if (!stack.equals(checkStack)) errors += "  STACK ERROR 16: [" + checkStack + "] and [" +
+      if (!stack.equals(checkStack)) errors += "  STACK ERROR 17: [" + checkStack + "] and [" +
                                                stack + "] are not equal." + System.lineSeparator();
 
       // Jump to beginning, check value of rax and 'words'
@@ -177,7 +177,7 @@ public class TestProcessRun {
 
       registers = run.getRegisters(DetailLevel.INTERMEDIATE);
       if (!registers.get("rax").equals("0x0000000000400571"))
-        errors += "  REGISTER ERROR 17: [rax] value is [" + registers.get("rax") +
+        errors += "  REGISTER ERROR 18: [rax] value is [" + registers.get("rax") +
                   "] which is wrong." + System.lineSeparator();
 
       variables = run.getVariables();
@@ -186,9 +186,157 @@ public class TestProcessRun {
                                                   "main",
                                                   "words",
                                                   "0x0000000000000000",
-                                                  140737488346744L);
+                                                  140737488346744L); /* */
 
-      // TODO: Do a test where the function that gets called also has a variable.
+      //////////////////////////////////////////////////////////////////////////////////////////////
+      // Try a run with multiple variables to make sure it's handling them correctly
+      //////////////////////////////////////////////////////////////////////////////////////////////
+
+      run = new ProcessRun("./simple2-output.txt", 3);
+
+      // Check variable
+      variables = run.getVariables();
+      errors += verifyVariableState(variables.get("main,a"),
+                                                  "int",
+                                                  "main",
+                                                  "a",
+                                                  "32767",
+                                                  140737488346740L);
+      errors += verifyVariableState(variables.get("main,b"),
+                                                  "int",
+                                                  "main",
+                                                  "b",
+                                                  "0",
+                                                  140737488346744L);
+      errors += verifyVariableState(variables.get("main,c"),
+                                                  "int",
+                                                  "main",
+                                                  "c",
+                                                  "0",
+                                                  140737488346748L);
+
+      run.next();
+      run.next();
+      run.next();
+      variables = run.getVariables();
+      errors += verifyVariableState(variables.get("main,a"),
+                                                  "int",
+                                                  "main",
+                                                  "a",
+                                                  "2",
+                                                  140737488346740L);
+      errors += verifyVariableState(variables.get("main,b"),
+                                                  "int",
+                                                  "main",
+                                                  "b",
+                                                  "8",
+                                                  140737488346744L);
+      errors += verifyVariableState(variables.get("subFunc,x"),
+                                                  "int",
+                                                  "subFunc",
+                                                  "x",
+                                                  "0",
+                                                  140737488346708L);
+      errors += verifyVariableState(variables.get("subFunc,y"),
+                                                  "int",
+                                                  "subFunc",
+                                                  "y",
+                                                  "0",
+                                                  140737488346712L);
+      errors += verifyVariableState(variables.get("subFunc,z"),
+                                                  "int",
+                                                  "subFunc",
+                                                  "z",
+                                                  "0",
+                                                  140737488346716L);
+
+      run.next();
+      run.next();
+      run.next();
+      variables = run.getVariables();
+
+      errors += verifyVariableState(variables.get("subFunc,z"),
+                                                  "int",
+                                                  "subFunc",
+                                                  "z",
+                                                  "7",
+                                                  140737488346716L);
+
+      run.next();
+      run.next();
+      variables = run.getVariables(); /* */
+
+      if (variables.size() != 3)
+      errors += "  VARIABLE ERROR 19: Should be [3] variables but there are [" + variables.size() +
+                "]." + System.lineSeparator();
+      errors += verifyVariableState(variables.get("main,c"),
+                                                  "int",
+                                                  "main",
+                                                  "c",
+                                                  "10",
+                                                  140737488346748L);
+
+      run.previous();
+      run.previous();
+      variables = run.getVariables();
+
+      errors += verifyVariableState(variables.get("main,a"),
+                                                  "int",
+                                                  "main",
+                                                  "a",
+                                                  "2",
+                                                  140737488346740L);
+      errors += verifyVariableState(variables.get("main,b"),
+                                                  "int",
+                                                  "main",
+                                                  "b",
+                                                  "8",
+                                                  140737488346744L);
+      errors += verifyVariableState(variables.get("main,c"),
+                                                  "int",
+                                                  "main",
+                                                  "c",
+                                                  "0",
+                                                  140737488346748L);
+      errors += verifyVariableState(variables.get("subFunc,x"),
+                                                  "int",
+                                                  "subFunc",
+                                                  "x",
+                                                  "4",
+                                                  140737488346708L);
+      errors += verifyVariableState(variables.get("subFunc,y"),
+                                                  "int",
+                                                  "subFunc",
+                                                  "y",
+                                                  "3",
+                                                  140737488346712L);
+      errors += verifyVariableState(variables.get("subFunc,z"),
+                                                  "int",
+                                                  "subFunc",
+                                                  "z",
+                                                  "0",
+                                                  140737488346716L);
+
+      run.jumpToBeginning();
+      variables = run.getVariables();
+      errors += verifyVariableState(variables.get("main,a"),
+                                                  "int",
+                                                  "main",
+                                                  "a",
+                                                  "32767",
+                                                  140737488346740L);
+      errors += verifyVariableState(variables.get("main,b"),
+                                                  "int",
+                                                  "main",
+                                                  "b",
+                                                  "0",
+                                                  140737488346744L);
+      errors += verifyVariableState(variables.get("main,c"),
+                                                  "int",
+                                                  "main",
+                                                  "c",
+                                                  "0",
+                                                  140737488346748L);
 
     } catch (Exception ex) {
       System.err.println("Exception thrown during test:");
