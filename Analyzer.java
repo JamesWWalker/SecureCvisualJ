@@ -322,6 +322,10 @@ public class Analyzer {
       System.out.println("target create --no-dependents --arch " + architecture + " " + binary);
       Thread.sleep(1000);
       consumeInput(input);
+      
+      System.out.println("image dump sections " + binary);
+      Thread.sleep(1000);
+      parseSections(input);
 
       System.out.println("breakpoint set --name main");
       Thread.sleep(100);
@@ -363,6 +367,31 @@ public class Analyzer {
       line = input.readLine();
       System.err.println("Consume Received: '" + line + "'");
       Thread.sleep(10);
+    }
+  }
+  
+  
+  static void parseSections(BufferedReader input)
+              throws IOException, InterruptedException
+  {
+    String[] inputLines = getLldbInput(input);
+
+    for (int n = 0; n < inputLines.length; ++n) {
+      String line = inputLines[n].trim();
+      if (line.startsWith("0x")) {
+        String[] splitLine = line.split("\\s+");
+        // ID, type, file address, file offset, file size, flags, section name
+        if (splitLine.length < 7) continue;
+        bw.write("section~!~" +
+                 splitLine[0]    + "|" + // ID
+                 splitLine[1]    + "|" + // type
+                 splitLine[2]    + "|" + // file address
+                 splitLine[3]    + "|" + // file offset
+                 splitLine[4]    + "|" + // file size
+                 splitLine[5]    + "|" + // flags
+                 splitLine[6]          + // section name
+                 System.lineSeparator());
+      }
     }
   }
 
