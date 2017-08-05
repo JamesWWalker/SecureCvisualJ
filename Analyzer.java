@@ -560,6 +560,7 @@ public class Analyzer {
       }
 
     } catch (Exception ex) {
+      bw.flush();
       ex.printStackTrace();
       System.exit(1);
     }
@@ -598,6 +599,7 @@ public class Analyzer {
     String[] inputLines = getLldbInput(input);
     if (inputLines.length < 7) {
       System.err.println("ERROR: Assembly output in unexpected format");
+      bw.flush();
       System.exit(1);
     }
     for (int n = 6; n < inputLines.length; ++n) {
