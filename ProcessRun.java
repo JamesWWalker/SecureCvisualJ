@@ -10,6 +10,7 @@ public class ProcessRun {
   ProcessState current;
   HashMap<Integer, String> assembly;
   HashMap<Integer, ProcessState> seedStates;
+  ArrayList<ProgramSection> sections;
 
 
   public ProcessRun(String filename) {
@@ -132,6 +133,7 @@ public class ProcessRun {
     index = 0;
     current = new ProcessState();
     assembly = new HashMap<>();
+    sections = new ArrayList<>();
 
     int previousEvent = 0;
     int currentEvent = 0;
@@ -151,7 +153,8 @@ public class ProcessRun {
         String type = typeAndParameters[0];
         String[] parameters = typeAndParameters[1].split("\\|");
 
-        if (!type.equals("assembly")) currentEvent = Integer.parseInt(parameters[0]);
+        if (!type.equals("assembly") && !type.equals("section")) 
+          currentEvent = Integer.parseInt(parameters[0]);
 
         if (currentEvent != previousEvent) {
           previousEvent = currentEvent;
@@ -164,6 +167,7 @@ public class ProcessRun {
         else if (type.equals("variable_access")) parseVariableAccess(stateToAdd, variableTypes, parameters);
         else if (type.equals("register")) stateToAdd.registers.put(parameters[2], parameters[3]);
         else if (type.equals("assembly")) parseAssembly(parameters);
+        else if (type.equals("section")) parseSection(parameters);
         else {
           System.err.println("Unrecognized event type " + type + ". Terminating parse.");
           return;
@@ -270,5 +274,21 @@ public class ProcessRun {
     }
     else assembly.put(lineNumber, assemblyLine);
   }
+  
+  
+  void parseSection(String[] parameters) throws Exception {
+    String[] addressStr = parameters[2].split("-");
+    long address = Long.parseUnsignedLong(addressStr[0].substring(3), 16) -
+                   Long.parseUnsignedLong(addressStr[1].substring(2, addressStr[1].length()-1), 16);
+  
+    sections.add(new ProgramSection(parameters[0],
+                                    parameters[1],
+                                    address,
+                                    Long.parseUnsignedLong(parameters[3].substring(2), 16),
+                                    Long.parseUnsignedLong(parameters[4].substring(2), 16),
+                                    parameters[5],
+                                    parameters[6]));
+  }
+  
 
 }
