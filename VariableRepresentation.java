@@ -121,7 +121,7 @@ public class VariableRepresentation {
   }
   
   
-  String getBytesByType(String digits, VariableType convertTo) {
+  private String getBytesByType(String digits, VariableType convertTo) {
     int numDigits;
     switch (convertTo) {
       case SIGNED_CHAR:
@@ -153,7 +153,7 @@ public class VariableRepresentation {
   }
   
   
-  List<String> divideHexIntoBytes(String hex) {
+  private List<String> divideHexIntoBytes(String hex) {
     List<String> bytes = new ArrayList<>();
     while (hex.length() > 0) {
       bytes.add(hex.substring(0, 2));
@@ -163,7 +163,7 @@ public class VariableRepresentation {
   }
   
   
-  String padWithZeroes(int numZeroes, String str) {
+  private String padWithZeroes(int numZeroes, String str) {
     String zeroes = "";
     for (int n = 0; n < numZeroes; ++n) zeroes += "0";
     return zeroes.substring(str.length()) + str;

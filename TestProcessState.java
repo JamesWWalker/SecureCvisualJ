@@ -162,7 +162,7 @@ public class TestProcessState {
   } // runTest()
 
 
-  static String verifyProcessState(
+  private static String verifyProcessState(
     ProcessState state,
     int sourceLine,
     TreeMap<String, String> registers,

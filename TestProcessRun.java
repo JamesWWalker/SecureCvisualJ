@@ -9,28 +9,33 @@ public class TestProcessRun {
     try {
 
       ProcessRun run = new ProcessRun("./simple-output.txt", 3);
+      ProcessRunFilter filter = new ProcessRunFilter();
 
       // Easy check: Current source line should be 10
-      if (run.getSourceLine() != 10) errors += "  LINE ERROR 0: [10] and [" + run.getSourceLine() +
-                                               "] are not equal." + System.lineSeparator();
+      if (filter.getSourceLine(run) != 10) errors += "  LINE ERROR 0: [10] and [" +
+                                                     filter.getSourceLine(run) +
+                                                     "] are not equal." + System.lineSeparator();
 
       // Check starting stack contents for different detail levels
       List<ActivationRecord> checkStack = new ArrayList<>();
       checkStack.add(new ActivationRecord("simple", "main"));
 
-      List<ActivationRecord> stack = run.getStack(DetailLevel.NOVICE);
+      filter.setDetailLevel(DetailLevel.NOVICE);
+      List<ActivationRecord> stack = filter.getStack(run);
       if (!stack.equals(checkStack)) errors += "  STACK ERROR 1: [" + checkStack + "] and [" +
                                                stack + "] are not equal." + System.lineSeparator();
 
       checkStack.add(0, new ActivationRecord("libc.so.6", "__libc_start_main(main=(simple"));
       checkStack.add(0, new ActivationRecord("simple", "_start"));
 
-      stack = run.getStack(DetailLevel.ADVANCED);
+      filter.setDetailLevel(DetailLevel.ADVANCED);
+      stack = filter.getStack(run);
       if (!stack.equals(checkStack)) errors += "  STACK ERROR 2: [" + checkStack + "] and [" +
                                                stack + "] are not equal." + System.lineSeparator();
 
       // Check a couple of registers at random
-      TreeMap<String, String> registers = run.getRegisters(DetailLevel.INTERMEDIATE);
+      filter.setDetailLevel(DetailLevel.INTERMEDIATE);
+      TreeMap<String, String> registers = filter.getRegisters(run);
       if (!registers.get("r11").equals("0x00007ffff7a2d740"))
         errors += "  REGISTER ERROR 3: [r11] value is [" + registers.get("r11") + "]" + System.lineSeparator();
       if (!registers.get("r11").equals("0x00007ffff7a2d740"))
@@ -43,9 +48,9 @@ public class TestProcessRun {
         "0x400583 <+18>: movq   %rax, %rdi" + System.lineSeparator() +
         "0x400586 <+21>: callq  0x400450                  ; ??? + 48" + System.lineSeparator() +
         "0x40058b <+26>: movq   %rax, -0x8(%rbp)";
-      if (!checkAssembly.equals(run.getAssembly()))
+      if (!checkAssembly.equals(filter.getAssembly(run)))
         errors += "  ASSEMBLY ERROR 5: [" + checkAssembly + "]" + System.lineSeparator() + "  and" +
-                  System.lineSeparator() + "[" + run.getAssembly() + "] are not equal." + System.lineSeparator();
+                  System.lineSeparator() + "[" + filter.getAssembly(run) + "] are not equal." + System.lineSeparator();
 
       // Check variable
       TreeMap<String, VariableDelta> variables = run.getVariables();
@@ -59,26 +64,28 @@ public class TestProcessRun {
       // Go to next event and check that things were updated correctly
       run.next();
 
-      if (run.getSourceLine() != 6) errors += "  LINE ERROR 6: [6] and [" + run.getSourceLine() +
+      if (filter.getSourceLine(run) != 6) errors += "  LINE ERROR 6: [6] and [" + filter.getSourceLine(run) +
                                                "] are not equal." + System.lineSeparator();
 
       checkStack.clear();
       checkStack.add(new ActivationRecord("simple", "main"));
       checkStack.add(new ActivationRecord("simple", "assignSize"));
 
-      stack = run.getStack(DetailLevel.NOVICE);
+      filter.setDetailLevel(DetailLevel.NOVICE);
+      stack = filter.getStack(run);
       if (!stack.equals(checkStack)) errors += "  STACK ERROR 7: [" + checkStack + "] and [" +
                                                stack + "] are not equal." + System.lineSeparator();
 
-      registers = run.getRegisters(DetailLevel.INTERMEDIATE);
+      filter.setDetailLevel(DetailLevel.INTERMEDIATE);
+      registers = filter.getRegisters(run);
       if (!registers.get("rbp").equals("0x00007fffffffde60"))
         errors += "  REGISTER ERROR 8: [rbp] value is [" + registers.get("rbp") +
                   "] which is wrong." + System.lineSeparator();
 
       checkAssembly = "0x40056a <+4>: movl   $0xe, %eax";
-      if (!checkAssembly.equals(run.getAssembly()))
+      if (!checkAssembly.equals(filter.getAssembly(run)))
         errors += "  ASSEMBLY ERROR 9: [" + checkAssembly + "]" + System.lineSeparator() + "  and" +
-                  System.lineSeparator() + "[" + run.getAssembly() + "] are not equal." + System.lineSeparator();
+                  System.lineSeparator() + "[" + filter.getAssembly(run) + "] are not equal." + System.lineSeparator();
 
       variables = run.getVariables();
       errors += verifyVariableState(variables.get("main,words"),
@@ -95,11 +102,13 @@ public class TestProcessRun {
       checkStack.clear();
       checkStack.add(new ActivationRecord("simple", "main"));
 
-      stack = run.getStack(DetailLevel.NOVICE);
+      filter.setDetailLevel(DetailLevel.NOVICE);
+      stack = filter.getStack(run);
       if (!stack.equals(checkStack)) errors += "  STACK ERROR 10: [" + checkStack + "] and [" +
                                                stack + "] are not equal." + System.lineSeparator();
 
-      registers = run.getRegisters(DetailLevel.INTERMEDIATE);
+      filter.setDetailLevel(DetailLevel.INTERMEDIATE);
+      registers = filter.getRegisters(run);
       if (!registers.get("rip").equals("0x0000000000400583"))
         errors += "  REGISTER ERROR 11: [rip] value is [" + registers.get("rip") +
                   "] which is wrong." + System.lineSeparator();
@@ -132,19 +141,22 @@ public class TestProcessRun {
       // Jump to the end, check rcx and rax
       run.jumpToEnd();
 
-      registers = run.getRegisters(DetailLevel.INTERMEDIATE);
+      filter.setDetailLevel(DetailLevel.INTERMEDIATE);
+      registers = filter.getRegisters(run);
       if (!registers.get("rcx").equals("0x000000007ffffff2"))
         errors += "  REGISTER ERROR 13: [rcx] value is [" + registers.get("rcx") +
                   "] which is wrong." + System.lineSeparator();
 
-      stack = run.getStack(DetailLevel.NOVICE);
+      filter.setDetailLevel(DetailLevel.NOVICE);
+      stack = filter.getStack(run);
       if (!stack.isEmpty()) errors += "  STACK ERROR 14: Stack should be empty but isn't:" +
                                       stack + System.lineSeparator();
 
       // Go back one: Now main should be on the stack
       run.previous();
 
-      stack = run.getStack(DetailLevel.NOVICE);
+      filter.setDetailLevel(DetailLevel.NOVICE);
+      stack = filter.getStack(run);
       if (!stack.equals(checkStack)) errors += "  STACK ERROR 15: [" + checkStack + "] and [" +
                                                stack + "] are not equal." + System.lineSeparator();
 
@@ -168,14 +180,16 @@ public class TestProcessRun {
       run.previous();
 
       checkStack.add(new ActivationRecord("simple", "assignSize"));
-      stack = run.getStack(DetailLevel.NOVICE);
+      filter.setDetailLevel(DetailLevel.NOVICE);
+      stack = filter.getStack(run);
       if (!stack.equals(checkStack)) errors += "  STACK ERROR 17: [" + checkStack + "] and [" +
                                                stack + "] are not equal." + System.lineSeparator();
 
       // Jump to beginning, check value of rax and 'words'
       run.jumpToBeginning();
 
-      registers = run.getRegisters(DetailLevel.INTERMEDIATE);
+      filter.setDetailLevel(DetailLevel.INTERMEDIATE);
+      registers = filter.getRegisters(run);
       if (!registers.get("rax").equals("0x0000000000400571"))
         errors += "  REGISTER ERROR 18: [rax] value is [" + registers.get("rax") +
                   "] which is wrong." + System.lineSeparator();
@@ -337,6 +351,40 @@ public class TestProcessRun {
                                                   "c",
                                                   "0",
                                                   140737488346748L);
+                                                  
+      //////////////////////////////////////////////////////////////////////////////////////////////
+      // Verify that sections filtering is working
+      //////////////////////////////////////////////////////////////////////////////////////////////
+      
+      filter.setDetailLevel(DetailLevel.ADVANCED);
+      ArrayList<ProgramSection> sections = filter.getSections(run);
+      
+      if (!sections.stream().anyMatch(s -> s.name.endsWith(".data")))
+        errors += "  SECTION ERROR 1: .data section not found." + System.lineSeparator();
+      if (!sections.stream().anyMatch(s -> s.name.endsWith(".rodata")))
+        errors += "  SECTION ERROR 2: .rodata section not found." + System.lineSeparator();
+      if (!sections.stream().anyMatch(s -> s.name.endsWith(".text")))
+        errors += "  SECTION ERROR 3: .text section not found." + System.lineSeparator();
+      if (sections.stream().anyMatch(s -> s.name.endsWith(".interp")))
+        errors += "  SECTION ERROR 4: .interp section should not be present, but is." + System.lineSeparator();
+      
+      if (sections.size() != 3)
+        errors += "  SECTION ERROR 5: Section size should be [3], but is [" + sections.size() +
+                  "]." + System.lineSeparator();
+        
+      filter.setDetailLevel(DetailLevel.NOVICE);
+      sections = filter.getSections(run);
+      
+      if (sections.size() > 0)
+        errors += "  SECTION ERROR 6: Sections should be empty, but is size [" + sections.size() +
+                  "]." + System.lineSeparator();
+                  
+      filter.setDetailLevel(DetailLevel.EXPERT);
+      sections = filter.getSections(run);
+      
+      if (sections.size() != 26)
+        errors += "  SECTION ERROR 7: Section size should be [26], but is [" + sections.size() +
+                  "]." + System.lineSeparator();
 
     } catch (Exception ex) {
       System.err.println("Exception thrown during test:");
@@ -345,10 +393,11 @@ public class TestProcessRun {
 
     if (errors.isEmpty()) errors = "  All tests passed!" + System.lineSeparator();
     return (header + errors);
+    
   } // runTest()
 
 
-  static String verifyVariableState(
+  private static String verifyVariableState(
     VariableDelta var,
     String type,
     String scope,

@@ -68,7 +68,7 @@ public class TestVariable {
   } // runTest()
 
 
-  static String verifyVariableState(
+  private static String verifyVariableState(
     VariableDelta var,
     String type,
     String scope,

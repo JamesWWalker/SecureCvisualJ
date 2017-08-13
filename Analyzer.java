@@ -7,11 +7,11 @@ import java.util.regex.Pattern;
 class Variable {
 
   public String name;
-  String type;
-  String address;
-  String pointsTo;
-  String value;
-  ArrayList<Variable> elements;
+  private String type;
+  private String address;
+  private String pointsTo;
+  private String value;
+  private ArrayList<Variable> elements;
 
 
   // Returns new index of where the variable concludes
@@ -112,7 +112,7 @@ class Variable {
 
 
 
-  int nextNonSpaceCharacter(String line, int index) {
+  private int nextNonSpaceCharacter(String line, int index) {
     try {
 
       while (index < line.length()) {
@@ -130,7 +130,7 @@ class Variable {
   }
 
 
-  int nextSpaceCharacter(String line, int index) {
+  private int nextSpaceCharacter(String line, int index) {
     try {
 
       while (index < line.length()) {
@@ -148,7 +148,7 @@ class Variable {
   }
 
 
-  boolean isLastTextChunk(String line, int index) {
+  private boolean isLastTextChunk(String line, int index) {
 
     try {
 
@@ -359,7 +359,7 @@ public class Analyzer {
   } // main
 
 
-  static void consumeInput(BufferedReader input)
+  private static void consumeInput(BufferedReader input)
               throws IOException, InterruptedException
   {
     String line = "";
@@ -371,7 +371,7 @@ public class Analyzer {
   }
   
   
-  static void parseSections(BufferedReader input)
+  private static void parseSections(BufferedReader input)
               throws IOException, InterruptedException
   {
     String[] inputLines = getLldbInput(input);
@@ -396,7 +396,7 @@ public class Analyzer {
   }
 
 
-  static void analyzeLine(BufferedReader input)
+  private static void analyzeLine(BufferedReader input)
               throws IOException, InterruptedException
   {
     // Get current line number, which function we're in,
@@ -433,7 +433,7 @@ public class Analyzer {
   } // analyzeLine()
 
 
-  static void parseSourceLine(BufferedReader input)
+  private static void parseSourceLine(BufferedReader input)
               throws IOException, InterruptedException
   {
 //    pendingFunctions.clear();
@@ -488,7 +488,7 @@ public class Analyzer {
   } // parseSourceLine()
 
 
-  static void parseBacktrace(BufferedReader input)
+  private static void parseBacktrace(BufferedReader input)
               throws IOException, InterruptedException
   {
     String[] inputLines = getLldbInput(input);
@@ -545,7 +545,7 @@ public class Analyzer {
   } // parseBacktrace()
 
 
-  static void parseVariables(BufferedReader input, boolean global)
+  private static void parseVariables(BufferedReader input, boolean global)
               throws IOException, InterruptedException
   {
     try {
@@ -596,7 +596,7 @@ public class Analyzer {
   } // parseVariable()
 
 
-  static void parseRegisters(BufferedReader input)
+  private static void parseRegisters(BufferedReader input)
               throws IOException, InterruptedException
   {
     String[] inputLines = getLldbInput(input);
@@ -622,7 +622,7 @@ public class Analyzer {
   } // parseRegisters()
 
 
-  static void parseAssembly(BufferedReader input)
+  private static void parseAssembly(BufferedReader input)
               throws IOException, InterruptedException
   {
     String[] inputLines = getLldbInput(input);
@@ -641,7 +641,7 @@ public class Analyzer {
   } // parseAssembly()
 
 
-  static String[] getLldbInput(BufferedReader input)
+  private static String[] getLldbInput(BufferedReader input)
                   throws IOException, InterruptedException
   {
     String lldbInput = "";

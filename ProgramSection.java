@@ -23,4 +23,16 @@ public class ProgramSection {
     flags = flagsIn;
     name = nameIn;
   }
+  
+  
+  // copy constructor
+  public ProgramSection(ProgramSection other) {
+    this(other.id, other.type, other.address, other.offset, other.size, other.flags, other.name);
+  }
+  
+  
+  @Override
+  public String toString() {
+    return name;
+  }
 }

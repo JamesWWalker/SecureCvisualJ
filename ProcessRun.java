@@ -4,13 +4,14 @@ import java.util.stream.*;
 
 public class ProcessRun {
 
-  String programName;
-  ArrayList<ProcessState> runSequence;
-  int index;
-  ProcessState current;
-  HashMap<Integer, String> assembly;
-  HashMap<Integer, ProcessState> seedStates;
-  ArrayList<ProgramSection> sections;
+  public String programName;
+  
+  private ArrayList<ProcessState> runSequence;
+  private int index;
+  private ProcessState current;
+  private HashMap<Integer, String> assembly;
+  private HashMap<Integer, ProcessState> seedStates;
+  private ArrayList<ProgramSection> sections;
 
 
   public ProcessRun(String filename) {
@@ -34,29 +35,33 @@ public class ProcessRun {
   }
 
 
-  public List<ActivationRecord> getStack(DetailLevel detailLevel) {
-    if (detailLevel == DetailLevel.ADVANCED || detailLevel == DetailLevel.EXPERT) return current.stack;
-    else { // In basic and intermediate mode, remove external & 'invisible' functions
-      List<ActivationRecord> filteredStack = new ArrayList<>();
-      for (ActivationRecord ar : current.stack) {
-        if (ar.file.equals(programName) && !ar.function.equals("_start")) filteredStack.add(ar);
-      }
-      return filteredStack;
-    }
+  public List<ActivationRecord> getStack() {
+    List<ActivationRecord> stack = new ArrayList<>();
+    for (ActivationRecord ar : current.stack) stack.add(new ActivationRecord(ar));
+    return stack;
   }
 
 
-  public TreeMap<String, String> getRegisters(DetailLevel detailLevel) {
-    if (detailLevel == DetailLevel.NOVICE) {
-      System.err.println("WARNING: Request for registers in novice mode.");
-      return null;
-    }
-    return current.registers;
+  public TreeMap<String, String> getRegisters() {
+    TreeMap<String, String> registers = new TreeMap<>();
+    Set<String> keys = current.registers.keySet();
+    for (String key : keys) registers.put(key, current.registers.get(key));
+    return registers;
   }
 
 
   public TreeMap<String, VariableDelta> getVariables() {
-    return current.variables;
+    TreeMap<String, VariableDelta> variables = new TreeMap<>();
+    Set<String> keys = current.variables.keySet();
+    for (String key : keys) variables.put(key, new VariableDelta(current.variables.get(key)));
+    return variables;
+  }
+  
+  
+  public ArrayList<ProgramSection> getSections() {
+    ArrayList<ProgramSection> retSections = new ArrayList<>();
+    for (ProgramSection section : sections) retSections.add(new ProgramSection(section));
+    return retSections;
   }
 
 
@@ -104,7 +109,7 @@ public class ProcessRun {
   }
 
 
-  Integer getClosestSeedIndex(int target) {
+  private Integer getClosestSeedIndex(int target) {
     Set<Integer> seeds = seedStates.keySet();
     Integer closest = 0;
     for (Integer i : seeds) {
@@ -211,13 +216,13 @@ public class ProcessRun {
   } // loadRun()
 
 
-  void addProcessState(List<ActivationRecord> runningStack, ProcessState stateToAdd) {
+  private void addProcessState(List<ActivationRecord> runningStack, ProcessState stateToAdd) {
     for (ActivationRecord ar : runningStack) stateToAdd.stack.add(new ActivationRecord(ar));
     runSequence.add(ProcessState.newInstance(stateToAdd));
   }
 
 
-  void parseFunctionInvocation(ProcessState state,
+  private void parseFunctionInvocation(ProcessState state,
                                List<ActivationRecord> stack,
                                String[] parameters) throws Exception
   {
@@ -227,7 +232,7 @@ public class ProcessRun {
   }
 
 
-  void parseVariableAccess(ProcessState state,
+  private void parseVariableAccess(ProcessState state,
                            HashMap<String, String> variableTypes,
                            String[] parameters) throws Exception
   {
@@ -258,14 +263,14 @@ public class ProcessRun {
   }
 
 
-  String getVariableType(String name, HashMap<String, String> variableTypes) throws Exception {
+  private String getVariableType(String name, HashMap<String, String> variableTypes) throws Exception {
     return variableTypes.containsKey(name.split(":")[0]) ?
                 variableTypes.get(name).split("\\s+")[0] :
                                               "Unknown";
   }
 
 
-  void parseAssembly(String[] parameters) throws Exception {
+  private void parseAssembly(String[] parameters) throws Exception {
     int lineNumber = Integer.parseInt(parameters[0]);
     String assemblyLine = parameters[1];
     if (assembly.containsKey(lineNumber)) {
@@ -276,7 +281,7 @@ public class ProcessRun {
   }
   
   
-  void parseSection(String[] parameters) throws Exception {
+  private void parseSection(String[] parameters) throws Exception {
     String[] addressStr = parameters[2].split("-");
     long address = Long.parseUnsignedLong(addressStr[0].substring(3), 16) -
                    Long.parseUnsignedLong(addressStr[1].substring(2, addressStr[1].length()-1), 16);
