@@ -1,3 +1,4 @@
+import java.util.*;
 
 public class VariableDelta {
 
@@ -62,6 +63,12 @@ public class VariableDelta {
     if (address != delta.address) return false;
 
     return true;
+  }
+  
+  
+  @Override
+  public int hashCode() {
+    return Objects.hash(type, scope, name, value, address, pointsTo);
   }
 
 

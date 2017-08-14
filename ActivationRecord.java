@@ -1,3 +1,4 @@
+import java.util.*;
 
 public class ActivationRecord {
 
@@ -34,6 +35,12 @@ public class ActivationRecord {
   @Override
   public String toString() {
     return file + "," + function;
+  }
+  
+  
+  @Override
+  public int hashCode() {
+    return Objects.hash(file, function);
   }
 
 }
