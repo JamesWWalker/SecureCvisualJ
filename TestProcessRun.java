@@ -8,7 +8,7 @@ public class TestProcessRun {
 
     try {
 
-      ProcessRun run = new ProcessRun("./simple-output.txt", 3);
+      ProcessRun run = new ProcessRun("./simple-output.vaccs", 3);
       ProcessRunFilter filter = new ProcessRunFilter();
 
       // Easy check: Current source line should be 10
@@ -206,7 +206,7 @@ public class TestProcessRun {
       // Try a run with multiple variables to make sure it's handling them correctly
       //////////////////////////////////////////////////////////////////////////////////////////////
 
-      run = new ProcessRun("./simple2-output.txt", 3);
+      run = new ProcessRun("./simple2-output.vaccs", 3);
 
       // Check variable
       variables = run.getVariables();

@@ -309,7 +309,7 @@ public class Analyzer {
       br.close(); /* */
 
       // Interact with LLDB through stdin/stdout
-      String outputFilename = binary + "-output.txt";
+      String outputFilename = binary + "-output.vaccs";
 
       fw = new FileWriter(outputFilename, true);
       bw = new BufferedWriter(fw);

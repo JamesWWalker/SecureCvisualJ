@@ -1,3 +1,4 @@
+import java.io.*;
 import javafx.application.Application;
 import javafx.beans.binding.*;
 import javafx.beans.property.*;
@@ -13,6 +14,7 @@ public class UIMainWindow {
   public Stage window;
   
   private CoordinatorMaster coordinator;
+  private FileChooser fileChooser;
   private DoubleProperty fontSize = new SimpleDoubleProperty(10);
   private BorderPane layout;
   private TabPane tabPane;
@@ -20,6 +22,11 @@ public class UIMainWindow {
   
   public UIMainWindow(CoordinatorMaster coordinatorIn) {
     coordinator = coordinatorIn;
+    fileChooser = new FileChooser();
+    FileChooser.ExtensionFilter extFilter =
+      new FileChooser.ExtensionFilter("Program run files (*.vaccs)", "*.vaccs");
+    fileChooser.getExtensionFilters().add(extFilter);
+    fileChooser.setTitle("Load Program Run");
   }
   
   
@@ -38,7 +45,13 @@ public class UIMainWindow {
     // File menu
     Menu fileMenu = new Menu("File");
     MenuItem menuOpen = new MenuItem("Open Program Run...");
-    menuOpen.setOnAction(e -> System.out.println("Load file")); // TODO
+    menuOpen.setOnAction(e -> {
+      File file = fileChooser.showOpenDialog(window);
+      if (file != null) {
+        coordinator.run = new ProcessRun(file.getAbsolutePath());
+        // TODO: load source file together with program run
+      }
+    });
     MenuItem menuExit = new MenuItem("Exit...");
     menuExit.setOnAction(e -> coordinator.closeProgram());
     fileMenu.getItems().addAll(menuOpen, menuExit);
@@ -50,7 +63,6 @@ public class UIMainWindow {
     Menu detailMenu = new Menu("Detail Mode");
     ToggleGroup detailToggle = new ToggleGroup();
 
-    // TODO: Default mode selected (config file?)
     RadioMenuItem menuNovice = new RadioMenuItem("Novice");
     menuNovice.setOnAction(e -> coordinator.runFilter.setDetailLevel(DetailLevel.NOVICE));
     RadioMenuItem menuIntermediate = new RadioMenuItem("Intermediate");

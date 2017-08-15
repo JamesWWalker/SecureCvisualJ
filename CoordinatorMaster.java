@@ -3,6 +3,7 @@ import java.util.*;
 
 public class CoordinatorMaster {
 
+  public ProcessRun run = null;
   public ProcessRunFilter runFilter;
 
   private List<UIDetachedTab> detachedTabs = new ArrayList<>();
