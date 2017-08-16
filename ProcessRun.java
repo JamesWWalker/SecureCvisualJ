@@ -76,6 +76,7 @@ public class ProcessRun {
 
 
   public boolean next() {
+  System.err.println("CALLED NEXT");
     if (index+1 < runSequence.size()) {
       ProcessState.applyDelta(current, runSequence.get(++index));
       return true;
@@ -85,6 +86,7 @@ public class ProcessRun {
 
 
   public boolean previous() {
+  System.err.println("CALLED PREVIOUS");
     if (index-1 >= 0) {
       int seedIndex = getClosestSeedIndex(index-1);
       ProcessState seedState = ProcessState.newInstance(seedStates.get(seedIndex));
@@ -98,11 +100,13 @@ public class ProcessRun {
 
 
   public void jumpToEnd() {
+  System.err.println("CALLED END");
     while (index < runSequence.size()-1) next();
   }
 
 
   public void jumpToBeginning() {
+  System.err.println("CALLED BEGINNING");
     index = 0;
     current = new ProcessState();
     ProcessState.applyDelta(current, runSequence.get(index));
