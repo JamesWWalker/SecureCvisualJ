@@ -1,3 +1,4 @@
+import java.util.*;
 import javafx.event.*;
 import javafx.stage.*;
 import javafx.scene.*;
@@ -65,6 +66,26 @@ public class UIPlayControls {
     Scene scene = new Scene(root, 360, 60);
     window.setScene(scene);
     window.show();
+  }
+  
+  
+  public String saveConfig() {
+    String config = "";
+    config += "PlayerX:" + Double.toString(window.getX()) + System.lineSeparator();
+    config += "PlayerY:" + Double.toString(window.getY()) + System.lineSeparator();
+    
+    return config;
+  }
+  
+  
+  public void loadConfig(List<String> config) {
+    for (String line : config) {
+      String[] parameters = line.trim().split(":");
+      if (parameters.length > 1) {
+        if (parameters[0].equals("PlayerX")) window.setX(Double.parseDouble(parameters[1]));
+        else if (parameters[0].equals("PlayerY")) window.setY(Double.parseDouble(parameters[1]));
+      }
+    }
   }
 
 }

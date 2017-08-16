@@ -181,7 +181,7 @@ public class ProcessRunFilter {
   
   public void loadConfig(List<String> config) {
     for (String line : config) {
-      String[] parameters = line.split(":");
+      String[] parameters = line.trim().split(":");
       if (parameters.length > 1) {
         if (parameters[0].equals("DetailLevel")) setDetailLevel(DetailLevel.parse(parameters[1].trim()));
         else if (parameters[0].equals("ShowAllFunctions")) showAllFunctions.set(Boolean.parseBoolean(parameters[1]));

@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.*;
 import javafx.application.Application;
 import javafx.beans.binding.*;
 import javafx.beans.property.*;
@@ -17,6 +18,7 @@ public class UIMainWindow {
   private FileChooser fileChooser;
   private DoubleProperty fontSize = new SimpleDoubleProperty(10);
   private BorderPane layout;
+  private Scene scene;
   private TabPane tabPane;
   
   
@@ -125,7 +127,7 @@ public class UIMainWindow {
 
     //Tabs
     Group root = new Group();
-    Scene scene = new Scene(root, 400, 250, Color.WHITE);
+    scene = new Scene(root, 400, 250, Color.WHITE);
 
     tabPane = new TabPane();
 
@@ -153,25 +155,20 @@ public class UIMainWindow {
       tab.setId(tabName);
       
       // content
-      HBox hbox = new HBox();
-      hbox.getChildren().add(new Label(tabName));
-      hbox.setAlignment(Pos.CENTER);
+      HBox content = new HBox();
+      content.getChildren().add(new Label(tabName));
+      content.setAlignment(Pos.CENTER);
       
       // make detachable
       ContextMenu contextMenu = new ContextMenu();
       MenuItem detach = new MenuItem("Detach " + tabName);
-      detach.setOnAction(e -> {
-        UIDetachedTab detachedTab = new UIDetachedTab(this, coordinator, hbox, tab.getText()); // set content
-        coordinator.registerDetachedTab(detachedTab);
-        detachedTab.display();
-        tabPane.getTabs().remove(tab);
-      });
+      detach.setOnAction(e -> detachTab(tab.getText()));
       contextMenu.getItems().add(detach);
       tab.setContextMenu(contextMenu);
       contextMenu.show(tabPane.lookup("#" + tabName), Side.RIGHT, 0, 0);
       
       // finalize
-      tab.setContent(hbox);
+      tab.setContent(content);
       tabPane.getTabs().add(tab);
     }
     
@@ -191,7 +188,17 @@ public class UIMainWindow {
   }
   
   
-  public void reattachTab(String title, HBox content) {
+  public void detachTab(String title) {
+    Tab tab = tabPane.getTabs().stream().filter(t -> t.getId().equals(title)).findAny().orElse(null);
+    assert tab != null;
+    UIDetachedTab detachedTab = new UIDetachedTab(this, coordinator, tab.getContent(), title);
+    coordinator.registerDetachedTab(detachedTab);
+    detachedTab.display();
+    tabPane.getTabs().remove(tab);
+  }
+  
+  
+  public void reattachTab(String title, Node content) {
     Tab tab = new Tab();
     tab.setClosable(false);
     tab.setText(title);
@@ -201,18 +208,38 @@ public class UIMainWindow {
     // Must be made detachable again
     ContextMenu contextMenu = new ContextMenu();
     MenuItem detach = new MenuItem("Detach " + title);
-    detach.setOnAction(e -> {
-      UIDetachedTab detachedTab = new UIDetachedTab(this, coordinator, content, tab.getText()); // set content
-      coordinator.registerDetachedTab(detachedTab);
-      detachedTab.display();
-      tabPane.getTabs().remove(tab);
-    });
+    detach.setOnAction(e -> detachTab(title));
     contextMenu.getItems().add(detach);
     tab.setContextMenu(contextMenu);
     contextMenu.show(tabPane.lookup("#" + title), Side.RIGHT, 0, 0);
     
     tabPane.getTabs().add(tab);
   }
+  
+  
+  public String saveConfig() {
+    String config = "";
+    config += "MainWindowX:" + Double.toString(window.getX()) + System.lineSeparator();
+    config += "MainWindowY:" + Double.toString(window.getY()) + System.lineSeparator();
+    config += "MainWindowWidth:" + Double.toString(window.getWidth()) + System.lineSeparator();
+    config += "MainWindowHeight:" + Double.toString(window.getHeight()) + System.lineSeparator();
+    
+    return config;
+  }
+  
+  
+  public void loadConfig(List<String> config) {
+    for (String line : config) {
+      String[] parameters = line.trim().split(":");
+      if (parameters.length > 1) {
+        if (parameters[0].equals("MainWindowX")) window.setX(Double.parseDouble(parameters[1]));
+        else if (parameters[0].equals("MainWindowY")) window.setY(Double.parseDouble(parameters[1]));
+        else if (parameters[0].equals("MainWindowWidth")) window.setWidth(Double.parseDouble(parameters[1]));
+        else if (parameters[0].equals("MainWindowHeight")) window.setHeight(Double.parseDouble(parameters[1]));
+      }
+    }
+  }
+
   
 
 }
