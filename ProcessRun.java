@@ -1,17 +1,34 @@
 import java.io.*;
 import java.util.*;
 import java.util.stream.*;
+import javafx.beans.property.*;
 
 public class ProcessRun {
 
+  public boolean isNull() { return isNull; }
   public String programName;
   
+  private IntegerProperty numberOfEvents = new SimpleIntegerProperty();
+  public final int getNumberOfEvents() { return numberOfEvents.get(); }
+  public final void setNumberOfEvents(int value) { numberOfEvents.set(value); }
+  public IntegerProperty numberOfEventsProperty() { return numberOfEvents; }
+  
+  private final ReadOnlyIntegerWrapper index = new ReadOnlyIntegerWrapper();
+  public final int getIndex() { return index.get(); }
+  public final ReadOnlyIntegerProperty indexProperty() { return index.getReadOnlyProperty(); }
+  
   private ArrayList<ProcessState> runSequence;
-  private int index;
   private ProcessState current;
   private HashMap<Integer, String> assembly;
   private HashMap<Integer, ProcessState> seedStates;
   private ArrayList<ProgramSection> sections;
+  private boolean isNull;
+  
+  
+  public ProcessRun() {
+    isNull = true;
+    setNumberOfEvents(0);
+  }
 
 
   public ProcessRun(String filename) {
@@ -65,20 +82,24 @@ public class ProcessRun {
   }
 
 
-  public void jumpToEvent(int jump) {
+  public boolean jumpToEvent(int jump) {
+  System.err.println("CALLED JUMP");
     if (jump < 0 || jump >= runSequence.size()) {
-      System.err.println("Illegal jump to " + jump + " (size " + runSequence.size() + ").");
-      return;
+      System.err.println("WARNING: Illegal jump to " + jump + " (size " + runSequence.size() + ").");
+      return false;
     }
-    while (jump > index+1) next();
-    while (jump < index-1) previous();
+    if (jump == index.get()) return false;
+    while (jump > index.get()+1) next();
+    while (jump < index.get()-1) previous();
+    return true;
   }
 
 
   public boolean next() {
-  System.err.println("CALLED NEXT");
-    if (index+1 < runSequence.size()) {
-      ProcessState.applyDelta(current, runSequence.get(++index));
+  System.err.println("CALLED NEXT" + index.get());
+    if (index.get()+1 < runSequence.size()) {
+      index.set(index.get()+1);
+      ProcessState.applyDelta(current, runSequence.get(index.get()));
       return true;
     }
     return false;
@@ -87,12 +108,12 @@ public class ProcessRun {
 
   public boolean previous() {
   System.err.println("CALLED PREVIOUS");
-    if (index-1 >= 0) {
-      int seedIndex = getClosestSeedIndex(index-1);
+    if (index.get()-1 >= 0) {
+      int seedIndex = getClosestSeedIndex(index.get()-1);
       ProcessState seedState = ProcessState.newInstance(seedStates.get(seedIndex));
-      while (seedIndex+1 < index-1) ProcessState.applyDelta(seedState, runSequence.get(++seedIndex));
+      while (seedIndex+1 < index.get()-1) ProcessState.applyDelta(seedState, runSequence.get(++seedIndex));
       current = seedState;
-      --index;
+      index.set(index.get()-1);
       return true;
     }
     return false;
@@ -101,15 +122,15 @@ public class ProcessRun {
 
   public void jumpToEnd() {
   System.err.println("CALLED END");
-    while (index < runSequence.size()-1) next();
+    while (index.get() < runSequence.size()-1) next();
   }
 
 
   public void jumpToBeginning() {
   System.err.println("CALLED BEGINNING");
-    index = 0;
+    index.set(0);
     current = new ProcessState();
-    ProcessState.applyDelta(current, runSequence.get(index));
+    ProcessState.applyDelta(current, runSequence.get(index.get()));
   }
 
 
@@ -139,7 +160,7 @@ public class ProcessRun {
     programName = programName.substring(0, programName.length()-7); // get rid of -output
 
     runSequence = new ArrayList<>();
-    index = 0;
+    index.set(0);
     current = new ProcessState();
     assembly = new HashMap<>();
     sections = new ArrayList<>();
@@ -190,14 +211,14 @@ public class ProcessRun {
       // Correctly making reverse deltas turns out to be incredibly hard, so what we're actually
       // going to do is seed the run sequence with periodic complete state information; and when
       // traveling backwards, we start from the nearest seed that's "behind" us and apply deltas
-      // forward from that point until we reach the desired index. This will serve as a compromise
+      // forward from that point until we reach the desired indexInternal. This will serve as a compromise
       // between time and space.
 
       seedStates = new HashMap<>();
       int seedIndex = 0;
       ProcessState seedState = new ProcessState();
-      assert index == 0;
-      ProcessState.applyDelta(seedState, runSequence.get(index));
+      assert index.get() == 0;
+      ProcessState.applyDelta(seedState, runSequence.get(index.get()));
       seedStates.put(0, ProcessState.newInstance(seedState));
 
       while (seedIndex + seedDistance < runSequence.size()) {
@@ -209,8 +230,10 @@ public class ProcessRun {
         seedStates.put(seedIndex, ProcessState.newInstance(seedState));
       }
 
-      // Done: initialize "current" state
-      ProcessState.applyDelta(current, runSequence.get(index));
+      // Done: initialize "current" state & perform other initializations
+      ProcessState.applyDelta(current, runSequence.get(index.get()));
+      setNumberOfEvents(runSequence.size() - 1);
+      isNull = false;
 
     } catch (Exception ex) {
       System.err.println("Analysis parsing failure on line: " + line);

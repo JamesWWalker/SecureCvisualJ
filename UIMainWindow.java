@@ -50,7 +50,7 @@ public class UIMainWindow {
     menuOpen.setOnAction(e -> {
       File file = fileChooser.showOpenDialog(window);
       if (file != null) {
-        coordinator.run = new ProcessRun(file.getAbsolutePath());
+        coordinator.getRun().loadRun(file.getAbsolutePath(), 100);
         // TODO: load source file together with program run
       }
     });

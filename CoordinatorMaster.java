@@ -1,9 +1,14 @@
 import java.io.*;
 import java.util.*;
+import javafx.beans.property.*;
 
 public class CoordinatorMaster {
 
-  public ProcessRun run = null;
+  private ObjectProperty<ProcessRun> run = new SimpleObjectProperty<>();
+  public final ProcessRun getRun() { return run.get(); }
+  public final void setRun(ProcessRun value) { run.set(value); }
+  public ObjectProperty<ProcessRun> runProperty() { return run; }
+
   public ProcessRunFilter runFilter;
 
   private List<UIDetachedTab> detachedTabs = new ArrayList<>();
@@ -12,6 +17,7 @@ public class CoordinatorMaster {
   
 
   public void exec() {
+    setRun(new ProcessRun());
     runFilter = new ProcessRunFilter();
     mainWindow = new UIMainWindow(this);
     playControls = new UIPlayControls(this);

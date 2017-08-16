@@ -1,5 +1,6 @@
 import java.util.*;
 import javafx.animation.*;
+import javafx.beans.binding.*;
 import javafx.event.*;
 import javafx.geometry.*;
 import javafx.scene.*;
@@ -11,7 +12,7 @@ import javafx.scene.text.*;
 import javafx.stage.*;
 import javafx.util.*;
 
-// TODO: Add speed speedSlider and maybe seek speedSlider
+
 public class UIPlayControls {
 
   public Stage window;
@@ -20,6 +21,9 @@ public class UIPlayControls {
   private Image imageStart, imageBack, imagePlay, imageNext, imageEnd;
   private boolean isPlaying;
   private long playbackSpeed;
+  private boolean processingNonSeekInput;
+  private Label seekCaption;
+  private Slider seekSlider;
   private Label speedCaption;
   private Slider speedSlider;
   private Timeline timeline;
@@ -38,7 +42,6 @@ public class UIPlayControls {
     speedCaption = new Label("Playback speed: Not set");
     speedSlider = new Slider(1, 10, 0);
     speedSlider.valueProperty().addListener((obs, oldv, newv) -> {
-    System.err.println("LISTENRE CALLED");
       setPlaybackSpeed(newv.intValue());
       speedCaption.setText("Playback speed: " + Long.toString(playbackSpeed) + " ms");
     });
@@ -48,6 +51,27 @@ public class UIPlayControls {
     speedSlider.setSnapToTicks(true);
     
     isPlaying = false;
+    processingNonSeekInput = false;
+    
+    seekCaption = new Label("Seek through program run: -");
+    seekSlider = new Slider(0, 0, 0);
+    seekSlider.setMajorTickUnit(1);
+    seekSlider.setMinorTickCount(0);
+    //seekSlider.setShowTickMarks(true);
+    seekSlider.setSnapToTicks(true);
+    seekSlider.maxProperty().bind(coordinator.getRun().numberOfEventsProperty());
+    seekCaption.textProperty().bind(
+      Bindings.createStringBinding(() -> coordinator.getRun().isNull() ?
+      "Seek through program run: -" : "Seek through program run: " +
+      Integer.toString(coordinator.getRun().getIndex()),
+      coordinator.getRun().indexProperty()));
+    coordinator.getRun().indexProperty().addListener((obs, oldv, newv) -> 
+      seekSlider.setValue(newv.doubleValue() + 0.01));
+    seekSlider.valueProperty().addListener((obs, oldv, newv) -> {
+      if (!processingNonSeekInput && !isPlaying && !coordinator.getRun().isNull()) {
+        coordinator.getRun().jumpToEvent((int)(newv.doubleValue() + 0.01));
+      }
+    });
   }
   
 
@@ -78,24 +102,28 @@ public class UIPlayControls {
 
     Button buttonStart = new Button("", new ImageView(imageStart));
     buttonStart.setOnAction(e -> {
-      if (coordinator.run != null) {
-        coordinator.run.jumpToBeginning();
+      if (!coordinator.getRun().isNull()) {
+        processingNonSeekInput = true;
+        coordinator.getRun().jumpToBeginning();
         // TODO: push update to PAS
+        processingNonSeekInput = false;
       }
     });
     Button buttonBack = new Button("", new ImageView(imageBack));
     buttonBack.setOnAction(e -> {
-      if (coordinator.run != null) {
-        coordinator.run.previous();
+      if (!coordinator.getRun().isNull()) {
+        processingNonSeekInput = true;
+        coordinator.getRun().previous();
         // TODO: push update to PAS
+        processingNonSeekInput = false;
       }
     });
     Button buttonPlay = new Button("", new ImageView(imagePlay));
     buttonPlay.setOnAction(e -> {
-      if (coordinator.run != null) {
+      if (!coordinator.getRun().isNull()) {
         if (!isPlaying) {
           timeline = new Timeline(new KeyFrame(Duration.millis(playbackSpeed), x-> {
-            if (!coordinator.run.next()) stopPlayer();
+            if (!coordinator.getRun().next()) stopPlayer();
           }));
           timeline.setCycleCount(Animation.INDEFINITE);
           timeline.play();
@@ -109,27 +137,31 @@ public class UIPlayControls {
     });
     Button buttonNext = new Button("", new ImageView(imageNext));
     buttonNext.setOnAction(e -> {
-      if (coordinator.run != null) {
-        coordinator.run.next();
+      if (!coordinator.getRun().isNull()) {
+        processingNonSeekInput = true;
+        coordinator.getRun().next();
         // TODO: push update to PAS
+        processingNonSeekInput = false;
       }
     });
     Button buttonEnd = new Button("", new ImageView(imageEnd));
     buttonEnd.setOnAction(e -> {
-      if (coordinator.run != null) {
-        coordinator.run.jumpToEnd();
+      if (!coordinator.getRun().isNull()) {
+        processingNonSeekInput = true;
+        coordinator.getRun().jumpToEnd();
         // TODO: push update to PAS
+        processingNonSeekInput = false;
       }
     });
     
     buttonPanel.getChildren().addAll(buttonStart, buttonBack, buttonPlay, buttonNext, buttonEnd);
     buttonPanel.setAlignment(Pos.CENTER);
     
-    root.getChildren().addAll(buttonPanel, speedCaption, speedSlider);
+    root.getChildren().addAll(buttonPanel, speedCaption, speedSlider, seekCaption, seekSlider);
     root.setAlignment(Pos.CENTER);
     root.setStyle("-fx-padding: 20 20 20 20;");
     
-    Scene scene = new Scene(root, 360, 140);
+    Scene scene = new Scene(root, 360, 220);
     window.setScene(scene);
     window.show();
     speedSlider.setValue(8);
@@ -166,6 +198,7 @@ public class UIPlayControls {
   private void stopPlayer() {
   System.err.println("CALLING STOP");
     timeline.stop();
+    isPlaying = false;
   }
   
   
