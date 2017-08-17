@@ -124,6 +124,7 @@ public class UIPlayControls {
       if (!coordinator.getRun().isNull()) {
         if (!isPlaying) {
           timeline = new Timeline(new KeyFrame(Duration.millis(playbackSpeed), x-> {
+            coordinator.queryProcessRunAndUpdateUI();
             if (!coordinator.getRun().next()) stopPlayer();
           }));
           timeline.setCycleCount(Animation.INDEFINITE);
