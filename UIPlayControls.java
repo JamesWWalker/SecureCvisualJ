@@ -70,11 +70,12 @@ public class UIPlayControls {
     seekSlider.valueProperty().addListener((obs, oldv, newv) -> {
       if (!processingNonSeekInput && !isPlaying && !coordinator.getRun().isNull()) {
         coordinator.getRun().jumpToEvent((int)(newv.doubleValue() + 0.01));
+        coordinator.queryProcessRunAndUpdateUI();
       }
     });
   }
   
-
+  
   public void display() {
     window = new Stage();
 
@@ -105,7 +106,7 @@ public class UIPlayControls {
       if (!coordinator.getRun().isNull()) {
         processingNonSeekInput = true;
         coordinator.getRun().jumpToBeginning();
-        // TODO: push update to PAS
+        coordinator.queryProcessRunAndUpdateUI();
         processingNonSeekInput = false;
       }
     });
@@ -114,7 +115,7 @@ public class UIPlayControls {
       if (!coordinator.getRun().isNull()) {
         processingNonSeekInput = true;
         coordinator.getRun().previous();
-        // TODO: push update to PAS
+        coordinator.queryProcessRunAndUpdateUI();
         processingNonSeekInput = false;
       }
     });
@@ -140,7 +141,7 @@ public class UIPlayControls {
       if (!coordinator.getRun().isNull()) {
         processingNonSeekInput = true;
         coordinator.getRun().next();
-        // TODO: push update to PAS
+        coordinator.queryProcessRunAndUpdateUI();
         processingNonSeekInput = false;
       }
     });
@@ -149,7 +150,7 @@ public class UIPlayControls {
       if (!coordinator.getRun().isNull()) {
         processingNonSeekInput = true;
         coordinator.getRun().jumpToEnd();
-        // TODO: push update to PAS
+        coordinator.queryProcessRunAndUpdateUI();
         processingNonSeekInput = false;
       }
     });
@@ -196,7 +197,6 @@ public class UIPlayControls {
   
   
   private void stopPlayer() {
-  System.err.println("CALLING STOP");
     timeline.stop();
     isPlaying = false;
   }

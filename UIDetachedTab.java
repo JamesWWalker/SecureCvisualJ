@@ -46,8 +46,7 @@ public class UIDetachedTab {
     // disable close button
     window.setOnCloseRequest(e -> {
       e.consume();
-      coordinator.deregisterDetachedTab(this);
-      mainWindow.reattachTab(title, content);
+      mainWindow.reattachTab(this);
       window.close(); 
     });
     

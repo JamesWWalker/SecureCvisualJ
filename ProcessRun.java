@@ -83,7 +83,6 @@ public class ProcessRun {
 
 
   public boolean jumpToEvent(int jump) {
-  System.err.println("CALLED JUMP");
     if (jump < 0 || jump >= runSequence.size()) {
       System.err.println("WARNING: Illegal jump to " + jump + " (size " + runSequence.size() + ").");
       return false;
@@ -96,7 +95,6 @@ public class ProcessRun {
 
 
   public boolean next() {
-  System.err.println("CALLED NEXT" + index.get());
     if (index.get()+1 < runSequence.size()) {
       index.set(index.get()+1);
       ProcessState.applyDelta(current, runSequence.get(index.get()));
@@ -107,7 +105,6 @@ public class ProcessRun {
 
 
   public boolean previous() {
-  System.err.println("CALLED PREVIOUS");
     if (index.get()-1 >= 0) {
       int seedIndex = getClosestSeedIndex(index.get()-1);
       ProcessState seedState = ProcessState.newInstance(seedStates.get(seedIndex));
@@ -121,13 +118,11 @@ public class ProcessRun {
 
 
   public void jumpToEnd() {
-  System.err.println("CALLED END");
     while (index.get() < runSequence.size()-1) next();
   }
 
 
   public void jumpToBeginning() {
-  System.err.println("CALLED BEGINNING");
     index.set(0);
     current = new ProcessState();
     ProcessState.applyDelta(current, runSequence.get(index.get()));
@@ -199,7 +194,7 @@ public class ProcessRun {
         else if (type.equals("assembly")) parseAssembly(parameters);
         else if (type.equals("section")) parseSection(parameters);
         else {
-          System.err.println("Unrecognized event type " + type + ". Terminating parse.");
+          System.err.println("ERROR: Unrecognized event type " + type + ". Terminating parse.");
           return;
         }
 
@@ -236,7 +231,7 @@ public class ProcessRun {
       isNull = false;
 
     } catch (Exception ex) {
-      System.err.println("Analysis parsing failure on line: " + line);
+      System.err.println("ERROR: Analysis parsing failure on line: " + line);
       ex.printStackTrace();
       return;
     }

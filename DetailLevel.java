@@ -8,13 +8,13 @@ public enum DetailLevel {
     else if (in.equals("EXPERT")) return EXPERT;
     else if (in.equals("CUSTOM")) return CUSTOM;
     else {
-      System.err.println("Illegal DetailLevel type " + in);
+      System.err.println("ERROR: Illegal DetailLevel type " + in);
       System.exit(1);
       return CUSTOM;
     }
   }
   
-  public String toString(DetailLevel in) {
+  public static String toString(DetailLevel in) {
     switch (in) {
       case NOVICE: return "NOVICE";
       case INTERMEDIATE: return "INTERMEDIATE";
@@ -22,7 +22,7 @@ public enum DetailLevel {
       case EXPERT: return "EXPERT";
       case CUSTOM: return "CUSTOM";
       default:
-        System.err.println("Illegal DetailLevel type " + in);
+        System.err.println("ERROR: Illegal DetailLevel type " + in);
         System.exit(1);
         return "Unreachable";
     }

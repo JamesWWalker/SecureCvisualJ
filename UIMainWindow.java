@@ -11,7 +11,8 @@ import javafx.scene.paint.*;
 import javafx.stage.*;
 
 public class UIMainWindow {
-
+  
+  public List<UIDetachedTab> detachedTabs = new ArrayList<>();
   public Stage window;
   
   private CoordinatorMaster coordinator;
@@ -51,6 +52,7 @@ public class UIMainWindow {
       File file = fileChooser.showOpenDialog(window);
       if (file != null) {
         coordinator.getRun().loadRun(file.getAbsolutePath(), 100);
+        coordinator.queryProcessRunAndUpdateUI();
         // TODO: load source file together with program run
       }
     });
@@ -65,15 +67,15 @@ public class UIMainWindow {
     Menu detailMenu = new Menu("Detail Mode");
     ToggleGroup detailToggle = new ToggleGroup();
 
-    RadioMenuItem menuNovice = new RadioMenuItem("Novice");
+    RadioMenuItem menuNovice = new RadioMenuItem(DetailLevel.toString(DetailLevel.NOVICE));
     menuNovice.setOnAction(e -> coordinator.runFilter.setDetailLevel(DetailLevel.NOVICE));
-    RadioMenuItem menuIntermediate = new RadioMenuItem("Intermediate");
+    RadioMenuItem menuIntermediate = new RadioMenuItem(DetailLevel.toString(DetailLevel.INTERMEDIATE));
     menuIntermediate.setOnAction(e -> coordinator.runFilter.setDetailLevel(DetailLevel.INTERMEDIATE));
-    RadioMenuItem menuAdvanced = new RadioMenuItem("Advanced");
+    RadioMenuItem menuAdvanced = new RadioMenuItem(DetailLevel.toString(DetailLevel.ADVANCED));
     menuAdvanced.setOnAction(e -> coordinator.runFilter.setDetailLevel(DetailLevel.ADVANCED));
-    RadioMenuItem menuExpert = new RadioMenuItem("Expert");
+    RadioMenuItem menuExpert = new RadioMenuItem(DetailLevel.toString(DetailLevel.EXPERT));
     menuExpert.setOnAction(e -> coordinator.runFilter.setDetailLevel(DetailLevel.EXPERT));
-    RadioMenuItem menuCustom = new RadioMenuItem("Custom"); // TODO
+    RadioMenuItem menuCustom = new RadioMenuItem(DetailLevel.toString(DetailLevel.CUSTOM)); // TODO
 
     menuNovice.setToggleGroup(detailToggle);
     menuIntermediate.setToggleGroup(detailToggle);
@@ -138,11 +140,11 @@ public class UIMainWindow {
     for (int i = 0; i < 5; ++i) {
     
       switch (i) {
-        case 0: tabName = "Program Address Space"; break;
-        case 1: tabName = "Call Graph"; break;
-        case 2: tabName = "Sensitive Data"; break;
-        case 3: tabName = "File Operations"; break;
-        case 4: tabName = "Source Code"; break;
+        case 0: tabName = SubProgram.toString(SubProgram.PAS); break;
+        case 1: tabName = SubProgram.toString(SubProgram.CG); break;
+        case 2: tabName = SubProgram.toString(SubProgram.FO); break;
+        case 3: tabName = SubProgram.toString(SubProgram.SD); break;
+        case 4: tabName = SubProgram.toString(SubProgram.SC); break;
         default:
           System.err.println("Error populating tabs");
           System.exit(1);
@@ -192,28 +194,67 @@ public class UIMainWindow {
     Tab tab = tabPane.getTabs().stream().filter(t -> t.getId().equals(title)).findAny().orElse(null);
     assert tab != null;
     UIDetachedTab detachedTab = new UIDetachedTab(this, coordinator, tab.getContent(), title);
-    coordinator.registerDetachedTab(detachedTab);
+    detachedTabs.add(detachedTab);
     detachedTab.display();
     tabPane.getTabs().remove(tab);
   }
   
   
-  public void reattachTab(String title, Node content) {
+  public void reattachTab(UIDetachedTab dtab) {
+    detachedTabs.remove(dtab);
+    
     Tab tab = new Tab();
     tab.setClosable(false);
-    tab.setText(title);
-    tab.setId(title);
-    tab.setContent(content);
+    tab.setText(dtab.title);
+    tab.setId(dtab.title);
+    tab.setContent(dtab.content);
     
     // Must be made detachable again
     ContextMenu contextMenu = new ContextMenu();
-    MenuItem detach = new MenuItem("Detach " + title);
-    detach.setOnAction(e -> detachTab(title));
+    MenuItem detach = new MenuItem("Detach " + dtab.title);
+    detach.setOnAction(e -> detachTab(dtab.title));
     contextMenu.getItems().add(detach);
     tab.setContextMenu(contextMenu);
-    contextMenu.show(tabPane.lookup("#" + title), Side.RIGHT, 0, 0);
+    contextMenu.show(tabPane.lookup("#" + dtab.title), Side.RIGHT, 0, 0);
     
     tabPane.getTabs().add(tab);
+  }
+  
+  
+  private void setTabContent(String title, Node content) {
+    Tab tab = tabPane.getTabs().stream().filter(t -> t.getId().equals(title)).findAny().orElse(null);
+    if (tab != null) {
+      tab.setContent(content);
+      return;
+    }
+    else {
+      UIDetachedTab dtab = detachedTabs.stream().filter(t -> t.title.equals(title)).findAny().orElse(null);
+      if (dtab != null) {
+        dtab.content = content;
+        return;
+      }
+    }
+    assert false;
+  }
+  
+  
+  public void updateUI(int sourceLine,
+                       String assembly,
+                       List<ActivationRecord> stack,
+                       TreeMap<String, String> registers,
+                       TreeMap<String, VariableDelta> variables,
+                       ArrayList<ProgramSection> sections)
+  {
+    // Update PAS
+    setTabContent(SubProgram.toString(SubProgram.PAS),
+                  UIProgramAddressSpace.buildPAS(scene,
+                                                 coordinator.runFilter.getDetailLevel(),
+                                                 stack,
+                                                 registers,
+                                                 variables,
+                                                 sections)
+                 );
+    // TODO: other tabs
   }
   
   
@@ -223,6 +264,8 @@ public class UIMainWindow {
     config += "MainWindowY:" + Double.toString(window.getY()) + System.lineSeparator();
     config += "MainWindowWidth:" + Double.toString(window.getWidth()) + System.lineSeparator();
     config += "MainWindowHeight:" + Double.toString(window.getHeight()) + System.lineSeparator();
+    for (UIDetachedTab tab : detachedTabs) config += "DetachedTab:" + tab.title + System.lineSeparator();
+    for (UIDetachedTab tab : detachedTabs) config += tab.saveConfig();
     
     return config;
   }
@@ -236,8 +279,10 @@ public class UIMainWindow {
         else if (parameters[0].equals("MainWindowY")) window.setY(Double.parseDouble(parameters[1]));
         else if (parameters[0].equals("MainWindowWidth")) window.setWidth(Double.parseDouble(parameters[1]));
         else if (parameters[0].equals("MainWindowHeight")) window.setHeight(Double.parseDouble(parameters[1]));
+        else if (parameters[0].equals("DetachedTab")) detachTab(parameters[1]);
       }
     }
+    for (UIDetachedTab tab : detachedTabs) tab.loadConfig(config);
   }
 
   
