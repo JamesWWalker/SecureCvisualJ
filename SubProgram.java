@@ -1,3 +1,5 @@
+import java.util.*;
+
 public enum SubProgram {
   PAS, CG, FO, SD, SC;
   
@@ -26,6 +28,16 @@ public enum SubProgram {
         System.exit(1);
         return "Unreachable";
     }
+  }
+  
+  public static List<String> allSubPrograms() {
+    List<String> all = new ArrayList<>();
+    all.add("Program Address Space");
+    all.add("Call Graph");
+    all.add("File Operations");
+    all.add("Sensitive Data");
+    all.add("Source Code");
+    return all;
   }
 
 }

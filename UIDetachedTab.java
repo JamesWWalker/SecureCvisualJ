@@ -10,8 +10,7 @@ import javafx.scene.paint.*;
 import javafx.stage.*;
 
 public class UIDetachedTab {
-
-  public Node content;
+  
   public String id;
   public String title;
   public Stage window;
@@ -21,10 +20,16 @@ public class UIDetachedTab {
   private UIMainWindow mainWindow;
   private StackPane layout;
   
+  
+  public void setContent(Node content) {
+    layout.getChildren().clear();
+    layout.getChildren().add(content);
+  }
+  
 
   public UIDetachedTab(UIMainWindow mainWindowIn, 
                        CoordinatorMaster coordinatorIn, 
-                       Node contentIn, 
+                       Node content, 
                        String titleIn)
   {
     mainWindow = mainWindowIn;
@@ -36,7 +41,6 @@ public class UIDetachedTab {
     window.setTitle(title);
     
     layout = new StackPane();
-    content = contentIn;
     layout.getChildren().add(content);
   }
   
@@ -73,6 +77,7 @@ public class UIDetachedTab {
   
   
   public void loadConfig(List<String> config) {
+  System.err.println("Loading config for " + title);
     for (String line : config) {
       String[] parameters = line.trim().split(":");
       if (parameters.length > 1) {

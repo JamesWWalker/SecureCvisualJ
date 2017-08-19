@@ -15,6 +15,7 @@ public class UIMainWindow {
   public List<UIDetachedTab> detachedTabs = new ArrayList<>();
   public Stage window;
   
+  private Map<String, Node> contentPool;
   private CoordinatorMaster coordinator;
   private FileChooser fileChooser;
   private DoubleProperty fontSize = new SimpleDoubleProperty(10);
@@ -24,6 +25,7 @@ public class UIMainWindow {
   
   
   public UIMainWindow(CoordinatorMaster coordinatorIn) {
+    contentPool = new HashMap<>();
     coordinator = coordinatorIn;
     fileChooser = new FileChooser();
     FileChooser.ExtensionFilter extFilter =
@@ -51,9 +53,17 @@ public class UIMainWindow {
     menuOpen.setOnAction(e -> {
       File file = fileChooser.showOpenDialog(window);
       if (file != null) {
-        coordinator.getRun().loadRun(file.getAbsolutePath(), 100);
+        String absolutePath = file.getAbsolutePath();
+        coordinator.getRun().loadRun(absolutePath, 100);
+        // Load source file together with program run
+        String possibleSourceFile = absolutePath.substring(0, absolutePath.length() - 13) + ".c";
+        try {
+          Node sourceCodeLayout = UISourceCode.loadSourceFile(possibleSourceFile);
+          setTabContent(SubProgram.toString(SubProgram.SC), sourceCodeLayout);
+        } catch (IOException ex) {
+          System.err.println("Could not find source file " + possibleSourceFile);
+        }
         coordinator.queryProcessRunAndUpdateUI();
-        // TODO: load source file together with program run
       }
     });
     MenuItem menuExit = new MenuItem("Exit...");
@@ -170,7 +180,8 @@ public class UIMainWindow {
       contextMenu.show(tabPane.lookup("#" + tabName), Side.RIGHT, 0, 0);
       
       // finalize
-      tab.setContent(content);
+      contentPool.put(tabName, content);
+      tab.setContent(contentPool.get(tabName));
       tabPane.getTabs().add(tab);
     }
     
@@ -193,7 +204,7 @@ public class UIMainWindow {
   public void detachTab(String title) {
     Tab tab = tabPane.getTabs().stream().filter(t -> t.getId().equals(title)).findAny().orElse(null);
     assert tab != null;
-    UIDetachedTab detachedTab = new UIDetachedTab(this, coordinator, tab.getContent(), title);
+    UIDetachedTab detachedTab = new UIDetachedTab(this, coordinator, contentPool.get(title), title);
     detachedTabs.add(detachedTab);
     detachedTab.display();
     tabPane.getTabs().remove(tab);
@@ -207,7 +218,7 @@ public class UIMainWindow {
     tab.setClosable(false);
     tab.setText(dtab.title);
     tab.setId(dtab.title);
-    tab.setContent(dtab.content);
+//    tab.setContent(contentPool.get(title));
     
     // Must be made detachable again
     ContextMenu contextMenu = new ContextMenu();
@@ -222,19 +233,18 @@ public class UIMainWindow {
   
   
   private void setTabContent(String title, Node content) {
+//    contentPool.put(title, content);
     Tab tab = tabPane.getTabs().stream().filter(t -> t.getId().equals(title)).findAny().orElse(null);
     if (tab != null) {
       tab.setContent(content);
       return;
     }
-    else {
-      UIDetachedTab dtab = detachedTabs.stream().filter(t -> t.title.equals(title)).findAny().orElse(null);
-      if (dtab != null) {
-        dtab.content = content;
-        return;
-      }
+    UIDetachedTab dtab = detachedTabs.stream().filter(t -> t.title.equals(title)).findAny().orElse(null);
+    if (dtab != null) {
+      dtab.setContent(content);
+      return;
     }
-    assert false;
+    assert false; /* */
   }
   
   
@@ -254,6 +264,9 @@ public class UIMainWindow {
                                                  variables,
                                                  sections)
                  );
+    // Update source code
+    setTabContent(SubProgram.toString(SubProgram.SC),
+                  UISourceCode.buildSC(scene, sourceLine, assembly));
     // TODO: other tabs
   }
   

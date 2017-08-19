@@ -90,7 +90,8 @@ public class ProcessRunFilter {
   
   public String getAssembly(ProcessRun run) {
     if (showAssembly.get()) return run.getAssembly();
-    else return "WARNING: Attempt to retrieve assembly while showing assembly is disabled.";
+    else return null;
+//    else return "WARNING: Attempt to retrieve assembly while showing assembly is disabled.";
   }
   
   
@@ -118,7 +119,7 @@ public class ProcessRunFilter {
       return registers;
     }
     else {
-      System.err.println("WARNING: Attempt to retrieve registers while showing registers is disabled.");
+//      System.err.println("WARNING: Attempt to retrieve registers while showing registers is disabled.");
       return new TreeMap<String, String>();
     }
   }
