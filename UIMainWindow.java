@@ -23,6 +23,11 @@ public class UIMainWindow {
   private Scene scene;
   private TabPane tabPane;
   
+  RadioMenuItem menuNovice;
+  RadioMenuItem menuIntermediate;
+  RadioMenuItem menuAdvanced;
+  RadioMenuItem menuExpert;
+  
   
   public UIMainWindow(CoordinatorMaster coordinatorIn) {
     contentPool = new HashMap<>();
@@ -77,21 +82,19 @@ public class UIMainWindow {
     Menu detailMenu = new Menu("Detail Mode");
     ToggleGroup detailToggle = new ToggleGroup();
 
-    RadioMenuItem menuNovice = new RadioMenuItem(DetailLevel.toString(DetailLevel.NOVICE));
+    menuNovice = new RadioMenuItem(DetailLevel.toString(DetailLevel.NOVICE));
     menuNovice.setOnAction(e -> coordinator.runFilter.setDetailLevel(DetailLevel.NOVICE));
-    RadioMenuItem menuIntermediate = new RadioMenuItem(DetailLevel.toString(DetailLevel.INTERMEDIATE));
+    menuIntermediate = new RadioMenuItem(DetailLevel.toString(DetailLevel.INTERMEDIATE));
     menuIntermediate.setOnAction(e -> coordinator.runFilter.setDetailLevel(DetailLevel.INTERMEDIATE));
-    RadioMenuItem menuAdvanced = new RadioMenuItem(DetailLevel.toString(DetailLevel.ADVANCED));
+    menuAdvanced = new RadioMenuItem(DetailLevel.toString(DetailLevel.ADVANCED));
     menuAdvanced.setOnAction(e -> coordinator.runFilter.setDetailLevel(DetailLevel.ADVANCED));
-    RadioMenuItem menuExpert = new RadioMenuItem(DetailLevel.toString(DetailLevel.EXPERT));
+    menuExpert = new RadioMenuItem(DetailLevel.toString(DetailLevel.EXPERT));
     menuExpert.setOnAction(e -> coordinator.runFilter.setDetailLevel(DetailLevel.EXPERT));
-    RadioMenuItem menuCustom = new RadioMenuItem(DetailLevel.toString(DetailLevel.CUSTOM)); // TODO
 
     menuNovice.setToggleGroup(detailToggle);
     menuIntermediate.setToggleGroup(detailToggle);
     menuAdvanced.setToggleGroup(detailToggle);
     menuExpert.setToggleGroup(detailToggle);
-    menuCustom.setToggleGroup(detailToggle);
     
     coordinator.runFilter.detailLevelProperty().addListener((obs, oldv, newv) -> {
       switch (newv) {
@@ -99,26 +102,29 @@ public class UIMainWindow {
         case INTERMEDIATE: menuIntermediate.setSelected(true); break;
         case ADVANCED: menuAdvanced.setSelected(true); break;
         case EXPERT: menuExpert.setSelected(true); break;
-        case CUSTOM: menuCustom.setSelected(true); break;
       }
     });
 
-    detailMenu.getItems().addAll(menuNovice, menuIntermediate, menuAdvanced, menuExpert, menuCustom);
+    detailMenu.getItems().addAll(menuNovice, menuIntermediate, menuAdvanced, menuExpert);
     viewMenu.getItems().add(detailMenu);
     
     // View elements
     Menu viewElementsMenu = new Menu("View Elements");
     CheckMenuItem menuShowHiddenFunctions = new CheckMenuItem("Hidden Functions");
     menuShowHiddenFunctions.selectedProperty().bindBidirectional(coordinator.runFilter.showAllFunctionsProperty());
+    menuShowHiddenFunctions.setOnAction(e -> setCustomDetailLevel());
     
     CheckMenuItem menuShowRegisters = new CheckMenuItem("CPU Registers");
     menuShowRegisters.selectedProperty().bindBidirectional(coordinator.runFilter.showRegistersProperty());
+    menuShowRegisters.setOnAction(e -> setCustomDetailLevel());
     
     CheckMenuItem menuShowProgramSections = new CheckMenuItem("Program Sections");
     menuShowProgramSections.selectedProperty().bindBidirectional(coordinator.runFilter.showAllSectionsByDefaultProperty());
+    menuShowProgramSections.setOnAction(e -> setCustomDetailLevel());
     
     CheckMenuItem menuShowAssemblyCode = new CheckMenuItem("Assembly Code");
     menuShowAssemblyCode.selectedProperty().bindBidirectional(coordinator.runFilter.showAssemblyProperty());
+    menuShowAssemblyCode.setOnAction(e -> setCustomDetailLevel());
     
     CheckMenuItem menuShowMemoryLayout = new CheckMenuItem("Memory Layout"); // TODO
     
@@ -198,6 +204,16 @@ public class UIMainWindow {
     root.getChildren().add(borderPane);
     window.setScene(scene);
     window.show();
+  }
+  
+  
+  private void setCustomDetailLevel() {
+    menuNovice.setSelected(false);
+    menuIntermediate.setSelected(false);
+    menuAdvanced.setSelected(false);
+    menuExpert.setSelected(false);
+    coordinator.runFilter.setDetailLevel(DetailLevel.CUSTOM);
+    coordinator.queryProcessRunAndUpdateUI();
   }
   
   

@@ -40,41 +40,44 @@ public class ProcessRunFilter {
   
   private void detailLevelChanged() {
   
-    functionsFilter.clear();
-    registersFilter.clear();
-    sectionsFilter.clear(); // TODO: custom
+    if (getDetailLevel() != DetailLevel.CUSTOM) {
     
-    switch (getDetailLevel()) {
-      case NOVICE:
-        showAllFunctions.set(false);
-        showRegisters.set(false);
-        showAllSectionsByDefault.set(false);
-        showAssembly.set(false);
-        break;
-      case INTERMEDIATE:
-        showAllFunctions.set(false);
-        showRegisters.set(true);
-        showAllSectionsByDefault.set(false);
-        showAssembly.set(true);
-        sectionsFilter.add(".text");
-        sectionsFilter.add(".data");
-        sectionsFilter.add(".rodata");
-        break;
-      case ADVANCED:
-        showAllFunctions.set(true);
-        showRegisters.set(true);
-        showAllSectionsByDefault.set(false);
-        showAssembly.set(true);
-        sectionsFilter.add(".text");
-        sectionsFilter.add(".data");
-        sectionsFilter.add(".rodata");
-        break;
-      case EXPERT:
-        showAllFunctions.set(true);
-        showRegisters.set(true);
-        showAllSectionsByDefault.set(true);
-        showAssembly.set(true);
-        break;
+      functionsFilter.clear();
+      registersFilter.clear();
+      sectionsFilter.clear();
+      
+      switch (getDetailLevel()) {
+        case NOVICE:
+          showAllFunctions.set(false);
+          showRegisters.set(false);
+          showAllSectionsByDefault.set(false);
+          showAssembly.set(false);
+          break;
+        case INTERMEDIATE:
+          showAllFunctions.set(false);
+          showRegisters.set(true);
+          showAllSectionsByDefault.set(false);
+          showAssembly.set(true);
+          sectionsFilter.add(".text");
+          sectionsFilter.add(".data");
+          sectionsFilter.add(".rodata");
+          break;
+        case ADVANCED:
+          showAllFunctions.set(true);
+          showRegisters.set(true);
+          showAllSectionsByDefault.set(false);
+          showAssembly.set(true);
+          sectionsFilter.add(".text");
+          sectionsFilter.add(".data");
+          sectionsFilter.add(".rodata");
+          break;
+        case EXPERT:
+          showAllFunctions.set(true);
+          showRegisters.set(true);
+          showAllSectionsByDefault.set(true);
+          showAssembly.set(true);
+          break;
+      }
     }
     
     if (!showAllFunctions.get()) {

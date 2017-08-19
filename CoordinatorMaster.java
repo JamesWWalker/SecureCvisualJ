@@ -30,12 +30,14 @@ public class CoordinatorMaster {
   
   public void queryProcessRunAndUpdateUI() {
     // TODO: add data for other tabs
-    mainWindow.updateUI(runFilter.getSourceLine(getRun()),
-                        runFilter.getAssembly(getRun()),
-                        runFilter.getStack(getRun()),
-                        runFilter.getRegisters(getRun()),
-                        runFilter.getVariables(getRun()),
-                        runFilter.getSections(getRun()));
+    if (!getRun().isNull()) {
+      mainWindow.updateUI(runFilter.getSourceLine(getRun()),
+                          runFilter.getAssembly(getRun()),
+                          runFilter.getStack(getRun()),
+                          runFilter.getRegisters(getRun()),
+                          runFilter.getVariables(getRun()),
+                          runFilter.getSections(getRun()));
+    }
   }
   
   
