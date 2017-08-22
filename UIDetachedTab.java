@@ -77,7 +77,6 @@ public class UIDetachedTab {
   
   
   public void loadConfig(List<String> config) {
-  System.err.println("Loading config for " + title);
     for (String line : config) {
       String[] parameters = line.trim().split(":");
       if (parameters.length > 1) {

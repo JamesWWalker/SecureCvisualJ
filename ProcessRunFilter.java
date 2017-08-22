@@ -102,9 +102,6 @@ public class ProcessRunFilter {
     List<ActivationRecord> stack = run.getStack();
     if (!showAllFunctions.get()) {
       for (int n = stack.size()-1; n >= 0; --n) {
-      System.err.println("Func file: " + stack.get(n).file);
-      System.err.println("Run name:  " + run.programName);
-      System.err.println();
         if (!stack.get(n).file.equals(run.programName)) stack.remove(n);
       }
     }

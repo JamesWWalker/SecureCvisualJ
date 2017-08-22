@@ -17,12 +17,13 @@ public class ProcessRun {
   public final int getIndex() { return index.get(); }
   public final ReadOnlyIntegerProperty indexProperty() { return index.getReadOnlyProperty(); }
   
-  private ArrayList<ProcessState> runSequence;
-  private ProcessState current;
   private HashMap<Integer, String> assembly;
-  private HashMap<Integer, ProcessState> seedStates;
-  private ArrayList<ProgramSection> sections;
+  private ProcessState current;
   private boolean isNull;
+  private ArrayList<ProcessState> runSequence;
+  private ArrayList<ProgramSection> sections;
+  private HashMap<Integer, ProcessState> seedStates;
+  
   
   
   public ProcessRun() {

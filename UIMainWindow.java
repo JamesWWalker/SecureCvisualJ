@@ -130,7 +130,7 @@ public class UIMainWindow {
     menuShowRegisters.selectedProperty().bindBidirectional(coordinator.runFilter.showRegistersProperty());
     menuShowRegisters.setOnAction(e -> setCustomDetailLevel());
     
-    CheckMenuItem menuShowProgramSections = new CheckMenuItem("Program Sections");
+    CheckMenuItem menuShowProgramSections = new CheckMenuItem("All Program Sections");
     menuShowProgramSections.selectedProperty().bindBidirectional(coordinator.runFilter.showAllSectionsByDefaultProperty());
     menuShowProgramSections.setOnAction(e -> setCustomDetailLevel());
     

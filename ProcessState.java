@@ -51,10 +51,13 @@ public class ProcessState {
     Set<String> varKeysDelta = delta.variables.keySet();
 
     // Remove variables whose scope isn't present in the delta's activation records
+    // EXCEPT GLOBALS; THOSE ARE ALWAYS PRESENT.
     ArrayList<String> variablesToRemove = new ArrayList<>();;
     for (String key : varKeys) {
-      if (delta.stack.stream().filter(
-          x -> x.function.equals(target.variables.get(key).scope)).findFirst().orElse(null) == null)
+      if (!target.variables.get(key).scope.equals(UIUtils.GLOBAL) &&
+          delta.stack.stream().filter(
+          x -> x.function.equals(target.variables.get(key).scope))
+          .findFirst().orElse(null) == null)
       {
         variablesToRemove.add(key);
       }

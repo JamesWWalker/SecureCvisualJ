@@ -33,6 +33,6 @@ public class ProgramSection {
   
   @Override
   public String toString() {
-    return name;
+    return name + " (Size: " + size + ")"; // TODO: I can't make head or tail of the address
   }
 }

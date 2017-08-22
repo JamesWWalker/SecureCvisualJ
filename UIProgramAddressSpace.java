@@ -18,7 +18,7 @@ public class UIProgramAddressSpace {
                               List<ActivationRecord> stack,
                               TreeMap<String, String> registers,
                               TreeMap<String, VariableDelta> variables,
-                              ArrayList<ProgramSection> sections)
+                              List<ProgramSection> sections)
   {
     final ScrollPane scrollPane = new ScrollPane();
     final AnchorPane layout = new AnchorPane();
@@ -48,8 +48,43 @@ public class UIProgramAddressSpace {
     // FUNCTIONS+VARIABLES
     VBox variableLayout = new VBox();
     
-    // TODO: globals
+    // TODO: Registers
     
+    // Sections
+    if (sections != null && sections.size() > 0) {
+      for (ProgramSection ps : sections) {
+        Label sectionHeader = new Label(ps.toString());      // TODO: color-coding etc.?
+        sectionHeader.setStyle("-fx-border-color: black;");
+        sectionHeader.prefWidthProperty().bind(variableLayout.widthProperty());;
+        variableLayout.getChildren().add(sectionHeader);
+        
+        // Globals
+        if (ps.name.endsWith(".data")) {
+          TreeMap<String, VariableDelta> globalVariables = new TreeMap<>();
+          for (VariableDelta v : variables.values()) {
+            if (v.scope.equals(UIUtils.GLOBAL) && !v.type.contains("const")) 
+              globalVariables.put(UIUtils.GLOBAL + "," + v.name, v);
+          }     
+          if (globalVariables.size() > 0) variableLayout.getChildren()
+            .add(UIPASVariableTable.createTable(mainWindow.getTabWindow(
+            SubProgram.toString(SubProgram.PAS)), globalVariables));
+        }
+        
+        // Read-only globals
+        if (ps.name.endsWith(".rodata")) {
+          TreeMap<String, VariableDelta> globalVariables = new TreeMap<>();
+          for (VariableDelta v : variables.values()) {
+            if (v.scope.equals(UIUtils.GLOBAL) && v.type.contains("const")) 
+              globalVariables.put(UIUtils.GLOBAL + "," + v.name, v);
+          }     
+          if (globalVariables.size() > 0) variableLayout.getChildren()
+            .add(UIPASVariableTable.createTable(mainWindow.getTabWindow(
+            SubProgram.toString(SubProgram.PAS)), globalVariables));
+        }
+      }
+    }
+    
+    // Locals
     for (ActivationRecord ar : stack) {
       
       Label arHeader = new Label("ADDRESS: " + ar.function);      // TODO: color-coding etc.?
@@ -70,9 +105,6 @@ public class UIProgramAddressSpace {
     AnchorPane.setRightAnchor(variableLayout, 10.0);
     layout.getChildren().add(variableLayout);
     
-    // TODO; heap variables
-    
-    // TODO
     scrollPane.setContent(layout);
      ((Group) scene.getRoot()).getChildren().add(scrollPane);
     
