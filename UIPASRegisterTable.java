@@ -5,6 +5,7 @@ import javafx.geometry.*;
 import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.*;
+import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.*;
 import javafx.stage.*;
@@ -12,60 +13,44 @@ import javafx.util.*;
 
 public class UIPASRegisterTable {
   
-  private static final String columnMapKeyName = "N";
-  private static final String columnMapKeyValue = "V";
   
+  public static GridPane createTable(UIMainWindow mainWindow,
+                                     Stage window,
+                                     TreeMap<String, String> registers) {
   
-  public static TableView createTable(Stage window, TreeMap<String, String> registers) {
-  
-    TableColumn<Map, String> columnName = new TableColumn<>("Name");
-    TableColumn<Map, String> columnValue = new TableColumn<>("Value");
+    GridPane table = new GridPane();
     
-    columnName.setCellValueFactory(new MapValueFactory(columnMapKeyName));
-    columnValue.setCellValueFactory(new MapValueFactory(columnMapKeyValue));
+    Label headerName = new Label("Register");
+    headerName.setStyle("-fx-font-weight: bold;");
+    Label headerValue = new Label("Value");
+    headerValue.setStyle("-fx-font-weight: bold;");
     
-    TableView table = new TableView<>(generateDataFromMap(registers));
+    table.add(headerName, 0, 0, 1, 1);
+    table.add(headerValue, 1, 0, 1, 1);
     
-    table.getSelectionModel().setCellSelectionEnabled(true);
-    table.getColumns().setAll(columnName, columnValue);
-    Callback<TableColumn<Map, String>, TableCell<Map, String>> cellFactoryForMap 
-      = new Callback<TableColumn<Map, String>, TableCell<Map, String>>() {
-        @Override
-        public TableCell call(TableColumn p) {
-          return new TextFieldTableCell(new StringConverter() {
-            @Override
-            public String toString(Object t) { return t.toString(); }
-            @Override
-            public Object fromString(String string) { return string; }                                    
-          });
-        }
-      };
+    int row = 1;
+    Set<String> keys = registers.keySet();
+    for (String key : keys) {
+      Label labelRegister = new Label(key);
+      labelRegister.setOnMouseClicked(e -> {
+        mainWindow.coordinator.runFilter.addRegisterFilter(key);
+        mainWindow.coordinator.queryProcessRunAndUpdateUI();
+      });
+      table.add(labelRegister, 0, row, 1, 1);
+      Label labelValue = new Label(registers.get(key));
+      labelValue.setOnMouseClicked(e -> {
+        mainWindow.coordinator.runFilter.addRegisterFilter(key);
+        mainWindow.coordinator.queryProcessRunAndUpdateUI();
+      });
+      table.add(labelValue, 1, row, 1, 1);
+      ++row;
+    }
     
-    columnName.setCellFactory(cellFactoryForMap);
-    columnValue.setCellFactory(cellFactoryForMap);
-    
-    table.fixedCellSizeProperty().bind(window.widthProperty().add(window.heightProperty()).divide(28));
-    table.prefHeightProperty().bind(table.fixedCellSizeProperty()
-      .multiply(Bindings.size(table.getItems()).add(1.01)));
-    table.minHeightProperty().bind(table.prefHeightProperty());
-    table.maxHeightProperty().bind(table.prefHeightProperty());
+    table.setHgap(10);
     
     return table;
     
   } // createTable()
   
-  
-  private static ObservableList<Map> generateDataFromMap(TreeMap<String, String> registers) {
-    ObservableList<Map> allData = FXCollections.observableArrayList();
-    Set<String> keys = registers.keySet();
-    for (String key : keys) {
-      String value = registers.get(key);
-      Map<String, String> dataRow = new HashMap<>();
-      dataRow.put(columnMapKeyName, key);
-      dataRow.put(columnMapKeyValue, value);
-      allData.add(dataRow);
-    }
-    return allData;
-  }
 
 }

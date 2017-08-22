@@ -38,6 +38,10 @@ public class ProcessRunFilter {
   }
   
   
+  public void addRegisterFilter(String register) { registersFilter.add(register); }
+  public void clearRegisterFilter() { registersFilter.clear(); }
+  
+  
   private void detailLevelChanged() {
   
     if (getDetailLevel() != DetailLevel.CUSTOM) {
@@ -115,9 +119,8 @@ public class ProcessRunFilter {
   public TreeMap<String, String> getRegisters(ProcessRun run) {
     if (showRegisters.get()) {
       TreeMap<String, String> registers = run.getRegisters();
-      Set<String> keys = registers.keySet();
-      for (String key : keys) {
-        if (registersFilter.contains(key)) registers.remove(key);
+      for (String key : registersFilter) {
+        if (registers.keySet().contains(key)) registers.remove(key);
       }
       return registers;
     }

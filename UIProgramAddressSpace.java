@@ -53,8 +53,8 @@ public class UIProgramAddressSpace {
     registerHeader.prefWidthProperty().bind(pasLayout.widthProperty());;
     pasLayout.getChildren().add(registerHeader);
     
-    pasLayout.getChildren().add(UIPASRegisterTable.createTable(mainWindow.getTabWindow(
-      SubProgram.toString(SubProgram.PAS)), registers));
+    pasLayout.getChildren().add(UIPASRegisterTable.createTable(mainWindow,
+      mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), registers));
     
     // FUNCTIONS+VARIABLES
     

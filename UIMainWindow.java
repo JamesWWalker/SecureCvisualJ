@@ -12,11 +12,11 @@ import javafx.stage.*;
 
 public class UIMainWindow {
   
+  public CoordinatorMaster coordinator;
   public List<UIDetachedTab> detachedTabs = new ArrayList<>();
   public Stage window;
   
   private Map<String, Node> contentPool;
-  private CoordinatorMaster coordinator;
   private FileChooser fileChooser;
   private DoubleProperty fontSize = new SimpleDoubleProperty(10);
   private BorderPane layout;
@@ -144,6 +144,17 @@ public class UIMainWindow {
                                        menuShowRegisters, menuShowProgramSections,
                                        menuShowAssemblyCode, menuShowMemoryLayout);
     viewMenu.getItems().add(viewElementsMenu);
+    
+    // Filters
+    Menu filtersMenu =new Menu("Filters");
+    MenuItem menuClearRegisterFilters = new MenuItem("Clear Register Filters");
+    menuClearRegisterFilters.setOnAction(e -> {
+      coordinator.runFilter.clearRegisterFilter();
+      coordinator.queryProcessRunAndUpdateUI();
+    });
+    
+    filtersMenu.getItems().add(menuClearRegisterFilters);
+    viewMenu.getItems().add(filtersMenu);
 
     // Help menu TODO
     Menu helpMenu = new Menu("Help");
