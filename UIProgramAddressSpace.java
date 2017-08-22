@@ -30,8 +30,9 @@ public class UIProgramAddressSpace {
 
     if (detailLevel == DetailLevel.NOVICE) {
       
-      TableView variableTable = UIPASVariableTable.createTable(mainWindow.getTabWindow(
-        SubProgram.toString(SubProgram.PAS)), variables);
+      GridPane variableTable = UIPASVariableTable.createTable(mainWindow,
+        mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), 
+        variables);
       
       AnchorPane.setTopAnchor(variableTable, 10.0);
       AnchorPane.setLeftAnchor(variableTable, 10.0);
@@ -74,8 +75,9 @@ public class UIProgramAddressSpace {
               globalVariables.put(UIUtils.GLOBAL + "," + v.name, v);
           }     
           if (globalVariables.size() > 0) pasLayout.getChildren()
-            .add(UIPASVariableTable.createTable(mainWindow.getTabWindow(
-            SubProgram.toString(SubProgram.PAS)), globalVariables));
+            .add(UIPASVariableTable.createTable(mainWindow,
+            mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), 
+            globalVariables));
         }
         
         // Read-only globals
@@ -86,8 +88,9 @@ public class UIProgramAddressSpace {
               globalVariables.put(UIUtils.GLOBAL + "," + v.name, v);
           }     
           if (globalVariables.size() > 0) pasLayout.getChildren()
-            .add(UIPASVariableTable.createTable(mainWindow.getTabWindow(
-            SubProgram.toString(SubProgram.PAS)), globalVariables));
+            .add(UIPASVariableTable.createTable(mainWindow,
+            mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), 
+            globalVariables));
         }
       }
     }
@@ -105,8 +108,9 @@ public class UIProgramAddressSpace {
         if (v.scope.equals(ar.function)) localVariables.put(ar.function + "," + v.name, v);
       }     
       if (localVariables.size() > 0) pasLayout.getChildren()
-        .add(UIPASVariableTable.createTable(mainWindow.getTabWindow(
-        SubProgram.toString(SubProgram.PAS)), localVariables));
+        .add(UIPASVariableTable.createTable(mainWindow,
+        mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), 
+        localVariables));
     }
     
     AnchorPane.setLeftAnchor(pasLayout, 10.0);

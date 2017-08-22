@@ -16,8 +16,8 @@ public class UIPASRegisterTable {
   
   public static GridPane createTable(UIMainWindow mainWindow,
                                      Stage window,
-                                     TreeMap<String, String> registers) {
-  
+                                     TreeMap<String, String> registers)
+  {
     GridPane table = new GridPane();
     
     Label headerName = new Label("Register");
@@ -36,13 +36,24 @@ public class UIPASRegisterTable {
         mainWindow.coordinator.runFilter.addRegisterFilter(key);
         mainWindow.coordinator.queryProcessRunAndUpdateUI();
       });
-      table.add(labelRegister, 0, row, 1, 1);
+      Pane registerContainer = new Pane();
+      registerContainer.getChildren().add(labelRegister);
+      table.add(registerContainer, 0, row, 1, 1);
+      
       Label labelValue = new Label(registers.get(key));
       labelValue.setOnMouseClicked(e -> {
         mainWindow.coordinator.runFilter.addRegisterFilter(key);
         mainWindow.coordinator.queryProcessRunAndUpdateUI();
       });
-      table.add(labelValue, 1, row, 1, 1);
+      Pane valueContainer = new Pane();
+      valueContainer.getChildren().add(labelValue);
+      table.add(valueContainer, 1, row, 1, 1);
+      
+      if (row % 2 != 0) {
+        registerContainer.setStyle("-fx-background-color: #bbbbbb;");
+        valueContainer.setStyle("-fx-background-color: #bbbbbb;");
+      }
+      
       ++row;
     }
     

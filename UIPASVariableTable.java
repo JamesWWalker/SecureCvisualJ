@@ -11,80 +11,77 @@ import javafx.stage.*;
 import javafx.util.*;
 
 public class UIPASVariableTable {
+
   
-  private static final String columnMapKeyAddress = "A";
-  private static final String columnMapKeyName = "N";
-  private static final String columnMapKeyType = "T";
-  private static final String columnMapKeySize = "S";
-  private static final String columnMapKeyValue = "V";
-  
-  
-  public static TableView createTable(Stage window, TreeMap<String, VariableDelta> variables) {
-  
-    TableColumn<Map, String> columnAddress = new TableColumn<>("Address");
-    TableColumn<Map, String> columnName = new TableColumn<>("Name");
-    TableColumn<Map, String> columnType = new TableColumn<>("Type");
-    TableColumn<Map, String> columnSize = new TableColumn<>("Size");
-    TableColumn<Map, String> columnValue = new TableColumn<>("Value");
+  public static GridPane createTable(UIMainWindow mainWindow,
+                                     Stage window,
+                                     TreeMap<String, VariableDelta> variables) 
+  {
+    GridPane table = new GridPane();
     
-    columnAddress.setCellValueFactory(new MapValueFactory(columnMapKeyAddress));
-    columnName.setCellValueFactory(new MapValueFactory(columnMapKeyName));
-    columnType.setCellValueFactory(new MapValueFactory(columnMapKeyType));
-    columnSize.setCellValueFactory(new MapValueFactory(columnMapKeySize));
-    columnValue.setCellValueFactory(new MapValueFactory(columnMapKeyValue));
+    Label headerAddress = new Label("Address");
+    headerAddress.setStyle("-fx-font-weight: bold;");
+    Label headerName = new Label("Name");
+    headerName.setStyle("-fx-font-weight: bold;");
+    Label headerType = new Label("Type");
+    headerType.setStyle("-fx-font-weight: bold;");
+    Label headerSize = new Label("Size");
+    headerSize.setStyle("-fx-font-weight: bold;");
+    Label headerValue = new Label("Value");
+    headerValue.setStyle("-fx-font-weight: bold;");
     
-    TableView table = new TableView<>(generateDataFromMap(variables));
+    table.add(headerAddress, 0, 0, 1, 1);
+    table.add(headerName, 1, 0, 1, 1);
+    table.add(headerType, 2, 0, 1, 1);
+    table.add(headerSize, 3, 0, 1, 1);
+    table.add(headerValue, 4, 0, 1, 1);
     
-    table.getSelectionModel().setCellSelectionEnabled(true);
-    table.getColumns().setAll(columnAddress, 
-                              columnName, 
-                              columnType, 
-                              columnSize, 
-                              columnValue);
-    Callback<TableColumn<Map, String>, TableCell<Map, String>> cellFactoryForMap 
-      = new Callback<TableColumn<Map, String>, TableCell<Map, String>>() {
-        @Override
-        public TableCell call(TableColumn p) {
-          return new TextFieldTableCell(new StringConverter() {
-            @Override
-            public String toString(Object t) { return t.toString(); }
-            @Override
-            public Object fromString(String string) { return string; }                                    
-          });
-        }
-      };
-    
-    columnAddress.setCellFactory(cellFactoryForMap);
-    columnName.setCellFactory(cellFactoryForMap);
-    columnType.setCellFactory(cellFactoryForMap);
-    columnSize.setCellFactory(cellFactoryForMap);
-    columnValue.setCellFactory(cellFactoryForMap);
-    
-    table.fixedCellSizeProperty().bind(window.widthProperty().add(window.heightProperty()).divide(28));
-    table.prefHeightProperty().bind(table.fixedCellSizeProperty()
-      .multiply(Bindings.size(table.getItems()).add(1.01)));
-    table.minHeightProperty().bind(table.prefHeightProperty());
-    table.maxHeightProperty().bind(table.prefHeightProperty());
+    int row = 1;
+    Set<String> keys = variables.keySet();
+    for (String key : keys) {
+      VariableDelta variable = variables.get(key);
+      
+      Label labelAddress = new Label("0x" + Long.toHexString(variable.address));
+      Pane addressContainer = new Pane();
+      addressContainer.getChildren().add(labelAddress);
+      table.add(addressContainer, 0, row, 1, 1);
+      
+      Label labelName = new Label(variable.name);
+      Pane nameContainer = new Pane();
+      nameContainer.getChildren().add(labelName);
+      table.add(nameContainer, 1, row, 1, 1);
+      
+      Label labelType = new Label(variable.type);
+      Pane typeContainer = new Pane();
+      typeContainer.getChildren().add(labelType);
+      table.add(typeContainer, 2, row, 1, 1);
+      
+      Label labelSize = new Label("TODO");
+      Pane sizeContainer = new Pane();
+      sizeContainer.getChildren().add(labelSize);
+      table.add(sizeContainer, 3, row, 1, 1);
+      
+      Label labelValue = new Label(variable.value);
+      Pane valueContainer = new Pane();
+      valueContainer.getChildren().add(labelValue);
+      table.add(valueContainer, 4, row, 1, 1);
+      
+      if (row % 2 != 0) {
+        addressContainer.setStyle("-fx-background-color: #bbbbbb;");
+        nameContainer.setStyle("-fx-background-color: #bbbbbb;");
+        typeContainer.setStyle("-fx-background-color: #bbbbbb;");
+        sizeContainer.setStyle("-fx-background-color: #bbbbbb;");
+        valueContainer.setStyle("-fx-background-color: #bbbbbb;");
+      }
+      
+      ++row;
+    }
+
+    table.setHgap(10);
     
     return table;
     
   } // createTable()
   
-  
-  private static ObservableList<Map> generateDataFromMap(TreeMap<String, VariableDelta> variables) {
-    ObservableList<Map> allData = FXCollections.observableArrayList();
-    Set<String> keys = variables.keySet();
-    for (String key : keys) {
-      VariableDelta variable = variables.get(key);
-      Map<String, String> dataRow = new HashMap<>();
-      dataRow.put(columnMapKeyAddress, "0x" + Long.toHexString(variable.address).toUpperCase());
-      dataRow.put(columnMapKeyName, variable.name);
-      dataRow.put(columnMapKeyType, variable.type);
-      dataRow.put(columnMapKeySize, "TEMPORARY"); // TODO
-      dataRow.put(columnMapKeyValue, variable.value);
-      allData.add(dataRow);
-    }
-    return allData;
-  }
 
 }
