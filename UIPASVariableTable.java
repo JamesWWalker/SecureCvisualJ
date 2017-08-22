@@ -1,4 +1,5 @@
 import java.util.*;
+import javafx.beans.binding.*;
 import javafx.collections.*;
 import javafx.geometry.*;
 import javafx.scene.*;
@@ -6,6 +7,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.*;
+import javafx.stage.*;
 import javafx.util.*;
 
 public class UIPASVariableTable {
@@ -17,7 +19,7 @@ public class UIPASVariableTable {
   private static final String columnMapKeyValue = "V";
   
   
-  public static TableView createTable(TreeMap<String, VariableDelta> variables) {
+  public static TableView createTable(Stage window, TreeMap<String, VariableDelta> variables) {
   
     TableColumn<Map, String> columnAddress = new TableColumn<>("Address");
     TableColumn<Map, String> columnName = new TableColumn<>("Name");
@@ -57,6 +59,12 @@ public class UIPASVariableTable {
     columnType.setCellFactory(cellFactoryForMap);
     columnSize.setCellFactory(cellFactoryForMap);
     columnValue.setCellFactory(cellFactoryForMap);
+    
+    table.fixedCellSizeProperty().bind(window.widthProperty().add(window.heightProperty()).divide(28));
+    table.prefHeightProperty().bind(table.fixedCellSizeProperty()
+      .multiply(Bindings.size(table.getItems()).add(1.01)));
+    table.minHeightProperty().bind(table.prefHeightProperty());
+    table.maxHeightProperty().bind(table.prefHeightProperty());
     
     return table;
     

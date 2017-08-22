@@ -18,7 +18,7 @@ public class UISourceCode {
   private static ScrollPane sourceCodeScrollPane;
   
   
-  public static Node loadSourceFile(String filename) throws IOException {
+  public static Pane loadSourceFile(String filename) throws IOException {
   
     assemblyDisplay = new TextFlow();
     assemblyScrollPane = new ScrollPane();
@@ -47,7 +47,7 @@ public class UISourceCode {
   }
   
 
-  public static Node buildSC(Scene scene, int sourceLine, String assembly) {
+  public static Pane buildSC(Scene scene, int sourceLine, String assembly) {
   
     if (sourceCodeLines > 0 && sourceLine > 0 && sourceLine < sourceCodeLines)  {
       if (previousSourceLine >= 0) {

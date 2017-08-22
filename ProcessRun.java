@@ -149,7 +149,7 @@ public class ProcessRun {
       return;
     }
 
-    String[] decomposedPath = filename.replaceAll("./", "").split("/");
+    String[] decomposedPath = filename.split("/");
     String fn = decomposedPath[decomposedPath.length-1];
     programName = fn.contains(".") ? fn.substring(0, fn.lastIndexOf('.')) : fn;
     programName = programName.substring(0, programName.length()-7); // get rid of -output

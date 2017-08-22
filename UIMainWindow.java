@@ -63,7 +63,7 @@ public class UIMainWindow {
         // Load source file together with program run
         String possibleSourceFile = absolutePath.substring(0, absolutePath.length() - 13) + ".c";
         try {
-          Node sourceCodeLayout = UISourceCode.loadSourceFile(possibleSourceFile);
+          Pane sourceCodeLayout = UISourceCode.loadSourceFile(possibleSourceFile);
           setTabContent(SubProgram.toString(SubProgram.SC), sourceCodeLayout);
         } catch (IOException ex) {
           System.err.println("Could not find source file " + possibleSourceFile);
@@ -83,13 +83,25 @@ public class UIMainWindow {
     ToggleGroup detailToggle = new ToggleGroup();
 
     menuNovice = new RadioMenuItem(DetailLevel.toString(DetailLevel.NOVICE));
-    menuNovice.setOnAction(e -> coordinator.runFilter.setDetailLevel(DetailLevel.NOVICE));
+    menuNovice.setOnAction(e -> {
+      coordinator.runFilter.setDetailLevel(DetailLevel.NOVICE);
+      coordinator.queryProcessRunAndUpdateUI();
+    });
     menuIntermediate = new RadioMenuItem(DetailLevel.toString(DetailLevel.INTERMEDIATE));
-    menuIntermediate.setOnAction(e -> coordinator.runFilter.setDetailLevel(DetailLevel.INTERMEDIATE));
+    menuIntermediate.setOnAction(e -> {
+      coordinator.runFilter.setDetailLevel(DetailLevel.INTERMEDIATE);
+      coordinator.queryProcessRunAndUpdateUI();
+    });
     menuAdvanced = new RadioMenuItem(DetailLevel.toString(DetailLevel.ADVANCED));
-    menuAdvanced.setOnAction(e -> coordinator.runFilter.setDetailLevel(DetailLevel.ADVANCED));
+    menuAdvanced.setOnAction(e -> {
+      coordinator.runFilter.setDetailLevel(DetailLevel.ADVANCED);
+      coordinator.queryProcessRunAndUpdateUI();
+    });
     menuExpert = new RadioMenuItem(DetailLevel.toString(DetailLevel.EXPERT));
-    menuExpert.setOnAction(e -> coordinator.runFilter.setDetailLevel(DetailLevel.EXPERT));
+    menuExpert.setOnAction(e -> {
+      coordinator.runFilter.setDetailLevel(DetailLevel.EXPERT);
+      coordinator.queryProcessRunAndUpdateUI();
+    });
 
     menuNovice.setToggleGroup(detailToggle);
     menuIntermediate.setToggleGroup(detailToggle);
@@ -224,6 +236,7 @@ public class UIMainWindow {
     detachedTabs.add(detachedTab);
     detachedTab.display();
     tabPane.getTabs().remove(tab);
+    coordinator.queryProcessRunAndUpdateUI();
   }
   
   
@@ -245,6 +258,7 @@ public class UIMainWindow {
     contextMenu.show(tabPane.lookup("#" + dtab.title), Side.RIGHT, 0, 0);
     
     tabPane.getTabs().add(tab);
+    coordinator.queryProcessRunAndUpdateUI();
   }
   
   
@@ -264,6 +278,16 @@ public class UIMainWindow {
   }
   
   
+  public Stage getTabWindow(String title) {
+    Tab tab = tabPane.getTabs().stream().filter(t -> t.getId().equals(title)).findAny().orElse(null);
+    if (tab != null) return window;
+    UIDetachedTab dtab = detachedTabs.stream().filter(t -> t.title.equals(title)).findAny().orElse(null);
+    if (dtab != null) return dtab.window;
+    assert false; /* */
+    return null;
+  }
+  
+  
   public void updateUI(int sourceLine,
                        String assembly,
                        List<ActivationRecord> stack,
@@ -273,7 +297,8 @@ public class UIMainWindow {
   {
     // Update PAS
     setTabContent(SubProgram.toString(SubProgram.PAS),
-                  UIProgramAddressSpace.buildPAS(scene,
+                  UIProgramAddressSpace.buildPAS(this,
+                                                 scene,
                                                  coordinator.runFilter.getDetailLevel(),
                                                  stack,
                                                  registers,
