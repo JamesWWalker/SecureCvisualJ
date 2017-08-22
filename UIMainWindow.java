@@ -11,6 +11,11 @@ import javafx.scene.paint.*;
 import javafx.stage.*;
 
 public class UIMainWindow {
+
+  private DoubleProperty previousPasScrollbar = new SimpleDoubleProperty();
+  public final double getPreviousPasScrollbar() { return previousPasScrollbar.get(); }
+  public final void setPreviousPasScrollbar(double value) { previousPasScrollbar.set(value); }
+  public DoubleProperty previousPasScrollbarProperty() { return previousPasScrollbar; }
   
   public CoordinatorMaster coordinator;
   public List<UIDetachedTab> detachedTabs = new ArrayList<>();
@@ -23,10 +28,13 @@ public class UIMainWindow {
   private Scene scene;
   private TabPane tabPane;
   
-  RadioMenuItem menuNovice;
-  RadioMenuItem menuIntermediate;
-  RadioMenuItem menuAdvanced;
-  RadioMenuItem menuExpert;
+  private RadioMenuItem menuNovice;
+  private RadioMenuItem menuIntermediate;
+  private RadioMenuItem menuAdvanced;
+  private RadioMenuItem menuExpert;
+  
+  private ScrollPane scrollPanePAS;
+  // TODO: other scrollpanes
   
   
   public UIMainWindow(CoordinatorMaster coordinatorIn) {
@@ -307,19 +315,23 @@ public class UIMainWindow {
                        ArrayList<ProgramSection> sections)
   {
     // Update PAS
-    setTabContent(SubProgram.toString(SubProgram.PAS),
-                  UIProgramAddressSpace.buildPAS(this,
-                                                 scene,
-                                                 coordinator.runFilter.getDetailLevel(),
-                                                 stack,
-                                                 registers,
-                                                 variables,
-                                                 sections)
-                 );
+    scrollPanePAS = UIProgramAddressSpace.buildPAS(this,
+                                                   scene,
+                                                   coordinator.runFilter.getDetailLevel(),
+                                                   stack,
+                                                   registers,
+                                                   variables,
+                                                   sections);
+    scrollPanePAS.setVvalue(getPreviousPasScrollbar());
+    previousPasScrollbarProperty().bind(scrollPanePAS.vvalueProperty());
+    setTabContent(SubProgram.toString(SubProgram.PAS), scrollPanePAS);
+    
     // Update source code
     setTabContent(SubProgram.toString(SubProgram.SC),
                   UISourceCode.buildSC(scene, sourceLine, assembly));
+                  
     // TODO: other tabs
+    
   }
   
   

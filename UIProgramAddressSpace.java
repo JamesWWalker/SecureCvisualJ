@@ -12,15 +12,16 @@ import javafx.util.*;
 public class UIProgramAddressSpace {
   
 
-  public static Node buildPAS(UIMainWindow mainWindow,
-                              Scene scene,
-                              DetailLevel detailLevel,
-                              List<ActivationRecord> stack,
-                              TreeMap<String, String> registers,
-                              TreeMap<String, VariableDelta> variables,
-                              List<ProgramSection> sections)
+  public static ScrollPane buildPAS(UIMainWindow mainWindow,
+                                    Scene scene,
+                                    DetailLevel detailLevel,
+                                    List<ActivationRecord> stack,
+                                    TreeMap<String, String> registers,
+                                    TreeMap<String, VariableDelta> variables,
+                                    List<ProgramSection> sections)
   {
     final ScrollPane scrollPane = new ScrollPane();
+    
     final AnchorPane layout = new AnchorPane();
     layout.setPadding(new Insets(10, 10, 10, 10));
     layout.prefWidthProperty().bind(mainWindow.getTabWindow(
@@ -42,7 +43,7 @@ public class UIProgramAddressSpace {
  
       scrollPane.setContent(layout);
       ((Group) scene.getRoot()).getChildren().add(scrollPane);
-      
+
       return scrollPane;
     }
     
@@ -119,7 +120,7 @@ public class UIProgramAddressSpace {
     
     scrollPane.setContent(layout);
      ((Group) scene.getRoot()).getChildren().add(scrollPane);
-    
+
     return scrollPane;
   }
 
