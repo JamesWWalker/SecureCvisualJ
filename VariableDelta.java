@@ -8,6 +8,7 @@ public class VariableDelta {
   public String value;
   public long address;
   public long pointsTo;
+  public String size;
 
 
   public VariableDelta(
@@ -23,6 +24,7 @@ public class VariableDelta {
     value = valueIn;
     address = addressIn;
     pointsTo = -1;
+    determineSize();
   }
 
 
@@ -40,6 +42,7 @@ public class VariableDelta {
     value = valueIn;
     address = addressIn;
     pointsTo = pointsToIn;
+    determineSize();
   }
 
 
@@ -87,6 +90,18 @@ public class VariableDelta {
 
   public String getKey() {
     return scope + "," + name;
+  }
+  
+  
+  private void determineSize() {
+    if (type.contains("long long")) size = "8";
+    else if (type.contains("long")) size = "4-8";
+    else if (type.contains("int")) size = "4";
+    else if (type.contains("short")) size = "2";
+    else if (type.contains("char")) size = "1";
+    else if (type.contains("float")) size = "4";
+    else if (type.contains("double")) size = "4-8";
+    else size = "Unknown";
   }
 
 

@@ -56,7 +56,7 @@ public class UIPASVariableTable {
       typeContainer.getChildren().add(labelType);
       table.add(typeContainer, 2, row, 1, 1);
       
-      Label labelSize = new Label("TODO");
+      Label labelSize = new Label(variable.size);
       Pane sizeContainer = new Pane();
       sizeContainer.getChildren().add(labelSize);
       table.add(sizeContainer, 3, row, 1, 1);
