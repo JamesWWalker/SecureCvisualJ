@@ -45,18 +45,26 @@ public class UIProgramAddressSpace {
       return scrollPane;
     }
     
-    // FUNCTIONS+VARIABLES
-    VBox variableLayout = new VBox();
+    VBox pasLayout = new VBox();
     
-    // TODO: Registers
+    // REGISTERS
+    Label registerHeader = new Label("CPU Registers");      // TODO: color-coding etc.?
+    registerHeader.setStyle("-fx-border-color: black;");
+    registerHeader.prefWidthProperty().bind(pasLayout.widthProperty());;
+    pasLayout.getChildren().add(registerHeader);
+    
+    pasLayout.getChildren().add(UIPASRegisterTable.createTable(mainWindow.getTabWindow(
+      SubProgram.toString(SubProgram.PAS)), registers));
+    
+    // FUNCTIONS+VARIABLES
     
     // Sections
     if (sections != null && sections.size() > 0) {
       for (ProgramSection ps : sections) {
         Label sectionHeader = new Label(ps.toString());      // TODO: color-coding etc.?
         sectionHeader.setStyle("-fx-border-color: black;");
-        sectionHeader.prefWidthProperty().bind(variableLayout.widthProperty());;
-        variableLayout.getChildren().add(sectionHeader);
+        sectionHeader.prefWidthProperty().bind(pasLayout.widthProperty());;
+        pasLayout.getChildren().add(sectionHeader);
         
         // Globals
         if (ps.name.endsWith(".data")) {
@@ -65,7 +73,7 @@ public class UIProgramAddressSpace {
             if (v.scope.equals(UIUtils.GLOBAL) && !v.type.contains("const")) 
               globalVariables.put(UIUtils.GLOBAL + "," + v.name, v);
           }     
-          if (globalVariables.size() > 0) variableLayout.getChildren()
+          if (globalVariables.size() > 0) pasLayout.getChildren()
             .add(UIPASVariableTable.createTable(mainWindow.getTabWindow(
             SubProgram.toString(SubProgram.PAS)), globalVariables));
         }
@@ -77,7 +85,7 @@ public class UIProgramAddressSpace {
             if (v.scope.equals(UIUtils.GLOBAL) && v.type.contains("const")) 
               globalVariables.put(UIUtils.GLOBAL + "," + v.name, v);
           }     
-          if (globalVariables.size() > 0) variableLayout.getChildren()
+          if (globalVariables.size() > 0) pasLayout.getChildren()
             .add(UIPASVariableTable.createTable(mainWindow.getTabWindow(
             SubProgram.toString(SubProgram.PAS)), globalVariables));
         }
@@ -89,21 +97,21 @@ public class UIProgramAddressSpace {
       
       Label arHeader = new Label("ADDRESS: " + ar.function);      // TODO: color-coding etc.?
       arHeader.setStyle("-fx-border-color: black;");
-      arHeader.prefWidthProperty().bind(variableLayout.widthProperty());;
-      variableLayout.getChildren().add(arHeader);
+      arHeader.prefWidthProperty().bind(pasLayout.widthProperty());;
+      pasLayout.getChildren().add(arHeader);
       
       TreeMap<String, VariableDelta> localVariables = new TreeMap<>();
       for (VariableDelta v : variables.values()) {
         if (v.scope.equals(ar.function)) localVariables.put(ar.function + "," + v.name, v);
       }     
-      if (localVariables.size() > 0) variableLayout.getChildren()
+      if (localVariables.size() > 0) pasLayout.getChildren()
         .add(UIPASVariableTable.createTable(mainWindow.getTabWindow(
         SubProgram.toString(SubProgram.PAS)), localVariables));
     }
     
-    AnchorPane.setLeftAnchor(variableLayout, 10.0);
-    AnchorPane.setRightAnchor(variableLayout, 10.0);
-    layout.getChildren().add(variableLayout);
+    AnchorPane.setLeftAnchor(pasLayout, 10.0);
+    AnchorPane.setRightAnchor(pasLayout, 10.0);
+    layout.getChildren().add(pasLayout);
     
     scrollPane.setContent(layout);
      ((Group) scene.getRoot()).getChildren().add(scrollPane);
