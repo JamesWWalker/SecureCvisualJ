@@ -6,6 +6,7 @@ import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.*;
 import javafx.scene.layout.*;
+import javafx.scene.paint.*;
 import javafx.scene.text.*;
 import javafx.util.*;
 
@@ -33,7 +34,7 @@ public class UIProgramAddressSpace {
       
       GridPane variableTable = UIPASVariableTable.createTable(mainWindow,
         mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), 
-        variables);
+        variables, "#ffffff");
       
       AnchorPane.setTopAnchor(variableTable, 10.0);
       AnchorPane.setLeftAnchor(variableTable, 10.0);
@@ -50,27 +51,53 @@ public class UIProgramAddressSpace {
     VBox pasLayout = new VBox();
     
     // REGISTERS
-    Label registerHeader = new Label("CPU Registers");      // TODO: color-coding etc.?
+    Label registerHeader = new Label("CPU Registers");
     registerHeader.setStyle("-fx-border-color: black;");
-    registerHeader.prefWidthProperty().bind(pasLayout.widthProperty());;
+    registerHeader.setStyle("-fx-background-color: black;");
+    registerHeader.setTextFill(Color.web("#cccccc"));
+    registerHeader.prefWidthProperty().bind(pasLayout.widthProperty());
+    registerHeader.setOnMouseClicked(e -> {
+      mainWindow.coordinator.runFilter.setShowRegisters(
+        !mainWindow.coordinator.runFilter.getShowRegisters());
+      mainWindow.setCustomDetailLevel();
+    });
     pasLayout.getChildren().add(registerHeader);
     
-    pasLayout.getChildren().add(UIPASRegisterTable.createTable(mainWindow,
-      mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), registers));
+    if (registers.size() > 0) {
+      pasLayout.getChildren().add(UIPASRegisterTable.createTable(mainWindow,
+        mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), registers));
+    }
     
     // FUNCTIONS+VARIABLES
     
     // Sections
+    Label sectionHeader = new Label("Program Sections");
+    sectionHeader.setStyle("-fx-border-color: black;");
+    sectionHeader.setStyle("-fx-background-color: black;");
+    sectionHeader.setTextFill(Color.web("#cccccc"));
+    sectionHeader.prefWidthProperty().bind(pasLayout.widthProperty());
+    sectionHeader.setOnMouseClicked(e -> {
+      if (sections.size() == 0) mainWindow.coordinator.runFilter.clearSectionFilter();
+      else {
+        for (ProgramSection ps : sections)
+          mainWindow.coordinator.runFilter.addSectionFilter(ps.name);
+      }
+      mainWindow.setCustomDetailLevel();
+    });
+    pasLayout.getChildren().add(sectionHeader);
+    
     if (sections != null && sections.size() > 0) {
       for (ProgramSection ps : sections) {
-        Label sectionHeader = new Label(ps.toString());      // TODO: color-coding etc.?
-        sectionHeader.setStyle("-fx-border-color: black;");
-        sectionHeader.prefWidthProperty().bind(pasLayout.widthProperty());
-        sectionHeader.setOnMouseClicked(e -> {
+        Label labelSection = new Label(ps.toString());      // TODO: color-coding etc.?
+        labelSection.setStyle("-fx-border-color: black;");
+        String color = UIUtils.getNextColor();
+        labelSection.setStyle("-fx-background-color: " + color + ";");
+        labelSection.prefWidthProperty().bind(pasLayout.widthProperty());
+        labelSection.setOnMouseClicked(e -> {
           mainWindow.coordinator.runFilter.addSectionFilter(ps.name);
           mainWindow.coordinator.queryProcessRunAndUpdateUI();
         });
-        pasLayout.getChildren().add(sectionHeader);
+        pasLayout.getChildren().add(labelSection);
         
         // Globals
         if (ps.name.endsWith(".data")) {
@@ -82,7 +109,7 @@ public class UIProgramAddressSpace {
           if (globalVariables.size() > 0) pasLayout.getChildren()
             .add(UIPASVariableTable.createTable(mainWindow,
             mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), 
-            globalVariables));
+            globalVariables, color));
         }
         
         // Read-only globals
@@ -95,16 +122,26 @@ public class UIProgramAddressSpace {
           if (globalVariables.size() > 0) pasLayout.getChildren()
             .add(UIPASVariableTable.createTable(mainWindow,
             mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), 
-            globalVariables));
+            globalVariables, color));
         }
       }
     }
     
     // Locals
+    Label stackHeader = new Label("Stack");
+    stackHeader.setStyle("-fx-border-color: black;");
+    stackHeader.setStyle("-fx-background-color: black;");
+    stackHeader.setTextFill(Color.web("#cccccc"));
+    stackHeader.prefWidthProperty().bind(pasLayout.widthProperty());
+    pasLayout.getChildren().add(stackHeader);
+    
     for (ActivationRecord ar : stack) {
+    
+      String color = UIUtils.getNextColor();
       
-      Label arHeader = new Label("0x" + Long.toHexString(ar.address) + ": " +ar.function);// TODO: color-coding etc.?
+      Label arHeader = new Label("0x" + Long.toHexString(ar.address) + ": " +ar.function);
       arHeader.setStyle("-fx-border-color: black;");
+      arHeader.setStyle("-fx-background-color: " + color + ";");
       arHeader.prefWidthProperty().bind(pasLayout.widthProperty());;
       pasLayout.getChildren().add(arHeader);
       
@@ -115,7 +152,7 @@ public class UIProgramAddressSpace {
       if (localVariables.size() > 0) pasLayout.getChildren()
         .add(UIPASVariableTable.createTable(mainWindow,
         mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), 
-        localVariables));
+        localVariables, color));
     }
     
     AnchorPane.setLeftAnchor(pasLayout, 10.0);

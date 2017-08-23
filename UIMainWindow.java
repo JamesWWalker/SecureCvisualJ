@@ -139,7 +139,8 @@ public class UIMainWindow {
     menuShowRegisters.setOnAction(e -> setCustomDetailLevel());
     
     CheckMenuItem menuShowProgramSections = new CheckMenuItem("All Program Sections");
-    menuShowProgramSections.selectedProperty().bindBidirectional(coordinator.runFilter.showAllSectionsByDefaultProperty());
+    menuShowProgramSections.selectedProperty().bindBidirectional
+      (coordinator.runFilter.showAllSectionsByDefaultProperty());
     menuShowProgramSections.setOnAction(e -> setCustomDetailLevel());
     
     CheckMenuItem menuShowAssemblyCode = new CheckMenuItem("Assembly Code");
@@ -244,7 +245,7 @@ public class UIMainWindow {
   }
   
   
-  private void setCustomDetailLevel() {
+  public void setCustomDetailLevel() {
     menuNovice.setSelected(false);
     menuIntermediate.setSelected(false);
     menuAdvanced.setSelected(false);

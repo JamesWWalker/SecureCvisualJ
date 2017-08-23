@@ -16,6 +16,7 @@ public class CoordinatorMaster {
   
 
   public void exec() {
+    UIUtils.initializeColorWheel();
     setRun(new ProcessRun());
     runFilter = new ProcessRunFilter();
     mainWindow = new UIMainWindow(this);
@@ -31,6 +32,7 @@ public class CoordinatorMaster {
   public void queryProcessRunAndUpdateUI() {
     // TODO: add data for other tabs
     if (!getRun().isNull()) {
+      UIUtils.resetColorIndex();
       mainWindow.updateUI(runFilter.getSourceLine(getRun()),
                           runFilter.getAssembly(getRun()),
                           runFilter.getStack(getRun()),
