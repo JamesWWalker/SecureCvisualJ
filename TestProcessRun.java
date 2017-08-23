@@ -18,15 +18,15 @@ public class TestProcessRun {
 
       // Check starting stack contents for different detail levels
       List<ActivationRecord> checkStack = new ArrayList<>();
-      checkStack.add(new ActivationRecord("simple", "main"));
+      checkStack.add(new ActivationRecord("simple", "main", 140737488346752L));
 
       filter.setDetailLevel(DetailLevel.NOVICE);
       List<ActivationRecord> stack = filter.getStack(run);
       if (!stack.equals(checkStack)) errors += "  STACK ERROR 1: [" + checkStack + "] and [" +
                                                stack + "] are not equal." + System.lineSeparator();
 
-      checkStack.add(0, new ActivationRecord("libc.so.6", "__libc_start_main(main=(simple"));
-      checkStack.add(0, new ActivationRecord("simple", "_start"));
+      checkStack.add(0, new ActivationRecord("libc.so.6", "__libc_start_main(main=(simple", 140737488346752L));
+      checkStack.add(0, new ActivationRecord("simple", "_start", 140737488346752L));
 
       filter.setDetailLevel(DetailLevel.ADVANCED);
       stack = filter.getStack(run);
@@ -68,8 +68,8 @@ public class TestProcessRun {
                                                "] are not equal." + System.lineSeparator();
 
       checkStack.clear();
-      checkStack.add(new ActivationRecord("simple", "main"));
-      checkStack.add(new ActivationRecord("simple", "assignSize"));
+      checkStack.add(new ActivationRecord("simple", "main", 140737488346752L));
+      checkStack.add(new ActivationRecord("simple", "assignSize", 140737488346720L));
 
       filter.setDetailLevel(DetailLevel.NOVICE);
       stack = filter.getStack(run);
@@ -100,7 +100,7 @@ public class TestProcessRun {
       run.next();
 
       checkStack.clear();
-      checkStack.add(new ActivationRecord("simple", "main"));
+      checkStack.add(new ActivationRecord("simple", "main", 140737488346752L));
 
       filter.setDetailLevel(DetailLevel.NOVICE);
       stack = filter.getStack(run);
@@ -179,7 +179,7 @@ public class TestProcessRun {
       run.previous();
       run.previous();
 
-      checkStack.add(new ActivationRecord("simple", "assignSize"));
+      checkStack.add(new ActivationRecord("simple", "assignSize", 140737488346720L));
       filter.setDetailLevel(DetailLevel.NOVICE);
       stack = filter.getStack(run);
       if (!stack.equals(checkStack)) errors += "  STACK ERROR 17: [" + checkStack + "] and [" +

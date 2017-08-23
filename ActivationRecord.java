@@ -4,17 +4,19 @@ public class ActivationRecord {
 
   public String file;
   public String function;
+  public long address;
 
 
-  public ActivationRecord(String fileIn, String functionIn) {
+  public ActivationRecord(String fileIn, String functionIn, long addressIn) {
     file = fileIn;
     function = functionIn;
+    address = addressIn;
   }
 
 
   // copy constructor
   public ActivationRecord(ActivationRecord ar) {
-    this(ar.file, ar.function);
+    this(ar.file, ar.function, ar.address);
   }
 
 
@@ -27,6 +29,7 @@ public class ActivationRecord {
 
     if (file != null ? !file.equals(ar.file) : ar.file != null) return false;
     if (function != null ? !function.equals(ar.function) : ar.function != null) return false;
+    if (address != ar.address) return false;
 
     return true;
   }
@@ -34,13 +37,13 @@ public class ActivationRecord {
 
   @Override
   public String toString() {
-    return file + "," + function;
+    return file + "," + function + "," + address;
   }
   
   
   @Override
   public int hashCode() {
-    return Objects.hash(file, function);
+    return Objects.hash(file, function, address);
   }
 
 }

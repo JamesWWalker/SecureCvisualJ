@@ -99,7 +99,7 @@ public class UIProgramAddressSpace {
     // Locals
     for (ActivationRecord ar : stack) {
       
-      Label arHeader = new Label("ADDRESS: " + ar.function);      // TODO: color-coding etc.?
+      Label arHeader = new Label("0x" + Long.toHexString(ar.address) + ": " +ar.function);// TODO: color-coding etc.?
       arHeader.setStyle("-fx-border-color: black;");
       arHeader.prefWidthProperty().bind(pasLayout.widthProperty());;
       pasLayout.getChildren().add(arHeader);

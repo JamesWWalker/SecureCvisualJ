@@ -23,9 +23,9 @@ public class TestProcessState {
     VariableDelta z = new VariableDelta("int", "beta", "z", "3", 700);
     VariableDelta x2 = new VariableDelta("int", "main", "x2", "1", 500);
 
-    ActivationRecord main = new ActivationRecord("test", "main");
-    ActivationRecord alpha = new ActivationRecord("test", "alpha");
-    ActivationRecord beta = new ActivationRecord("test", "beta");
+    ActivationRecord main = new ActivationRecord("test", "main", 0);
+    ActivationRecord alpha = new ActivationRecord("test", "alpha", 1);
+    ActivationRecord beta = new ActivationRecord("test", "beta", 2);
 
     TreeMap<String, String> delta1regs = new TreeMap<>();
     delta1regs.put("jax", "10");
@@ -102,19 +102,19 @@ public class TestProcessState {
     checkRegisters.put("jbx", "11");
     checkRegisters.put("jcx", "12");
     checkVariables.put("main,x", new VariableDelta(x1));
-    checkStack.add(new ActivationRecord("test", "main"));
+    checkStack.add(new ActivationRecord("test", "main", 0));
     errors += verifyProcessState(current, 1, checkRegisters, checkVariables, checkStack);
 
     ProcessState.applyDelta(current, delta2);
     checkRegisters.put("jbx", "21");
     checkVariables.put("alpha,y", new VariableDelta(y));
-    checkStack.add(new ActivationRecord("test", "alpha"));
+    checkStack.add(new ActivationRecord("test", "alpha", 1));
     errors += verifyProcessState(current, 5, checkRegisters, checkVariables, checkStack);
 
     ProcessState.applyDelta(current, delta3);
     checkRegisters.put("jcx", "22");
     checkVariables.put("beta,z", new VariableDelta(z));
-    checkStack.add(new ActivationRecord("test", "beta"));
+    checkStack.add(new ActivationRecord("test", "beta", 2));
     errors += verifyProcessState(current, 9, checkRegisters, checkVariables, checkStack);
 
     ProcessState.applyDelta(current, delta4);
@@ -134,14 +134,14 @@ public class TestProcessState {
     ProcessState.applyDelta(current, delta4R);
     checkRegisters.put("jax", "20");
     checkVariables.put("alpha,y", new VariableDelta(y));
-    checkStack.add(new ActivationRecord("test", "alpha"));
+    checkStack.add(new ActivationRecord("test", "alpha", 1));
     errors += verifyProcessState(current, 6, checkRegisters, checkVariables, checkStack);
 
     ProcessState.applyDelta(current, delta3R);
     checkRegisters.put("jax", "10");
     checkRegisters.put("jcx", "22");
     checkVariables.put("beta,z", new VariableDelta(z));
-    checkStack.add(new ActivationRecord("test", "beta"));
+    checkStack.add(new ActivationRecord("test", "beta", 2));
     errors += verifyProcessState(current, 9, checkRegisters, checkVariables, checkStack);
 
     ProcessState.applyDelta(current, delta2R);
