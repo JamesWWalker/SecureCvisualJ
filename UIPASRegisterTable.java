@@ -32,20 +32,20 @@ public class UIPASRegisterTable {
     Set<String> keys = registers.keySet();
     for (String key : keys) {
       Label labelRegister = new Label(key);
-      labelRegister.setOnMouseClicked(e -> {
+      Pane registerContainer = new Pane();
+      registerContainer.getChildren().add(labelRegister);
+      registerContainer.setOnMouseClicked(e -> {
         mainWindow.coordinator.runFilter.addRegisterFilter(key);
         mainWindow.coordinator.queryProcessRunAndUpdateUI();
       });
-      Pane registerContainer = new Pane();
-      registerContainer.getChildren().add(labelRegister);
       table.add(registerContainer, 0, row, 1, 1);
       
       Label labelValue = new Label(registers.get(key));
-      labelValue.setOnMouseClicked(e -> {
+      Pane valueContainer = new Pane();
+      valueContainer.setOnMouseClicked(e -> {
         mainWindow.coordinator.runFilter.addRegisterFilter(key);
         mainWindow.coordinator.queryProcessRunAndUpdateUI();
       });
-      Pane valueContainer = new Pane();
       valueContainer.getChildren().add(labelValue);
       table.add(valueContainer, 1, row, 1, 1);
       

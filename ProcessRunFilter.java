@@ -41,6 +41,23 @@ public class ProcessRunFilter {
   public void addRegisterFilter(String register) { registersFilter.add(register); }
   public void clearRegisterFilter() { registersFilter.clear(); }
   
+  public void addSectionFilter(String section) {
+    String[] splitSection = section.split("\\.");
+    String useSection = "";
+    if (splitSection.length > 1) useSection = "." + splitSection[splitSection.length-1];
+    else useSection = section;
+    if (getShowAllSectionsByDefault()) sectionsFilter.add(useSection);
+    else sectionsFilter.remove(useSection);
+  }
+  public void clearSectionFilter() {
+    sectionsFilter.clear(); 
+    if (getDetailLevel() == DetailLevel.INTERMEDIATE || getDetailLevel() == DetailLevel.ADVANCED) {
+      sectionsFilter.add(".text");
+      sectionsFilter.add(".data");
+      sectionsFilter.add(".rodata");
+    }
+  }
+  
   
   private void detailLevelChanged() {
   

@@ -155,13 +155,19 @@ public class UIMainWindow {
     
     // Filters
     Menu filtersMenu =new Menu("Filters");
-    MenuItem menuClearRegisterFilters = new MenuItem("Clear Register Filters");
+    MenuItem menuClearRegisterFilters = new MenuItem("Reset Register Filters");
     menuClearRegisterFilters.setOnAction(e -> {
       coordinator.runFilter.clearRegisterFilter();
       coordinator.queryProcessRunAndUpdateUI();
     });
     
-    filtersMenu.getItems().add(menuClearRegisterFilters);
+    MenuItem menuClearSectionFilters = new MenuItem("Reset Section Filters");
+    menuClearSectionFilters.setOnAction(e -> {
+      coordinator.runFilter.clearSectionFilter();
+      coordinator.queryProcessRunAndUpdateUI();
+    });
+    
+    filtersMenu.getItems().addAll(menuClearRegisterFilters, menuClearSectionFilters);
     viewMenu.getItems().add(filtersMenu);
 
     // Help menu TODO

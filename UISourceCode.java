@@ -26,6 +26,7 @@ public class UISourceCode {
     sourceCodeDisplay = new TextFlow();
     sourceCodeLines = 0;
     sourceCodeScrollPane = new ScrollPane();
+    previousSourceLine = -1;
     
     BufferedReader bufferedReader = new BufferedReader(new FileReader(filename));
     String line = null;

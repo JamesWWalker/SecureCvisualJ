@@ -65,7 +65,11 @@ public class UIProgramAddressSpace {
       for (ProgramSection ps : sections) {
         Label sectionHeader = new Label(ps.toString());      // TODO: color-coding etc.?
         sectionHeader.setStyle("-fx-border-color: black;");
-        sectionHeader.prefWidthProperty().bind(pasLayout.widthProperty());;
+        sectionHeader.prefWidthProperty().bind(pasLayout.widthProperty());
+        sectionHeader.setOnMouseClicked(e -> {
+          mainWindow.coordinator.runFilter.addSectionFilter(ps.name);
+          mainWindow.coordinator.queryProcessRunAndUpdateUI();
+        });
         pasLayout.getChildren().add(sectionHeader);
         
         // Globals
