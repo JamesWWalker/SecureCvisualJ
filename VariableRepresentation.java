@@ -102,6 +102,17 @@ public class VariableRepresentation {
   }
   
   
+  public void reverseEndianness(boolean newEndianness) {
+    if (isBigEndian != newEndianness) {
+      List<String> bytes = divideHexIntoBytes(value.substring(2));
+      Collections.reverse(bytes);
+      String joinedBytes = getBytesByType(String.join("", bytes), type);
+      setValue("0x" + joinedBytes, type);
+      isBigEndian = !isBigEndian;
+    }
+  }
+  
+  
   public String getBinary(VariableType convertTo, boolean convertToBigEndian) {
     if (type == VariableType.STRING || convertTo == VariableType.STRING) return value;
     String hex = getHex(convertTo, convertToBigEndian).substring(2);

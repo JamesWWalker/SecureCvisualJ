@@ -57,26 +57,31 @@ public class UIPASVariableTable {
       Label labelAddress = new Label("0x" + Long.toHexString(variable.address));
       Pane addressContainer = new Pane();
       addressContainer.getChildren().add(labelAddress);
+      addressContainer.setOnMouseClicked(e -> UIVariableRepresentation.display(variable.type, variable.value));
       table.add(addressContainer, 1, row, 1, 1);
       
       Label labelName = new Label(variable.name);
       Pane nameContainer = new Pane();
       nameContainer.getChildren().add(labelName);
+      nameContainer.setOnMouseClicked(e -> UIVariableRepresentation.display(variable.type, variable.value));
       table.add(nameContainer, 2, row, 1, 1);
       
       Label labelType = new Label(variable.type);
       Pane typeContainer = new Pane();
       typeContainer.getChildren().add(labelType);
+      typeContainer.setOnMouseClicked(e -> UIVariableRepresentation.display(variable.type, variable.value));
       table.add(typeContainer, 3, row, 1, 1);
       
       Label labelSize = new Label(variable.size);
       Pane sizeContainer = new Pane();
       sizeContainer.getChildren().add(labelSize);
+      sizeContainer.setOnMouseClicked(e -> UIVariableRepresentation.display(variable.type, variable.value));
       table.add(sizeContainer, 4, row, 1, 1);
       
       Label labelValue = new Label(variable.value);
       Pane valueContainer = new Pane();
       valueContainer.getChildren().add(labelValue);
+      valueContainer.setOnMouseClicked(e -> UIVariableRepresentation.display(variable.type, variable.value));
       table.add(valueContainer, 5, row, 1, 1);
       
       if (row % 2 != 0) {
