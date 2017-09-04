@@ -286,9 +286,6 @@ public class ProcessRun {
     if (type.equals("null")) type = getVariableType(name, variableTypes);
     else variableTypes.put(name, type);
     long address;
-System.err.print("DEBUG: ");
-for (int n= 0 ; n < parameters.length; ++n) System.err.print(parameters[n] + "  ");
-System.err.println();
     if (parameters[3].startsWith("0x")) address = Long.parseUnsignedLong(parameters[3].substring(2), 16);
     else address = Long.parseUnsignedLong(parameters[3], 16);
 
