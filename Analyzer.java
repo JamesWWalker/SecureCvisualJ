@@ -21,6 +21,8 @@ class Variable {
 
       String line = lines[linesIndex];
 
+      if (line.trim().isEmpty() || line.split(":")[0].trim().isEmpty()) return linesIndex+1;
+
       int index = 0;
 
       // Get address
@@ -167,6 +169,8 @@ class Variable {
 
 
   public String print(int eventNumber, int lineNumber, String scope) {
+  
+    if (type == null || address == null) return "";
 
     String output = "";
 
@@ -198,6 +202,8 @@ class Variable {
       ex.printStackTrace();
       System.exit(1);
     }
+    
+    
 
     return output;
 
