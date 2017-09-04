@@ -170,7 +170,7 @@ class Variable {
 
   public String print(int eventNumber, int lineNumber, String scope) {
   
-    if (type == null || address == null) return "";
+    if (type == null && address == null) return "";
 
     String output = "";
 

@@ -281,6 +281,7 @@ public class ProcessRun {
                                    String[] parameters) throws Exception
   {
     String type = parameters[4];
+    if (type.contains("[")) type = type.split("\\[")[0].trim();
     String name = parameters[5];
     String scope = parameters[2];
     if (type.equals("null")) type = getVariableType(name, variableTypes);
@@ -307,10 +308,9 @@ public class ProcessRun {
   }
 
 
-  private String getVariableType(String name, HashMap<String, String> variableTypes) throws Exception {
-    return variableTypes.containsKey(name.split(":")[0]) ?
-                variableTypes.get(name).split("\\s+")[0] :
-                                              "Unknown";
+  private String getVariableType(String nameIn, HashMap<String, String> variableTypes) throws Exception {
+    String name = nameIn.split(":")[0];
+    return variableTypes.containsKey(name) ? variableTypes.get(name).split("\\s+")[0] : "Unknown";
   }
 
 
