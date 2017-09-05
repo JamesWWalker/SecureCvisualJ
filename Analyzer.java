@@ -506,7 +506,7 @@ public class Analyzer {
       if (line.startsWith("(lldb)")) continue;
       if (!line.contains("frame #")) continue;
       String[] halves = line.split("`");
-      if (halves.length < 2) return; // If it won't even tell us what the function is called, forget it.
+      if (halves.length < 2) continue; // If it won't even tell us what the function is called, forget it.
       String[] front = halves[0].split("\\s+");
       String[] back = halves[1].split("\\s+");
       String frameFile = front[front.length-1];
