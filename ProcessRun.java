@@ -255,7 +255,7 @@ public class ProcessRun {
     state.sourceLine = Integer.parseInt(parameters[1]);
     String[] function = parameters[2].split("`");
     
-    // Need to look ahead to get address from RBP
+    // Need to look ahead to get address from EBP/RBP
     long address = 0;
     ++index;
     while (index < contents.size()) {
@@ -264,7 +264,10 @@ public class ProcessRun {
       String type = typeAndParameters[0];
       String[] parametersLookahead = typeAndParameters[1].split("\\|");
       
-      if (type.equals("register") && parametersLookahead[2].equals("rbp")) {
+      if (type.equals("register") && 
+         (parametersLookahead[2].equals("rbp") ||
+          parametersLookahead[2].equals("ebp"))) 
+      {
         address = Long.parseLong(parametersLookahead[3].substring(2), 16);
         break;
       }
