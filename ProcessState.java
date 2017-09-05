@@ -72,10 +72,17 @@ public class ProcessState {
 
     target.sourceLine = delta.sourceLine;
 
-    while (target.stack.size() > delta.stack.size()) target.stack.remove(target.stack.size()-1);
-    if (target.stack.size() < delta.stack.size()) {
-      for (int n = target.stack.size(); n < delta.stack.size(); ++n) {
-        target.stack.add(new ActivationRecord(delta.stack.get(n)));
+    if (target.stack.size() != delta.stack.size()) {
+      while (target.stack.size() > delta.stack.size()) target.stack.remove(target.stack.size()-1);
+      if (target.stack.size() < delta.stack.size()) {
+        for (int n = target.stack.size(); n < delta.stack.size(); ++n) {
+          target.stack.add(new ActivationRecord(delta.stack.get(n)));
+        }
+      }
+    }
+    else {
+      for (int n = 0; n < target.stack.size(); ++n) {
+        if (!target.stack.get(n).equals(delta.stack.get(n))) target.stack.set(n, delta.stack.get(n));
       }
     }
 

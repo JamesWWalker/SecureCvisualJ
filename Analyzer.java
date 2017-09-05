@@ -267,12 +267,10 @@ public class Analyzer {
 
   // TODO: external functions
 
-  static Hashtable<String, Variable> variables
-    = new Hashtable<String, Variable>(); // scope,name -> value
-  static Hashtable<String, String> registers
-    = new Hashtable<String, String>(); // name -> value
-  static Stack<String> backtrace = new Stack<String>();
-  static ArrayList<String> externalFunctions = new ArrayList<String>();
+  static Hashtable<String, Variable> variables = new Hashtable<>(); // scope,name -> value
+  static Hashtable<String, String> registers = new Hashtable<>(); // name -> value
+  static ArrayList<String> backtrace = new ArrayList<>();
+  static ArrayList<String> externalFunctions = new ArrayList<>();
 //  static ArrayList<Pair<String, Integer>> pendingFunctions
 //    = new ArrayList<Pair<String, Integer>>(); // for prioritizing call order
 
@@ -451,7 +449,7 @@ public class Analyzer {
       index = n;
       String line = inputLines[n];
       if (line.contains("frame")) {
-        function = line.split("`")[1].split("\\s+")[0];
+        function = line.split("`")[1].split("\\s+")[0].split("\\(")[0];
         break;
       }
     }
@@ -511,7 +509,7 @@ public class Analyzer {
       String[] back = halves[1].split("\\s+");
       String frameFile = front[front.length-1];
       String frameFunction = back[0];
-      currentBacktrace.add(frameFile+"`"+frameFunction);
+      currentBacktrace.add(frameFile + "`" + frameFunction.split("\\(")[0]);
     }
 
     // Check for termination -- obsoleted
@@ -530,7 +528,7 @@ public class Analyzer {
       int sizeDifference = backtrace.size() - currentBacktrace.size();
       if (sizeDifference > 0) {
         for (int n = 0; n < sizeDifference; ++n) {
-          backtrace.pop();
+          backtrace.remove(backtrace.size()-1);
           bw.write("return~!~" + ++eventNumber + System.lineSeparator());
         }
       }
@@ -538,11 +536,32 @@ public class Analyzer {
         for (int n = currentBacktrace.size() + sizeDifference;
              n < currentBacktrace.size(); ++n)
         {
-          backtrace.push(currentBacktrace.get(n));
+          backtrace.add(currentBacktrace.get(n));
+          bw.write("function_invocation~!~"                 +
+                   eventNumber                              + "|" +
+                   lineNumber                               + "|" +
+                   currentBacktrace.get(n)                  +
+                   System.lineSeparator());
+        }
+      }
+    }
+    else {
+      boolean stacksEqual = true;
+      for (int n = 0; n < backtrace.size(); ++n) {
+        if (!backtrace.get(n).equals(currentBacktrace.get(n))) {
+          stacksEqual = false;
+          break;
+        }
+      }
+      if (!stacksEqual) { // Stacks are different without having changed size
+        for (int n = 0; n < backtrace.size(); ++n) bw.write("return~!~" + eventNumber + System.lineSeparator());
+        backtrace.clear();
+        for (String s : currentBacktrace) {
+          backtrace.add(s);
           bw.write("function_invocation~!~" +
                    eventNumber              + "|" +
                    lineNumber               + "|" +
-                   currentBacktrace.get(n)  +
+                   s                        +
                    System.lineSeparator());
         }
       }
