@@ -175,15 +175,19 @@ public class ProcessRunFilter {
   
   public String saveConfig() {
     String config = "";
-    config += "DetailLevel:" + getDetailLevel().toString() + System.lineSeparator();
-    config += "ShowAllFunctions:" + showAllFunctions.get() + System.lineSeparator();
-    config += "ShowRegisters:" + showRegisters.get() + System.lineSeparator();
-    config += "ShowAllSectionsByDefault:" + showAllSectionsByDefault.get() + System.lineSeparator();
-    config += "ShowAssembly:" + showAssembly.get() + System.lineSeparator();
+    
+    try {
+      config += "DetailLevel:" + getDetailLevel().toString() + System.lineSeparator();
+      config += "ShowAllFunctions:" + showAllFunctions.get() + System.lineSeparator();
+      config += "ShowRegisters:" + showRegisters.get() + System.lineSeparator();
+      config += "ShowAllSectionsByDefault:" + showAllSectionsByDefault.get() + System.lineSeparator();
+      config += "ShowAssembly:" + showAssembly.get() + System.lineSeparator();
 
-    config += outputFilter("FunctionsFilter", functionsFilter);
-    config += outputFilter("RegistersFilter", registersFilter);
-    config += outputFilter("SectionsFilter", sectionsFilter);
+      config += outputFilter("FunctionsFilter", functionsFilter);
+      config += outputFilter("RegistersFilter", registersFilter);
+      config += outputFilter("SectionsFilter", sectionsFilter);
+    } catch (Exception ex) {
+    }
     
     return config;
   }

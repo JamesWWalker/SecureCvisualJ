@@ -10,7 +10,7 @@ class Variable {
   private String type;
   private String address;
   private String pointsTo;
-  private String value;
+  public String value;
   private ArrayList<Variable> elements;
 
 
@@ -271,6 +271,8 @@ public class Analyzer {
   static Hashtable<String, String> registers = new Hashtable<>(); // name -> value
   static ArrayList<String> backtrace = new ArrayList<>();
   static ArrayList<String> externalFunctions = new ArrayList<>();
+  static ArrayList<String> sensitiveData = new ArrayList<>();
+  static ArrayList<String> coreSizeZeroStructs = new ArrayList<>();
 //  static ArrayList<Pair<String, Integer>> pendingFunctions
 //    = new ArrayList<Pair<String, Integer>>(); // for prioritizing call order
 
@@ -290,7 +292,8 @@ public class Analyzer {
     try {
 
       if (args.length < 1) {
-        System.err.println("Usage: Analyzer binary [sm:speed_multiplier] [arch:architecture]");
+        System.err.println("Usage: Analyzer binary [sm:speed_multiplier] [arch:architecture]" +
+                           " [sd:func,variable_to_track]");
         System.exit(1);
       }
 
@@ -301,6 +304,7 @@ public class Analyzer {
         String[] arg = args[n].split(":");
         if (arg[0].equals("sm")) speedMultiplier = Integer.parseInt(arg[1]);
         else if (arg[0].equals("arch")) architecture = arg[1];
+        else if (arg[0].equals("sd")) sensitiveData.add(arg[1]);
       }
 
       // Read list of externally defined functions
@@ -405,7 +409,7 @@ public class Analyzer {
   {
     // Get current line number, which function we're in,
     // and compile list of external function calls
-    parseSourceLine(input);
+    String resourceZeroed = parseSourceLine(input);
 
     int sleepTime = speedMultiplier * 10;
 
@@ -433,11 +437,20 @@ public class Analyzer {
     System.out.println("disassemble --line");
     Thread.sleep(sleepTime);
     parseAssembly(input);
+    
+    // If zeroed resource is core limit, print event
+    if (resourceZeroed != null && coreSizeZeroStructs.contains(resourceZeroed)) {
+      bw.write("sd_corezero~!~" +
+               eventNumber      + "|" +
+               lineNumber       +
+               System.lineSeparator());
+    }
 
   } // analyzeLine()
 
 
-  private static void parseSourceLine(BufferedReader input)
+  // Returns resource that has been zeroed out (if any)
+  private static String parseSourceLine(BufferedReader input)
               throws IOException, InterruptedException
   {
 //    pendingFunctions.clear();
@@ -466,7 +479,70 @@ public class Analyzer {
         break;
       }
     }
-
+    
+    if (!sensitiveData.isEmpty()) {
+      // Look for mlock/munlock calls
+      //String regex = "(\\{|\\}|;|\\s+)mlock\\s*\\(";
+      String regex = "(\\bmlock\\b\\s*\\()|(\\bmunlock\\b\\s*\\()";
+      Pattern pattern = Pattern.compile(regex);
+      Matcher matcher = pattern.matcher(sourceLine);
+      if (matcher.find()) {
+        // Get the variable being memory-locked
+        String variable = "";
+        int idx = matcher.end();
+        char c = sourceLine.charAt(idx);
+        while (c != ' ' && c != '\n' && c != ',' && c != '\t') {
+          variable += c;
+          ++idx;
+          c = sourceLine.charAt(idx);
+        }
+        
+        // Check if it's a tracked variable
+        if (sensitiveData.contains(function + "," + variable) ||
+            sensitiveData.contains(GLOBAL + "," + variable))
+        {
+          String eventType = "sd_lock~!~";
+          if (sourceLine.contains("munlock")) eventType = "sd_unlock~!~";
+          bw.write(eventType     +
+                   eventNumber   + "|" +
+                   lineNumber    + "|" +
+                   function      + "|" +
+                   variable      +
+                   System.lineSeparator());
+        }
+      }
+      
+      // Look for setrlimit calls for zeroing the core size
+      regex = "\\bsetrlimit\\b\\s*\\(";
+      pattern = Pattern.compile(regex);
+      matcher = pattern.matcher(sourceLine);
+      if (matcher.find()) {
+        // Get the limit being set
+        String limit = "";
+        int idx = matcher.end();
+        char c = sourceLine.charAt(idx);
+        while (c != ' ' && c != '\n' && c != ',' && c != '\t') {
+          limit += c;
+          ++idx;
+          c = sourceLine.charAt(idx);
+        }
+        if (limit.equals("RLIMIT_CORE")) {
+          // See if the struct has had its limit set to 0
+          ++idx;
+          String variable = "";
+          c = sourceLine.charAt(idx);
+          while (c != ')' && c != '\n') {
+            if (c != ' ' && c != '&' && c != '\t') variable += c;
+            ++idx;
+            c = sourceLine.charAt(idx);
+          }
+          return variable;
+        }
+      }
+    }
+    
+    return null;
+    
     // Compile list of external function calls
     // We aren't doing anything with this right now, but we might in the future.
 /*    for (String function : externalFunctions) {
@@ -602,8 +678,35 @@ public class Analyzer {
 
         if (variables.keySet().contains(key)) {
           ArrayList<Variable> changedList = variable.changedValues(variables.get(key));
-          for (Variable v : changedList)
-            bw.write(v.print(eventNumber, lineNumber, scope));
+          for (Variable v : changedList) {
+            bw.write(v.print(eventNumber, lineNumber, scope)); // output variable data
+            
+            // Sensitive data outputs
+            if (sensitiveData.contains(scope + "," + v.name) ||
+                sensitiveData.contains(GLOBAL + "," + v.name)) 
+            {
+              if (v.value.equals("0") || v.value.equals("\"\""))
+                bw.write("sd_clear~!~" +
+                         eventNumber   + "|" +
+                         lineNumber    + "|" +
+                         scope         + "|" +
+                         v.name        +
+                         System.lineSeparator());
+              else
+                bw.write("sd_set~!~"   +
+                         eventNumber   + "|" +
+                         lineNumber    + "|" +
+                         scope         + "|" +
+                         v.name        +
+                         System.lineSeparator());
+            }
+            
+            // Check for structs that zero out core size
+            if (v.name.endsWith("rlim_max")) {
+              if (v.value.equals("0")) coreSizeZeroStructs.add(v.name.split(":")[0]);
+              else coreSizeZeroStructs.remove(v.name.split(":")[0]);
+            }
+          }
           if (!changedList.isEmpty()) variables.put(key, variable);
         }
         else {
