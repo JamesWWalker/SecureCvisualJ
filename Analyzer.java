@@ -761,10 +761,12 @@ public class Analyzer {
     }
     for (int n = 6; n < inputLines.length; ++n) {
       String line = inputLines[n].replaceAll("->", "").trim();
-      bw.write("assembly~!~" +
-               lineNumber    + "|" +
-               line          +
-               System.lineSeparator());
+      if (line.contains("=") && line.split("=").length == 2 && line.split("=")[1].trim().startsWith("0x")) {
+        bw.write("assembly~!~" +
+                 lineNumber    + "|" +
+                 line          +
+                 System.lineSeparator());
+      }
     }
   } // parseAssembly()
 
