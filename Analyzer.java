@@ -267,12 +267,13 @@ public class Analyzer {
 
   // TODO: external functions
 
+  static List<String> binaryArguments = new ArrayList<>();
   static Hashtable<String, Variable> variables = new Hashtable<>(); // scope,name -> value
   static Hashtable<String, String> registers = new Hashtable<>(); // name -> value
-  static ArrayList<String> backtrace = new ArrayList<>();
-  static ArrayList<String> externalFunctions = new ArrayList<>();
-  static ArrayList<String> sensitiveData = new ArrayList<>();
-  static ArrayList<String> coreSizeZeroStructs = new ArrayList<>();
+  static List<String> backtrace = new ArrayList<>();
+  static List<String> externalFunctions = new ArrayList<>();
+  static List<String> sensitiveData = new ArrayList<>();
+  static List<String> coreSizeZeroStructs = new ArrayList<>();
 //  static ArrayList<Pair<String, Integer>> pendingFunctions
 //    = new ArrayList<Pair<String, Integer>>(); // for prioritizing call order
 
@@ -292,8 +293,8 @@ public class Analyzer {
     try {
 
       if (args.length < 1) {
-        System.err.println("Usage: Analyzer binary [sm:speed_multiplier] [arch:architecture]" +
-                           " [sd:func,variable_to_track]");
+        System.err.println("Usage: Analyzer binary [arg:argument_to_binary] [sm:speed_multiplier]" +
+                           "  [arch:architecture] [sd:func,variable_to_track]");
         System.exit(1);
       }
 
@@ -305,6 +306,7 @@ public class Analyzer {
         if (arg[0].equals("sm")) speedMultiplier = Integer.parseInt(arg[1]);
         else if (arg[0].equals("arch")) architecture = arg[1];
         else if (arg[0].equals("sd")) sensitiveData.add(arg[1]);
+        else if (arg[0].equals("arg")) binaryArguments.add(arg[1]);
       }
 
       // Read list of externally defined functions
@@ -339,7 +341,9 @@ public class Analyzer {
       Thread.sleep(100);
       consumeInput(input);
 
-      System.out.println("run");
+      String runCommand = "run";
+      for (String arg : binaryArguments) runCommand += (" " + arg);
+      System.out.println(runCommand);
       Thread.sleep(1000);
 
       while (true) {
