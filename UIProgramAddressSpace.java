@@ -88,7 +88,7 @@ public class UIProgramAddressSpace {
     
     if (sections != null && sections.size() > 0) {
       for (ProgramSection ps : sections) {
-        Label labelSection = new Label(ps.toString());      // TODO: color-coding etc.?
+        Label labelSection = new Label(ps.toString());
         labelSection.setStyle("-fx-border-color: black;");
         String color = UIUtils.getNextColor();
         labelSection.setStyle("-fx-background-color: " + color + ";");
@@ -105,7 +105,7 @@ public class UIProgramAddressSpace {
           for (VariableDelta v : variables.values()) {
             if (v.scope.equals(UIUtils.GLOBAL) && !v.type.contains("const")) 
               globalVariables.put(UIUtils.GLOBAL + "," + v.name, v);
-          }     
+          }
           if (globalVariables.size() > 0) pasLayout.getChildren()
             .add(UIPASVariableTable.createTable(mainWindow,
             mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), 
@@ -135,11 +135,13 @@ public class UIProgramAddressSpace {
     stackHeader.prefWidthProperty().bind(pasLayout.widthProperty());
     pasLayout.getChildren().add(stackHeader);
     
+    Collections.sort(stack);
+    
     for (ActivationRecord ar : stack) {
     
       String color = UIUtils.getNextColor();
       
-      Label arHeader = new Label("0x" + Long.toHexString(ar.address) + ": " +ar.function);
+      Label arHeader = new Label("0x" + Long.toHexString(ar.address) + ": " + ar.function);
       arHeader.setStyle("-fx-border-color: black;");
       arHeader.setStyle("-fx-background-color: " + color + ";");
       arHeader.prefWidthProperty().bind(pasLayout.widthProperty());;

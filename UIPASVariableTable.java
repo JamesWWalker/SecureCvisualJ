@@ -15,9 +15,12 @@ public class UIPASVariableTable {
   
   public static GridPane createTable(UIMainWindow mainWindow,
                                      Stage window,
-                                     TreeMap<String, VariableDelta> variables,
+                                     TreeMap<String, VariableDelta> varTree,
                                      String color) 
   {
+    List<VariableDelta> variables = new ArrayList<>(varTree.values());
+    Collections.sort(variables);
+  
     GridPane table = new GridPane();
     
     ColumnConstraints column = new ColumnConstraints(10); // left column for color-coding
@@ -46,10 +49,8 @@ public class UIPASVariableTable {
     table.add(headerValue, 5, 0, 1, 1);
     
     int row = 1;
-    Set<String> keys = variables.keySet();
-    for (String key : keys) {
-      VariableDelta variable = variables.get(key);
-      
+    for (VariableDelta variable : variables) {
+          
       Pane colorPane = new Pane();
       colorPane.setStyle("-fx-background-color: " + color + ";");
       table.add(colorPane, 0, row, 1, 1);

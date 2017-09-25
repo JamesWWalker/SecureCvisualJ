@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class VariableDelta {
+public class VariableDelta implements Comparable<VariableDelta> {
 
   public String type;
   public String scope;
@@ -113,5 +113,10 @@ public class VariableDelta {
     target.value = delta.value;
     target.address = delta.address;
   }
+  
+  
+  public int compareTo(VariableDelta other) {
+    return Long.compare(address, other.address);
+	}
 
 } // VariableDelta class

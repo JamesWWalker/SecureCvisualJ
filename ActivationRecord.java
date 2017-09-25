@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class ActivationRecord {
+public class ActivationRecord implements Comparable<ActivationRecord> {
 
   public String file;
   public String function;
@@ -45,5 +45,10 @@ public class ActivationRecord {
   public int hashCode() {
     return Objects.hash(file, function, address);
   }
+  
+  
+  public int compareTo(ActivationRecord other) {
+    return Long.compare(address, other.address);
+	}
 
 }
