@@ -116,7 +116,7 @@ public class VariableDelta implements Comparable<VariableDelta> {
   
   
   public int compareTo(VariableDelta other) {
-    return Long.compare(address, other.address);
+    return Long.compare(other.address, address); // reverse order
 	}
 
 } // VariableDelta class

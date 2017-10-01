@@ -11,11 +11,11 @@ section~!~0x0000000b|elf-relocation-entries|[0x0000000000400378-0x00000000004003
 section~!~0x0000000c|regular|[0x0000000000400390-0x00000000004003aa)|0x00000390|0x0000001a|0x00000006|simple2..init
 section~!~0x0000000d|regular|[0x00000000004003b0-0x00000000004003d0)|0x000003b0|0x00000020|0x00000006|simple2..plt
 section~!~0x0000000e|regular|[0x00000000004003d0-0x00000000004003d8)|0x000003d0|0x00000008|0x00000006|simple2..plt.got
-section~!~0x0000000f|code|[0x00000000004003e0-0x00000000004005a2)|0x000003e0|0x000001c2|0x00000006|simple2..text
-section~!~0x00000010|regular|[0x00000000004005a4-0x00000000004005ad)|0x000005a4|0x00000009|0x00000006|simple2..fini
-section~!~0x00000011|regular|[0x00000000004005b0-0x00000000004005b4)|0x000005b0|0x00000004|0x00000012|simple2..rodata
-section~!~0x00000012|regular|[0x00000000004005b4-0x00000000004005f0)|0x000005b4|0x0000003c|0x00000002|simple2..eh_frame_hdr
-section~!~0x00000013|eh-frame|[0x00000000004005f0-0x0000000000400704)|0x000005f0|0x00000114|0x00000002|simple2..eh_frame
+section~!~0x0000000f|code|[0x00000000004003e0-0x00000000004005b2)|0x000003e0|0x000001d2|0x00000006|simple2..text
+section~!~0x00000010|regular|[0x00000000004005b4-0x00000000004005bd)|0x000005b4|0x00000009|0x00000006|simple2..fini
+section~!~0x00000011|regular|[0x00000000004005c0-0x00000000004005c4)|0x000005c0|0x00000004|0x00000012|simple2..rodata
+section~!~0x00000012|regular|[0x00000000004005c4-0x0000000000400600)|0x000005c4|0x0000003c|0x00000002|simple2..eh_frame_hdr
+section~!~0x00000013|eh-frame|[0x0000000000400600-0x0000000000400714)|0x00000600|0x00000114|0x00000002|simple2..eh_frame
 section~!~0x00000014|regular|[0x0000000000600e10-0x0000000000600e18)|0x00000e10|0x00000008|0x00000003|simple2..init_array
 section~!~0x00000015|regular|[0x0000000000600e18-0x0000000000600e20)|0x00000e18|0x00000008|0x00000003|simple2..fini_array
 section~!~0x00000016|regular|[0x0000000000600e20-0x0000000000600e28)|0x00000e20|0x00000008|0x00000003|simple2..jcr
@@ -31,7 +31,7 @@ return_address~!~main|0xffffde40
 variable_access~!~0|12|main|0x00007fffffffdd54|int|a|32767
 variable_access~!~0|12|main|0x00007fffffffdd58|int|b|0
 variable_access~!~0|12|main|0x00007fffffffdd5c|int|c|0
-register~!~0|12|rax|0x00000000004004f6
+register~!~0|12|rax|0x0000000000400500
 register~!~0|12|rbx|0x0000000000000000
 register~!~0|12|rcx|0x0000000000000000
 register~!~0|12|rdx|0x00007fffffffde58
@@ -39,7 +39,7 @@ register~!~0|12|rdi|0x0000000000000001
 register~!~0|12|rsi|0x00007fffffffde48
 register~!~0|12|rbp|0x00007fffffffdd60
 register~!~0|12|rsp|0x00007fffffffdd50
-register~!~0|12|r8|0x00000000004005a0
+register~!~0|12|r8|0x00000000004005b0
 register~!~0|12|r9|0x00007ffff7de7ab0
 register~!~0|12|r10|0x0000000000000846
 register~!~0|12|r11|0x00007ffff7a2d740
@@ -47,7 +47,7 @@ register~!~0|12|r12|0x00000000004003e0
 register~!~0|12|r13|0x00007fffffffde40
 register~!~0|12|r14|0x0000000000000000
 register~!~0|12|r15|0x0000000000000000
-register~!~0|12|rip|0x00000000004004fe
+register~!~0|12|rip|0x0000000000400508
 register~!~0|12|rflags|0x0000000000000206
 register~!~0|12|cs|0x0000000000000033
 register~!~0|12|fs|0x0000000000000000
@@ -55,62 +55,77 @@ register~!~0|12|gs|0x0000000000000000
 register~!~0|12|ss|0x000000000000002b
 register~!~0|12|ds|0x0000000000000000
 register~!~0|12|es|0x0000000000000000
-assembly~!~12|0x4004fe <+8>: movl   $0x2, -0xc(%rbp)
+assembly~!~12|0x400508 <+8>: movl   $0x2, -0xc(%rbp)
 return_address~!~main|0xffffde40
 variable_access~!~1|13|main|0x00007fffffffdd54|int|a|2
-register~!~1|13|rip|0x0000000000400505
-assembly~!~13|0x400505 <+15>: movl   $0x8, -0x8(%rbp)
+register~!~1|13|rip|0x000000000040050f
+assembly~!~13|0x40050f <+15>: movl   $0x8, -0x8(%rbp)
 return_address~!~main|0xffffde40
 variable_access~!~2|14|main|0x00007fffffffdd58|int|b|8
-register~!~2|14|rip|0x000000000040050c
-assembly~!~14|0x40050c <+22>: movl   $0x0, %eax
-assembly~!~14|0x400511 <+27>: callq  0x4004d6                  ; subFunc at simple2.c:5
+register~!~2|14|rip|0x0000000000400516
+assembly~!~14|0x400516 <+22>: movl   -0x8(%rbp), %edx
+assembly~!~14|0x400519 <+25>: movl   -0xc(%rbp), %eax
+assembly~!~14|0x40051c <+28>: movl   %edx, %esi
+assembly~!~14|0x40051e <+30>: movl   %eax, %edi
+assembly~!~14|0x400520 <+32>: callq  0x4004d6                  ; subFunc at simple2.c:5
 function_invocation~!~3|6|simple2`subFunc
 return_address~!~subFunc|0xffffdd60
+variable_access~!~3|6|subFunc|0x00007fffffffdd2c|int|p1|2
+variable_access~!~3|6|subFunc|0x00007fffffffdd28|int|p2|8
 variable_access~!~3|6|subFunc|0x00007fffffffdd34|int|x|0
 variable_access~!~3|6|subFunc|0x00007fffffffdd38|int|y|0
 variable_access~!~3|6|subFunc|0x00007fffffffdd3c|int|z|0
-register~!~3|6|rax|0x0000000000000000
+register~!~3|6|rax|0x0000000000000002
+register~!~3|6|rdx|0x0000000000000008
+register~!~3|6|rdi|0x0000000000000002
+register~!~3|6|rsi|0x0000000000000008
 register~!~3|6|rbp|0x00007fffffffdd40
 register~!~3|6|rsp|0x00007fffffffdd40
-register~!~3|6|rip|0x00000000004004da
-assembly~!~6|0x4004da <+4>: movl   $0x4, -0xc(%rbp)
+register~!~3|6|rip|0x00000000004004e0
+assembly~!~6|0x4004e0 <+10>: movl   -0x14(%rbp), %eax
+assembly~!~6|0x4004e3 <+13>: addl   $0x4, %eax
+assembly~!~6|0x4004e6 <+16>: movl   %eax, -0xc(%rbp)
 return_address~!~subFunc|0xffffdd60
-variable_access~!~4|7|subFunc|0x00007fffffffdd34|int|x|4
-register~!~4|7|rip|0x00000000004004e1
-assembly~!~7|0x4004e1 <+11>: movl   $0x3, -0x8(%rbp)
+variable_access~!~4|7|subFunc|0x00007fffffffdd34|int|x|6
+register~!~4|7|rax|0x0000000000000006
+register~!~4|7|rip|0x00000000004004e9
+assembly~!~7|0x4004e9 <+19>: movl   -0x18(%rbp), %eax
+assembly~!~7|0x4004ec <+22>: addl   $0x3, %eax
+assembly~!~7|0x4004ef <+25>: movl   %eax, -0x8(%rbp)
 return_address~!~subFunc|0xffffdd60
-variable_access~!~5|8|subFunc|0x00007fffffffdd38|int|y|3
-register~!~5|8|rip|0x00000000004004e8
-assembly~!~8|0x4004e8 <+18>: movl   -0xc(%rbp), %edx
-assembly~!~8|0x4004eb <+21>: movl   -0x8(%rbp), %eax
-assembly~!~8|0x4004ee <+24>: addl   %edx, %eax
-assembly~!~8|0x4004f0 <+26>: movl   %eax, -0x4(%rbp)
+variable_access~!~5|8|subFunc|0x00007fffffffdd38|int|y|11
+register~!~5|8|rax|0x000000000000000b
+register~!~5|8|rip|0x00000000004004f2
+register~!~5|8|rflags|0x0000000000000202
+assembly~!~8|0x4004f2 <+28>: movl   -0xc(%rbp), %edx
+assembly~!~8|0x4004f5 <+31>: movl   -0x8(%rbp), %eax
+assembly~!~8|0x4004f8 <+34>: addl   %edx, %eax
+assembly~!~8|0x4004fa <+36>: movl   %eax, -0x4(%rbp)
 return_address~!~subFunc|0xffffdd60
-variable_access~!~6|9|subFunc|0x00007fffffffdd3c|int|z|7
-register~!~6|9|rax|0x0000000000000007
-register~!~6|9|rdx|0x0000000000000004
-register~!~6|9|rip|0x00000000004004f3
-register~!~6|9|rflags|0x0000000000000202
-assembly~!~9|0x4004f3 <+29>: nop
-assembly~!~9|0x4004f4 <+30>: popq   %rbp
-assembly~!~9|0x4004f5 <+31>: retq
+variable_access~!~6|9|subFunc|0x00007fffffffdd3c|int|z|17
+register~!~6|9|rax|0x0000000000000011
+register~!~6|9|rdx|0x0000000000000006
+register~!~6|9|rip|0x00000000004004fd
+register~!~6|9|rflags|0x0000000000000216
+assembly~!~9|0x4004fd <+39>: nop
+assembly~!~9|0x4004fe <+40>: popq   %rbp
+assembly~!~9|0x4004ff <+41>: retq
 return~!~8
 return_address~!~main|0xffffde40
 register~!~8|15|rbp|0x00007fffffffdd60
 register~!~8|15|rsp|0x00007fffffffdd50
-register~!~8|15|rip|0x0000000000400516
-assembly~!~15|0x400516 <+32>: movl   -0xc(%rbp), %edx
-assembly~!~15|0x400519 <+35>: movl   -0x8(%rbp), %eax
-assembly~!~15|0x40051c <+38>: addl   %edx, %eax
-assembly~!~15|0x40051e <+40>: movl   %eax, -0x4(%rbp)
-assembly~!~15|0x400521 <+43>: movl   $0x0, %eax
+register~!~8|15|rip|0x0000000000400525
+assembly~!~15|0x400525 <+37>: movl   -0xc(%rbp), %edx
+assembly~!~15|0x400528 <+40>: movl   -0x8(%rbp), %eax
+assembly~!~15|0x40052b <+43>: addl   %edx, %eax
+assembly~!~15|0x40052d <+45>: movl   %eax, -0x4(%rbp)
+assembly~!~15|0x400530 <+48>: movl   $0x0, %eax
 return_address~!~main|0xffffde40
 variable_access~!~9|16|main|0x00007fffffffdd5c|int|c|10
 register~!~9|16|rax|0x0000000000000000
 register~!~9|16|rdx|0x0000000000000002
-register~!~9|16|rip|0x0000000000400526
+register~!~9|16|rip|0x0000000000400535
 register~!~9|16|rflags|0x0000000000000206
-assembly~!~16|0x400527 <+49>: retq
+assembly~!~16|0x400536 <+54>: retq
 return~!~11
 return_address~!~__libc_start_main|0x00000000

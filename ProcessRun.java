@@ -349,7 +349,7 @@ public class ProcessRun {
   {
     for (ActivationRecord ar : stack) {
       if (ar.function.equals(parameters[0])) {
-        ar.returnAddress = Long.parseUnsignedLong(parameters[1].substring(2), 16);
+        ar.returnAddress = parameters[1];
         return;
       }
     }

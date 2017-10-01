@@ -5,7 +5,7 @@ public class ActivationRecord implements Comparable<ActivationRecord> {
   public String file;
   public String function;
   public long address;
-  public long returnAddress;
+  String returnAddress;
 
 
   public ActivationRecord(String fileIn, String functionIn, long addressIn) {
@@ -15,7 +15,7 @@ public class ActivationRecord implements Comparable<ActivationRecord> {
   }
   
   
-  public ActivationRecord(String fileIn, String functionIn, long addressIn, long returnAddressIn) {
+  public ActivationRecord(String fileIn, String functionIn, long addressIn, String returnAddressIn) {
     file = fileIn;
     function = functionIn;
     address = addressIn;
@@ -39,7 +39,8 @@ public class ActivationRecord implements Comparable<ActivationRecord> {
     if (file != null ? !file.equals(ar.file) : ar.file != null) return false;
     if (function != null ? !function.equals(ar.function) : ar.function != null) return false;
     if (address != ar.address) return false;
-    if (returnAddress != ar.returnAddress) return false;
+    if (returnAddress != null ? !returnAddress.equals(ar.returnAddress) 
+      : ar.returnAddress != null) return false;
 
     return true;
   }
@@ -58,7 +59,7 @@ public class ActivationRecord implements Comparable<ActivationRecord> {
   
   
   public int compareTo(ActivationRecord other) {
-    return Long.compare(address, other.address);
+    return Long.compare(other.address, address); // reverse order
 	}
 
 }

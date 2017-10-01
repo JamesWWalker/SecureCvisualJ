@@ -273,7 +273,7 @@ public class TestProcessRun {
                                                   "int",
                                                   "subFunc",
                                                   "z",
-                                                  "7",
+                                                  "17",
                                                   140737488346428L);
 
       run.next();
@@ -316,13 +316,13 @@ public class TestProcessRun {
                                                   "int",
                                                   "subFunc",
                                                   "x",
-                                                  "4",
+                                                  "6",
                                                   140737488346420L);
       errors += verifyVariableState(variables.get("subFunc,y"),
                                                   "int",
                                                   "subFunc",
                                                   "y",
-                                                  "3",
+                                                  "11",
                                                   140737488346424L);
       errors += verifyVariableState(variables.get("subFunc,z"),
                                                   "int",

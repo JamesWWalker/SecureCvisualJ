@@ -144,8 +144,16 @@ public class UIProgramAddressSpace {
       Label arHeader = new Label("0x" + Long.toHexString(ar.address) + ": " + ar.function);
       arHeader.setStyle("-fx-border-color: black;");
       arHeader.setStyle("-fx-background-color: " + color + ";");
-      arHeader.prefWidthProperty().bind(pasLayout.widthProperty());;
+      arHeader.prefWidthProperty().bind(pasLayout.widthProperty());
       pasLayout.getChildren().add(arHeader);
+      
+      String returnAddressText = "Return Address: ";
+      returnAddressText += ar.returnAddress;
+      Label returnAddressLabel = new Label(returnAddressText);
+      returnAddressLabel.setStyle("-fx-border-color: black;");
+      returnAddressLabel.setStyle("-fx-background-color: " + color + ";");
+      returnAddressLabel.prefWidthProperty().bind(pasLayout.widthProperty());
+      pasLayout.getChildren().add(returnAddressLabel);
       
       TreeMap<String, VariableDelta> localVariables = new TreeMap<>();
       for (VariableDelta v : variables.values()) {
