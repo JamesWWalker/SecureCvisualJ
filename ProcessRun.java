@@ -191,7 +191,8 @@ public class ProcessRun {
         if (type.equals("function_invocation")) parseFunctionInvocation(
                                                 contents, n, stateToAdd, runningStack, parameters);
         else if (type.equals("return")) runningStack.remove(runningStack.size()-1);
-        else if (type.equals("variable_access")) parseVariableAccess(stateToAdd, variableTypes, parameters);
+        else if (type.equals("variable_access")) parseVariableAccess(stateToAdd, runningStack, 
+                                                                     variableTypes, parameters);
         else if (type.equals("register")) stateToAdd.registers.put(parameters[2], parameters[3]);
         else if (type.equals("assembly")) parseAssembly(parameters);
         else if (type.equals("section")) parseSection(parameters);
@@ -276,11 +277,31 @@ public class ProcessRun {
       ++index;
     }
     
-    stack.add(new ActivationRecord(function[0], function[1], address));
+    // Handle recursion by detecting multiple calls to same function and assigning them numbers
+    String alteredFunction = function[1];
+    for (int n = stack.size()-1; n >= 0; --n) {
+      String compareFunction = stack.get(n).function;
+      if (stack.get(n).file.equals(function[0]) && 
+          (compareFunction.equals(function[1]) || 
+          compareFunction.startsWith(function[1] + "{")))
+      {
+        if (!compareFunction.contains("{")) alteredFunction += "{2}";
+        else {
+          String[] inter1 = compareFunction.split("\\{");
+          String[] inter2 = inter1[1].split("\\}");
+          int number = Integer.parseInt(inter2[0]);
+          alteredFunction += ("{" + (number+1) + "}");
+        }
+        break;
+      }
+    }
+    
+    stack.add(new ActivationRecord(function[0], alteredFunction, address));
   }
 
 
   private void parseVariableAccess(ProcessState state,
+                                   List<ActivationRecord> stack,
                                    HashMap<String, String> variableTypes,
                                    String[] parameters) throws Exception
   {
@@ -293,6 +314,17 @@ public class ProcessRun {
     long address;
     if (parameters[3].startsWith("0x")) address = Long.parseUnsignedLong(parameters[3].substring(2), 16);
     else address = Long.parseUnsignedLong(parameters[3], 16);
+    
+    // Detect recursive calls and assign variable to most recent call of that function
+    if (!scope.equals(UIUtils.GLOBAL)) {
+      for (int n = stack.size()-1; n >= 0; --n) {
+        String compareFunction = stack.get(n).function;
+        if (compareFunction.startsWith(scope + "{")) {
+          scope = compareFunction;
+          break;
+        }
+      }
+    }
 
     VariableDelta var = new VariableDelta(
       type,
@@ -347,9 +379,11 @@ public class ProcessRun {
   private void parseReturnAddress(List<ActivationRecord> stack, String[] parameters) 
                throws Exception 
   {
-    for (ActivationRecord ar : stack) {
-      if (ar.function.equals(parameters[0])) {
-        ar.returnAddress = parameters[1];
+    String scope = parameters[0];
+    for (int n = stack.size()-1; n >= 0; --n) {
+      String compareFunction = stack.get(n).function;
+      if (compareFunction.equals(scope) || compareFunction.startsWith(scope + "{")) {
+        stack.get(n).returnAddress = parameters[1];
         return;
       }
     }

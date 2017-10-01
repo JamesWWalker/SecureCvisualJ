@@ -168,7 +168,7 @@ public class TestProcessRun {
                                                   "char *",
                                                   "main",
                                                   "words",
-                                                  "\"\"",
+                                                  "\"Rappan Athuk\\n\"",
                                                   140737488346744L);
       if (variables.get("main,words").pointsTo != 6299664L)
       errors += "  VARIABLE ERROR 16: words pointsTo is [" + variables.get("main,words").pointsTo +
@@ -328,7 +328,7 @@ public class TestProcessRun {
                                                   "int",
                                                   "subFunc",
                                                   "z",
-                                                  "0",
+                                                  "17",
                                                   140737488346428L);
 
       run.jumpToBeginning();
@@ -421,6 +421,7 @@ public class TestProcessRun {
     if (var.address != address)
       errors += "  ADDRESS ERROR: [" + address + "] and [" + var.address +
                 "] are different." + System.lineSeparator();
+    if (!errors.isEmpty()) errors = scope + "`" + name + ": " + errors;
     return errors;
   } // verifyVariableState()
 

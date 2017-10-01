@@ -38,7 +38,7 @@ public class ProcessState {
     Set<String> variableKeys = state.variables.keySet();
     for (String key : variableKeys) copyVariables.put(key, new VariableDelta(state.variables.get(key)));
 
-    List<ActivationRecord> copyStack = new ArrayList<>();;
+    List<ActivationRecord> copyStack = new ArrayList<>();
     for (ActivationRecord ar : state.stack) copyStack.add(new ActivationRecord(ar));
 
     return new ProcessState(state.sourceLine, copyRegisters, copyVariables, copyStack);
