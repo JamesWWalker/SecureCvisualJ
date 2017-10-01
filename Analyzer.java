@@ -421,6 +421,11 @@ public class Analyzer {
     System.out.println("bt");
     Thread.sleep(sleepTime);
     parseBacktrace(input);
+    
+    // Get return address
+    System.out.println("x/1x $sp");
+    Thread.sleep(sleepTime);
+    parseReturnAddress(input);
 
     // Get local vars + args
     System.out.println("frame variable -L");
@@ -570,6 +575,25 @@ public class Analyzer {
     }); /* */
 
   } // parseSourceLine()
+  
+  
+  private static void parseReturnAddress(BufferedReader input)
+              throws IOException, InterruptedException
+  {
+    String[] inputLines = getLldbInput(input);
+    
+    for (int n = inputLines.length-1; n >= 0; --n) {
+      String line = inputLines[n];
+      if (line.startsWith("0x") && line.contains(": 0x")) {
+        String address = line.split(":")[1].trim();
+        bw.write("return_address~!~" +
+                 function            + "|" +
+                 address             +
+                 System.lineSeparator());
+        return;
+      }
+    }
+  }
 
 
   private static void parseBacktrace(BufferedReader input)

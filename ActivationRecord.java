@@ -5,6 +5,7 @@ public class ActivationRecord implements Comparable<ActivationRecord> {
   public String file;
   public String function;
   public long address;
+  public long returnAddress;
 
 
   public ActivationRecord(String fileIn, String functionIn, long addressIn) {
@@ -12,11 +13,19 @@ public class ActivationRecord implements Comparable<ActivationRecord> {
     function = functionIn;
     address = addressIn;
   }
+  
+  
+  public ActivationRecord(String fileIn, String functionIn, long addressIn, long returnAddressIn) {
+    file = fileIn;
+    function = functionIn;
+    address = addressIn;
+    returnAddress = returnAddressIn;
+  }
 
 
   // copy constructor
   public ActivationRecord(ActivationRecord ar) {
-    this(ar.file, ar.function, ar.address);
+    this(ar.file, ar.function, ar.address, ar.returnAddress);
   }
 
 
@@ -30,6 +39,7 @@ public class ActivationRecord implements Comparable<ActivationRecord> {
     if (file != null ? !file.equals(ar.file) : ar.file != null) return false;
     if (function != null ? !function.equals(ar.function) : ar.function != null) return false;
     if (address != ar.address) return false;
+    if (returnAddress != ar.returnAddress) return false;
 
     return true;
   }
@@ -37,13 +47,13 @@ public class ActivationRecord implements Comparable<ActivationRecord> {
 
   @Override
   public String toString() {
-    return file + "," + function + "," + address;
+    return file + "," + function + "," + address + "," + returnAddress;
   }
   
   
   @Override
   public int hashCode() {
-    return Objects.hash(file, function, address);
+    return Objects.hash(file, function, address, returnAddress);
   }
   
   

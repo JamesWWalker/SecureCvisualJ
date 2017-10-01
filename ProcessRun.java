@@ -179,7 +179,7 @@ public class ProcessRun {
         String type = typeAndParameters[0];
         String[] parameters = typeAndParameters[1].split("\\|");
 
-        if (!type.equals("assembly") && !type.equals("section")) 
+        if (!type.equals("assembly") && !type.equals("section") && !type.equals("return_address")) 
           currentEvent = Integer.parseInt(parameters[0]);
 
         if (currentEvent != previousEvent) {
@@ -195,6 +195,7 @@ public class ProcessRun {
         else if (type.equals("register")) stateToAdd.registers.put(parameters[2], parameters[3]);
         else if (type.equals("assembly")) parseAssembly(parameters);
         else if (type.equals("section")) parseSection(parameters);
+        else if (type.equals("return_address")) parseReturnAddress(runningStack, parameters);
         else {
           System.err.println("ERROR: Unrecognized event type " + type + ". Terminating parse.");
           return;
@@ -340,6 +341,18 @@ public class ProcessRun {
                                     Long.parseUnsignedLong(parameters[4].substring(2), 16),
                                     parameters[5],
                                     parameters[6]));
+  }
+  
+  
+  private void parseReturnAddress(List<ActivationRecord> stack, String[] parameters) 
+               throws Exception 
+  {
+    for (ActivationRecord ar : stack) {
+      if (ar.function.equals(parameters[0])) {
+        ar.returnAddress = Long.parseUnsignedLong(parameters[1].substring(2), 16);
+        return;
+      }
+    }
   }
   
 

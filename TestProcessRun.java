@@ -215,19 +215,19 @@ public class TestProcessRun {
                                                   "main",
                                                   "a",
                                                   "32767",
-                                                  140737488346740L);
+                                                  140737488346452L);
       errors += verifyVariableState(variables.get("main,b"),
                                                   "int",
                                                   "main",
                                                   "b",
                                                   "0",
-                                                  140737488346744L);
+                                                  140737488346456L);
       errors += verifyVariableState(variables.get("main,c"),
                                                   "int",
                                                   "main",
                                                   "c",
                                                   "0",
-                                                  140737488346748L);
+                                                  140737488346460L);
 
       run.next();
       run.next();
@@ -238,31 +238,31 @@ public class TestProcessRun {
                                                   "main",
                                                   "a",
                                                   "2",
-                                                  140737488346740L);
+                                                  140737488346452L);
       errors += verifyVariableState(variables.get("main,b"),
                                                   "int",
                                                   "main",
                                                   "b",
                                                   "8",
-                                                  140737488346744L);
+                                                  140737488346456L);
       errors += verifyVariableState(variables.get("subFunc,x"),
                                                   "int",
                                                   "subFunc",
                                                   "x",
                                                   "0",
-                                                  140737488346708L);
+                                                  140737488346420L);
       errors += verifyVariableState(variables.get("subFunc,y"),
                                                   "int",
                                                   "subFunc",
                                                   "y",
                                                   "0",
-                                                  140737488346712L);
+                                                  140737488346424L);
       errors += verifyVariableState(variables.get("subFunc,z"),
                                                   "int",
                                                   "subFunc",
                                                   "z",
                                                   "0",
-                                                  140737488346716L);
+                                                  140737488346428L);
 
       run.next();
       run.next();
@@ -274,7 +274,7 @@ public class TestProcessRun {
                                                   "subFunc",
                                                   "z",
                                                   "7",
-                                                  140737488346716L);
+                                                  140737488346428L);
 
       run.next();
       run.next();
@@ -288,7 +288,7 @@ public class TestProcessRun {
                                                   "main",
                                                   "c",
                                                   "10",
-                                                  140737488346748L);
+                                                  140737488346460L);
 
       run.previous();
       run.previous();
@@ -299,37 +299,37 @@ public class TestProcessRun {
                                                   "main",
                                                   "a",
                                                   "2",
-                                                  140737488346740L);
+                                                  140737488346452L);
       errors += verifyVariableState(variables.get("main,b"),
                                                   "int",
                                                   "main",
                                                   "b",
                                                   "8",
-                                                  140737488346744L);
+                                                  140737488346456L);
       errors += verifyVariableState(variables.get("main,c"),
                                                   "int",
                                                   "main",
                                                   "c",
                                                   "0",
-                                                  140737488346748L);
+                                                  140737488346460L);
       errors += verifyVariableState(variables.get("subFunc,x"),
                                                   "int",
                                                   "subFunc",
                                                   "x",
                                                   "4",
-                                                  140737488346708L);
+                                                  140737488346420L);
       errors += verifyVariableState(variables.get("subFunc,y"),
                                                   "int",
                                                   "subFunc",
                                                   "y",
                                                   "3",
-                                                  140737488346712L);
+                                                  140737488346424L);
       errors += verifyVariableState(variables.get("subFunc,z"),
                                                   "int",
                                                   "subFunc",
                                                   "z",
                                                   "0",
-                                                  140737488346716L);
+                                                  140737488346428L);
 
       run.jumpToBeginning();
       variables = run.getVariables();
@@ -338,19 +338,19 @@ public class TestProcessRun {
                                                   "main",
                                                   "a",
                                                   "32767",
-                                                  140737488346740L);
+                                                  140737488346452L);
       errors += verifyVariableState(variables.get("main,b"),
                                                   "int",
                                                   "main",
                                                   "b",
                                                   "0",
-                                                  140737488346744L);
+                                                  140737488346456L);
       errors += verifyVariableState(variables.get("main,c"),
                                                   "int",
                                                   "main",
                                                   "c",
                                                   "0",
-                                                  140737488346748L);
+                                                  140737488346460L);
                                                   
       //////////////////////////////////////////////////////////////////////////////////////////////
       // Verify that sections filtering is working

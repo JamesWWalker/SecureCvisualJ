@@ -1,53 +1,54 @@
-section~!~0x00000002|regular|[0x0000000008048154-0x0000000008048167)|0x00000154|0x00000013|0x00000002|simple2..interp
-section~!~0x00000003|regular|[0x0000000008048168-0x0000000008048188)|0x00000168|0x00000020|0x00000002|simple2..note.ABI-tag
-section~!~0x00000004|regular|[0x0000000008048188-0x00000000080481ac)|0x00000188|0x00000024|0x00000002|simple2..note.gnu.build-id
-section~!~0x00000005|regular|[0x00000000080481ac-0x00000000080481cc)|0x000001ac|0x00000020|0x00000002|simple2..gnu.hash
-section~!~0x00000006|elf-dynamic-symbols|[0x00000000080481cc-0x000000000804824c)|0x000001cc|0x00000080|0x00000002|simple2..dynsym
-section~!~0x00000007|regular|[0x000000000804824c-0x00000000080482a9)|0x0000024c|0x0000005d|0x00000002|simple2..dynstr
-section~!~0x00000008|regular|[0x00000000080482aa-0x00000000080482ba)|0x000002aa|0x00000010|0x00000002|simple2..gnu.version
-section~!~0x00000009|regular|[0x00000000080482bc-0x00000000080482dc)|0x000002bc|0x00000020|0x00000002|simple2..gnu.version_r
-section~!~0x0000000a|elf-relocation-entries|[0x00000000080482dc-0x00000000080482e4)|0x000002dc|0x00000008|0x00000002|simple2..rel.dyn
-section~!~0x0000000b|elf-relocation-entries|[0x00000000080482e4-0x000000000804830c)|0x000002e4|0x00000028|0x00000042|simple2..rel.plt
-section~!~0x0000000c|regular|[0x000000000804830c-0x000000000804832f)|0x0000030c|0x00000023|0x00000006|simple2..init
-section~!~0x0000000d|regular|[0x0000000008048330-0x0000000008048390)|0x00000330|0x00000060|0x00000006|simple2..plt
-section~!~0x0000000e|regular|[0x0000000008048390-0x0000000008048398)|0x00000390|0x00000008|0x00000006|simple2..plt.got
-section~!~0x0000000f|code|[0x00000000080483a0-0x00000000080487f2)|0x000003a0|0x00000452|0x00000006|simple2..text
-section~!~0x00000010|regular|[0x00000000080487f4-0x0000000008048808)|0x000007f4|0x00000014|0x00000006|simple2..fini
-section~!~0x00000011|regular|[0x0000000008048808-0x0000000008048982)|0x00000808|0x0000017a|0x00000002|simple2..rodata
-section~!~0x00000012|regular|[0x0000000008048984-0x00000000080489c0)|0x00000984|0x0000003c|0x00000002|simple2..eh_frame_hdr
-section~!~0x00000013|eh-frame|[0x00000000080489c0-0x0000000008048ac8)|0x000009c0|0x00000108|0x00000002|simple2..eh_frame
-section~!~0x00000014|regular|[0x0000000008049f08-0x0000000008049f0c)|0x00000f08|0x00000004|0x00000003|simple2..init_array
-section~!~0x00000015|regular|[0x0000000008049f0c-0x0000000008049f10)|0x00000f0c|0x00000004|0x00000003|simple2..fini_array
-section~!~0x00000016|regular|[0x0000000008049f10-0x0000000008049f14)|0x00000f10|0x00000004|0x00000003|simple2..jcr
-section~!~0x00000017|elf-dynamic-link-info|[0x0000000008049f14-0x0000000008049ffc)|0x00000f14|0x000000e8|0x00000003|simple2..dynamic
-section~!~0x00000018|regular|[0x0000000008049ffc-0x000000000804a000)|0x00000ffc|0x00000004|0x00000003|simple2..got
-section~!~0x00000019|regular|[0x000000000804a000-0x000000000804a020)|0x00001000|0x00000020|0x00000003|simple2..got.plt
-section~!~0x0000001a|data|[0x000000000804a020-0x000000000804a028)|0x00001020|0x00000008|0x00000003|simple2..data
-section~!~0x0000001b|zero-fill|[0x000000000804a028-0x000000000804a038)|0x00001028|0x00000000|0x00000003|simple2..bss
+section~!~0x00000002|regular|[0x0000000000400238-0x0000000000400254)|0x00000238|0x0000001c|0x00000002|simple2..interp
+section~!~0x00000003|regular|[0x0000000000400254-0x0000000000400274)|0x00000254|0x00000020|0x00000002|simple2..note.ABI-tag
+section~!~0x00000004|regular|[0x0000000000400274-0x0000000000400298)|0x00000274|0x00000024|0x00000002|simple2..note.gnu.build-id
+section~!~0x00000005|regular|[0x0000000000400298-0x00000000004002b4)|0x00000298|0x0000001c|0x00000002|simple2..gnu.hash
+section~!~0x00000006|elf-dynamic-symbols|[0x00000000004002b8-0x0000000000400300)|0x000002b8|0x00000048|0x00000002|simple2..dynsym
+section~!~0x00000007|regular|[0x0000000000400300-0x0000000000400338)|0x00000300|0x00000038|0x00000002|simple2..dynstr
+section~!~0x00000008|regular|[0x0000000000400338-0x000000000040033e)|0x00000338|0x00000006|0x00000002|simple2..gnu.version
+section~!~0x00000009|regular|[0x0000000000400340-0x0000000000400360)|0x00000340|0x00000020|0x00000002|simple2..gnu.version_r
+section~!~0x0000000a|elf-relocation-entries|[0x0000000000400360-0x0000000000400378)|0x00000360|0x00000018|0x00000002|simple2..rela.dyn
+section~!~0x0000000b|elf-relocation-entries|[0x0000000000400378-0x0000000000400390)|0x00000378|0x00000018|0x00000042|simple2..rela.plt
+section~!~0x0000000c|regular|[0x0000000000400390-0x00000000004003aa)|0x00000390|0x0000001a|0x00000006|simple2..init
+section~!~0x0000000d|regular|[0x00000000004003b0-0x00000000004003d0)|0x000003b0|0x00000020|0x00000006|simple2..plt
+section~!~0x0000000e|regular|[0x00000000004003d0-0x00000000004003d8)|0x000003d0|0x00000008|0x00000006|simple2..plt.got
+section~!~0x0000000f|code|[0x00000000004003e0-0x00000000004005a2)|0x000003e0|0x000001c2|0x00000006|simple2..text
+section~!~0x00000010|regular|[0x00000000004005a4-0x00000000004005ad)|0x000005a4|0x00000009|0x00000006|simple2..fini
+section~!~0x00000011|regular|[0x00000000004005b0-0x00000000004005b4)|0x000005b0|0x00000004|0x00000012|simple2..rodata
+section~!~0x00000012|regular|[0x00000000004005b4-0x00000000004005f0)|0x000005b4|0x0000003c|0x00000002|simple2..eh_frame_hdr
+section~!~0x00000013|eh-frame|[0x00000000004005f0-0x0000000000400704)|0x000005f0|0x00000114|0x00000002|simple2..eh_frame
+section~!~0x00000014|regular|[0x0000000000600e10-0x0000000000600e18)|0x00000e10|0x00000008|0x00000003|simple2..init_array
+section~!~0x00000015|regular|[0x0000000000600e18-0x0000000000600e20)|0x00000e18|0x00000008|0x00000003|simple2..fini_array
+section~!~0x00000016|regular|[0x0000000000600e20-0x0000000000600e28)|0x00000e20|0x00000008|0x00000003|simple2..jcr
+section~!~0x00000017|elf-dynamic-link-info|[0x0000000000600e28-0x0000000000600ff8)|0x00000e28|0x000001d0|0x00000003|simple2..dynamic
+section~!~0x00000018|regular|[0x0000000000600ff8-0x0000000000601000)|0x00000ff8|0x00000008|0x00000003|simple2..got
+section~!~0x00000019|regular|[0x0000000000601000-0x0000000000601020)|0x00001000|0x00000020|0x00000003|simple2..got.plt
+section~!~0x0000001a|data|[0x0000000000601020-0x0000000000601030)|0x00001020|0x00000010|0x00000003|simple2..data
+section~!~0x0000001b|zero-fill|[0x0000000000601030-0x0000000000601038)|0x00001030|0x00000000|0x00000003|simple2..bss
 function_invocation~!~0|12|simple2`_start
-function_invocation~!~0|12|libc.so.6`__libc_start_main(main=(simple2
+function_invocation~!~0|12|libc.so.6`__libc_start_main
 function_invocation~!~0|12|simple2`main
-variable_access~!~0|12|main|0x00007fffffffde74|int|a|32767
-variable_access~!~0|12|main|0x00007fffffffde78|int|b|0
-variable_access~!~0|12|main|0x00007fffffffde7c|int|c|0
+return_address~!~main|0xffffde40
+variable_access~!~0|12|main|0x00007fffffffdd54|int|a|32767
+variable_access~!~0|12|main|0x00007fffffffdd58|int|b|0
+variable_access~!~0|12|main|0x00007fffffffdd5c|int|c|0
 register~!~0|12|rax|0x00000000004004f6
 register~!~0|12|rbx|0x0000000000000000
 register~!~0|12|rcx|0x0000000000000000
-register~!~0|12|rdx|0x00007fffffffdf78
+register~!~0|12|rdx|0x00007fffffffde58
 register~!~0|12|rdi|0x0000000000000001
-register~!~0|12|rsi|0x00007fffffffdf68
-register~!~0|12|rbp|0x00007fffffffde80
-register~!~0|12|rsp|0x00007fffffffde70
+register~!~0|12|rsi|0x00007fffffffde48
+register~!~0|12|rbp|0x00007fffffffdd60
+register~!~0|12|rsp|0x00007fffffffdd50
 register~!~0|12|r8|0x00000000004005a0
 register~!~0|12|r9|0x00007ffff7de7ab0
 register~!~0|12|r10|0x0000000000000846
 register~!~0|12|r11|0x00007ffff7a2d740
 register~!~0|12|r12|0x00000000004003e0
-register~!~0|12|r13|0x00007fffffffdf60
+register~!~0|12|r13|0x00007fffffffde40
 register~!~0|12|r14|0x0000000000000000
 register~!~0|12|r15|0x0000000000000000
 register~!~0|12|rip|0x00000000004004fe
-register~!~0|12|rflags|0x0000000000000202
+register~!~0|12|rflags|0x0000000000000206
 register~!~0|12|cs|0x0000000000000033
 register~!~0|12|fs|0x0000000000000000
 register~!~0|12|gs|0x0000000000000000
@@ -55,51 +56,61 @@ register~!~0|12|ss|0x000000000000002b
 register~!~0|12|ds|0x0000000000000000
 register~!~0|12|es|0x0000000000000000
 assembly~!~12|0x4004fe <+8>: movl   $0x2, -0xc(%rbp)
-variable_access~!~1|13|main|0x00007fffffffde74|int|a|2
+return_address~!~main|0xffffde40
+variable_access~!~1|13|main|0x00007fffffffdd54|int|a|2
 register~!~1|13|rip|0x0000000000400505
 assembly~!~13|0x400505 <+15>: movl   $0x8, -0x8(%rbp)
-variable_access~!~2|14|main|0x00007fffffffde78|int|b|8
+return_address~!~main|0xffffde40
+variable_access~!~2|14|main|0x00007fffffffdd58|int|b|8
 register~!~2|14|rip|0x000000000040050c
 assembly~!~14|0x40050c <+22>: movl   $0x0, %eax
 assembly~!~14|0x400511 <+27>: callq  0x4004d6                  ; subFunc at simple2.c:5
 function_invocation~!~3|6|simple2`subFunc
-variable_access~!~3|6|subFunc|0x00007fffffffde54|int|x|0
-variable_access~!~3|6|subFunc|0x00007fffffffde58|int|y|0
-variable_access~!~3|6|subFunc|0x00007fffffffde5c|int|z|0
+return_address~!~subFunc|0xffffdd60
+variable_access~!~3|6|subFunc|0x00007fffffffdd34|int|x|0
+variable_access~!~3|6|subFunc|0x00007fffffffdd38|int|y|0
+variable_access~!~3|6|subFunc|0x00007fffffffdd3c|int|z|0
 register~!~3|6|rax|0x0000000000000000
-register~!~3|6|rbp|0x00007fffffffde60
-register~!~3|6|rsp|0x00007fffffffde60
+register~!~3|6|rbp|0x00007fffffffdd40
+register~!~3|6|rsp|0x00007fffffffdd40
 register~!~3|6|rip|0x00000000004004da
 assembly~!~6|0x4004da <+4>: movl   $0x4, -0xc(%rbp)
-variable_access~!~4|7|subFunc|0x00007fffffffde54|int|x|4
+return_address~!~subFunc|0xffffdd60
+variable_access~!~4|7|subFunc|0x00007fffffffdd34|int|x|4
 register~!~4|7|rip|0x00000000004004e1
 assembly~!~7|0x4004e1 <+11>: movl   $0x3, -0x8(%rbp)
-variable_access~!~5|8|subFunc|0x00007fffffffde58|int|y|3
+return_address~!~subFunc|0xffffdd60
+variable_access~!~5|8|subFunc|0x00007fffffffdd38|int|y|3
 register~!~5|8|rip|0x00000000004004e8
 assembly~!~8|0x4004e8 <+18>: movl   -0xc(%rbp), %edx
 assembly~!~8|0x4004eb <+21>: movl   -0x8(%rbp), %eax
 assembly~!~8|0x4004ee <+24>: addl   %edx, %eax
 assembly~!~8|0x4004f0 <+26>: movl   %eax, -0x4(%rbp)
-variable_access~!~6|9|subFunc|0x00007fffffffde5c|int|z|7
+return_address~!~subFunc|0xffffdd60
+variable_access~!~6|9|subFunc|0x00007fffffffdd3c|int|z|7
 register~!~6|9|rax|0x0000000000000007
 register~!~6|9|rdx|0x0000000000000004
 register~!~6|9|rip|0x00000000004004f3
+register~!~6|9|rflags|0x0000000000000202
 assembly~!~9|0x4004f3 <+29>: nop
 assembly~!~9|0x4004f4 <+30>: popq   %rbp
 assembly~!~9|0x4004f5 <+31>: retq
 return~!~8
-register~!~8|15|rbp|0x00007fffffffde80
-register~!~8|15|rsp|0x00007fffffffde70
+return_address~!~main|0xffffde40
+register~!~8|15|rbp|0x00007fffffffdd60
+register~!~8|15|rsp|0x00007fffffffdd50
 register~!~8|15|rip|0x0000000000400516
 assembly~!~15|0x400516 <+32>: movl   -0xc(%rbp), %edx
 assembly~!~15|0x400519 <+35>: movl   -0x8(%rbp), %eax
 assembly~!~15|0x40051c <+38>: addl   %edx, %eax
 assembly~!~15|0x40051e <+40>: movl   %eax, -0x4(%rbp)
 assembly~!~15|0x400521 <+43>: movl   $0x0, %eax
-variable_access~!~9|16|main|0x00007fffffffde7c|int|c|10
+return_address~!~main|0xffffde40
+variable_access~!~9|16|main|0x00007fffffffdd5c|int|c|10
 register~!~9|16|rax|0x0000000000000000
 register~!~9|16|rdx|0x0000000000000002
 register~!~9|16|rip|0x0000000000400526
 register~!~9|16|rflags|0x0000000000000206
 assembly~!~16|0x400527 <+49>: retq
 return~!~11
+return_address~!~__libc_start_main|0x00000000
