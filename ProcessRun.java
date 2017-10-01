@@ -109,7 +109,7 @@ public class ProcessRun {
     if (index.get()-1 >= 0) {
       int seedIndex = getClosestSeedIndex(index.get()-1);
       ProcessState seedState = ProcessState.newInstance(seedStates.get(seedIndex));
-      while (seedIndex+1 < index.get()-1) ProcessState.applyDelta(seedState, runSequence.get(++seedIndex));
+      while (seedIndex+1 < index.get()) ProcessState.applyDelta(seedState, runSequence.get(++seedIndex));
       current = seedState;
       index.set(index.get()-1);
       return true;
