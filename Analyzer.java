@@ -628,50 +628,75 @@ public class Analyzer {
     } /* */
 
     // If current and old backtrace don't match, output returns or invocations
-    if (backtrace.size() != currentBacktrace.size()) {
-      int sizeDifference = backtrace.size() - currentBacktrace.size();
-      if (sizeDifference > 0) {
-        for (int n = 0; n < sizeDifference; ++n) {
-          backtrace.remove(backtrace.size()-1);
-          bw.write("return~!~" + ++eventNumber + System.lineSeparator());
-        }
-      }
-      else {
-        for (int n = currentBacktrace.size() + sizeDifference;
-             n < currentBacktrace.size(); ++n)
-        {
-          backtrace.add(currentBacktrace.get(n));
-          bw.write("function_invocation~!~"                 +
-                   eventNumber                              + "|" +
-                   lineNumber                               + "|" +
-                   currentBacktrace.get(n)                  +
-                   System.lineSeparator());
-        }
-      }
+    // When we're demonstrating memory manipulation hacks, odd behavior can ensue
+    // (e.g., frame_dummy replacing main in the backtrace, the stack size changing
+    // at random). This puts us in the very awkward position of not being able to
+    // regard the backtrace as reliable for indicating genuine changes to the stack.
+    // One thing that seems to remain constant in the backtrace even when memory
+    // hacks are messing it up is that the top function remains the same. This
+    // suggests that we can regard the stack as not having changed even if the stack
+    // size has changed, as long as the top function remains the same.
+    // One scenario this fails on is recursion, so we need to be able to detect
+    // when the stack size is changing due to recursion. So, the conditions that
+    // determine whether we output if the stack has changed are the following:
+    //
+    // If the top function has changed:
+    //   Output change
+    // Else If the stack size has changed:
+    //   If the number of copies of the top function in the backtrace has changed:
+    //     Output change
+    //   Else No Change
+    
+    String topOfStack = 
+      currentBacktrace.size() > 0 ? 
+      currentBacktrace.get(currentBacktrace.size()-1) :
+      "";
+    if ((backtrace.size() == 0 && currentBacktrace.size() > 0) ||
+        !backtrace.get(backtrace.size()-1).equals(topOfStack)) 
+    { // Top of stack is different
+      outputStackChange(backtrace, currentBacktrace);
     }
     else {
-      boolean stacksEqual = true;
-      for (int n = 0; n < backtrace.size(); ++n) {
-        if (!backtrace.get(n).equals(currentBacktrace.get(n))) {
-          stacksEqual = false;
-          break;
+      if (backtrace.size() != currentBacktrace.size()) { // Stack size changed
+        // Check if number of copies of top function has changed
+        int previousQuantity = 0;
+        for (String s : backtrace) {
+          if (s.equals(topOfStack)) ++previousQuantity;
         }
-      }
-      if (!stacksEqual) { // Stacks are different without having changed size
-        for (int n = 0; n < backtrace.size(); ++n) bw.write("return~!~" + eventNumber + System.lineSeparator());
-        backtrace.clear();
+        int newQuantity = 0;
         for (String s : currentBacktrace) {
-          backtrace.add(s);
-          bw.write("function_invocation~!~" +
-                   eventNumber              + "|" +
-                   lineNumber               + "|" +
-                   s                        +
-                   System.lineSeparator());
+          if (s.equals(topOfStack)) ++newQuantity;
         }
+        if (previousQuantity != newQuantity) outputStackChange(backtrace, currentBacktrace);
       }
     }
 
   } // parseBacktrace()
+  
+  
+  private static void outputStackChange(List<String> backtrace, List<String> currentBacktrace)
+                                        throws IOException
+  {
+    for (String s : backtrace) bw.write("return~!~" + eventNumber + System.lineSeparator());
+    for (String s : currentBacktrace) {
+      bw.write("function_invocation~!~" +
+               eventNumber              + "|" +
+               lineNumber               + "|" +
+               s                        +
+               System.lineSeparator());
+    }
+    backtrace.clear();
+    for (String s : currentBacktrace) backtrace.add(s);
+  }
+  
+  
+  private static void debugPrint(List<String> bt) throws IOException {
+    bw.write(System.lineSeparator());
+    bw.write("---DEBUG---\n");
+    for (String s : bt) bw.write(s + "\n");
+    bw.write("---ENDDB---\n");
+    bw.write(System.lineSeparator());
+  }
 
 
   private static void parseVariables(BufferedReader input, boolean global)
