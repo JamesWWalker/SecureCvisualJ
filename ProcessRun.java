@@ -258,6 +258,14 @@ public class ProcessRun {
     long address = 0;
     if (!parameters[3].contains("----")) address = Long.parseLong(parameters[3].substring(2), 16);
     
+    // If the same function name+address already exists in the stack, then don't add the new one
+    // because it's a duplicate
+    for (ActivationRecord ar : stack) {
+      if ((ar.function.equals(function[1]) || ar.function.startsWith(function[1] + "{")) &&
+          ar.address == address)
+        return;
+    }
+    
     // Handle recursion by detecting multiple calls to same function and assigning them numbers
     String alteredFunction = function[1];
     for (int n = stack.size()-1; n >= 0; --n) {

@@ -281,6 +281,7 @@ public class Analyzer {
   static int lineNumber = 0;
   static String function = "<unknown>";
   static String currentFunctionAddress = "--------";
+  static String architecture = "x86_64"; // default
 
   static int speedMultiplier = 7;
 
@@ -300,7 +301,6 @@ public class Analyzer {
       }
 
       String binary = args[0];
-      String architecture = "x86_64"; // default
 
       for (int n = 1; n < args.length; ++n) {
         String[] arg = args[n].split(":");
@@ -431,13 +431,20 @@ public class Analyzer {
     // Get return address--could be offset by an arbitrary amount, so keep expanding search
     // space until it is found. This approach isn't efficient but it's very unlikely that it
     // will ever be necessary to expand more than a handful of times.
-    int bytes = 4;
-    while (true) {
-      System.out.println("x/" + bytes + "x $sp");
+    if (architecture.equals("x86_64")) {
+      int bytes = 4;
+      while (true) {
+        System.out.println("x/" + bytes + "x $sp");
+        Thread.sleep(sleepTime);
+        if (parseReturnAddress(input)) break;
+        else bytes *= 2;
+        if (bytes >= 512) break;
+      }
+    }
+    else {
+      System.out.println("x/8x $sp");
       Thread.sleep(sleepTime);
-      if (parseReturnAddress(input)) break;
-      else bytes *= 2;
-      if (bytes >= 512) break;
+      parseReturnAddress(input);
     }
 
     // Get local vars + args
@@ -590,17 +597,37 @@ public class Analyzer {
   {
     String[] inputLines = getLldbInput(input);
     
-    for (int n = inputLines.length-1; n >= 0; --n) {
-      String line = inputLines[n];
-      if (line.startsWith("0x") && line.contains(": 0x")) {
-        String rowAddress = line.split(":")[0];
-        if (currentFunctionAddress.endsWith(rowAddress.substring(2))) {      
-          String returnAddress = line.split(":")[1].split("\\s+")[1].trim();
-          bw.write("return_address~!~" +
-                   function            + "|" +
-                   returnAddress       +
-                   System.lineSeparator());
-          return true;
+    // Retrieved differently in x86_64 vs. i386
+    if (architecture.equals("x86_64")) {
+      for (int n = inputLines.length-1; n >= 0; --n) {
+        String line = inputLines[n];
+        if (line.startsWith("0x") && line.contains(": 0x")) {
+          String rowAddress = line.split(":")[0];
+          if (currentFunctionAddress.endsWith(rowAddress.substring(2))) {      
+            String returnAddress = line.split(":")[1].split("\\s+")[1].trim();
+            bw.write("return_address~!~" +
+                     function            + "|" +
+                     returnAddress       +
+                     System.lineSeparator());
+            return true;
+          }
+        }
+      }
+    }
+    else {
+      int row = 0;
+      for (int n = 0; n < inputLines.length; ++n) {
+        String line = inputLines[n];
+        if (line.startsWith("0x") && line.contains(": 0x")) {
+          ++row;
+          if (row == 2) {
+            String returnAddress = line.split(":")[1].split("\\s+")[3].trim();
+            bw.write("return_address~!~" +
+                     function            + "|" +
+                     returnAddress       +
+                     System.lineSeparator());
+            return true;
+          }
         }
       }
     }
@@ -680,8 +707,16 @@ public class Analyzer {
         }
       }
       else if (backtrace.size() > currentBacktrace.size()) {
-        for (int n = currentBacktrace.size(); n < backtrace.size(); ++n) {
+        for (int n = currentBacktrace.size(); n <= backtrace.size(); ++n) {
           bw.write("return~!~" + eventNumber + System.lineSeparator());
+          if (!topOfStack.isEmpty()) {
+            bw.write("function_invocation~!~" +
+                     eventNumber              + "|" +
+                     lineNumber               + "|" +
+                     topOfStack               + "|" +
+                     currentFunctionAddress   +
+                     System.lineSeparator());
+          }
         }
       }
       else {
@@ -842,10 +877,8 @@ public class Analyzer {
     String[] inputLines = getLldbInput(input);
     for (int n = 0; n < inputLines.length; ++n) {
       String line = inputLines[n];
-      if (line.startsWith("(lldb)")) continue;
-      if (line.startsWith("General")) continue;
+      if (!line.contains("= 0x")) continue;
       String[] splitLine = line.split("\\s+");
-
       String name = splitLine[1];
       String value = splitLine[3];
       
