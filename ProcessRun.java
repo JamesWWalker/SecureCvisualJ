@@ -188,11 +188,11 @@ public class ProcessRun {
           stateToAdd = new ProcessState();
         }
 
-        if (type.equals("function_invocation")) parseFunctionInvocation(
-                                                contents, n, stateToAdd, runningStack, parameters);
+        if (type.equals("function_invocation")) 
+          parseFunctionInvocation(stateToAdd, runningStack, parameters);
         else if (type.equals("return")) runningStack.remove(runningStack.size()-1);
-        else if (type.equals("variable_access")) parseVariableAccess(stateToAdd, runningStack, 
-                                                                     variableTypes, parameters);
+        else if (type.equals("variable_access")) 
+          parseVariableAccess(stateToAdd, runningStack, variableTypes, parameters);
         else if (type.equals("register")) stateToAdd.registers.put(parameters[2], parameters[3]);
         else if (type.equals("assembly")) parseAssembly(parameters);
         else if (type.equals("section")) parseSection(parameters);
@@ -248,34 +248,15 @@ public class ProcessRun {
   }
 
 
-  private void parseFunctionInvocation(List<String> contents,
-                                       int index,
-                                       ProcessState state,
+  private void parseFunctionInvocation(ProcessState state,
                                        List<ActivationRecord> stack,
                                        String[] parameters) throws Exception
   {
     state.sourceLine = Integer.parseInt(parameters[1]);
     String[] function = parameters[2].split("`");
     
-    // Need to look ahead to get address from EBP/RBP
     long address = 0;
-    ++index;
-    while (index < contents.size()) {
-      String line = contents.get(index);
-      String[] typeAndParameters = line.split("~!~");
-      String type = typeAndParameters[0];
-      String[] parametersLookahead = typeAndParameters[1].split("\\|");
-      
-      if (type.equals("register") && 
-         (parametersLookahead[2].equals("rbp") ||
-          parametersLookahead[2].equals("ebp"))) 
-      {
-        address = Long.parseLong(parametersLookahead[3].substring(2), 16);
-        break;
-      }
-      
-      ++index;
-    }
+    if (!parameters[3].contains("----")) address = Long.parseLong(parameters[3].substring(2), 16);
     
     // Handle recursion by detecting multiple calls to same function and assigning them numbers
     String alteredFunction = function[1];
@@ -295,7 +276,6 @@ public class ProcessRun {
         break;
       }
     }
-    
     stack.add(new ActivationRecord(function[0], alteredFunction, address));
   }
 

@@ -280,6 +280,7 @@ public class Analyzer {
   static int eventNumber = 0;
   static int lineNumber = 0;
   static String function = "<unknown>";
+  static String currentFunctionAddress = "--------";
 
   static int speedMultiplier = 7;
 
@@ -294,7 +295,7 @@ public class Analyzer {
 
       if (args.length < 1) {
         System.err.println("Usage: Analyzer binary [arg:argument_to_binary] [sm:speed_multiplier]" +
-                           "  [arch:architecture] [sd:func,variable_to_track]");
+                           " [arch:architecture] [sd:func,variable_to_track]");
         System.exit(1);
       }
 
@@ -417,15 +418,27 @@ public class Analyzer {
 
     int sleepTime = speedMultiplier * 10;
 
+    // Get registers
+    System.out.println("register read");
+    Thread.sleep(sleepTime);
+    parseRegisters(input);
+
     // Get backtrace
     System.out.println("bt");
     Thread.sleep(sleepTime);
     parseBacktrace(input);
-    
-    // Get return address
-    System.out.println("x/1x $sp");
-    Thread.sleep(sleepTime);
-    parseReturnAddress(input);
+
+    // Get return address--could be offset by an arbitrary amount, so keep expanding search
+    // space until it is found. This approach isn't efficient but it's very unlikely that it
+    // will ever be necessary to expand more than a handful of times.
+    int bytes = 4;
+    while (true) {
+      System.out.println("x/" + bytes + "x $sp");
+      Thread.sleep(sleepTime);
+      if (parseReturnAddress(input)) break;
+      else bytes *= 2;
+      if (bytes >= 512) break;
+    }
 
     // Get local vars + args
     System.out.println("frame variable -L");
@@ -436,11 +449,6 @@ public class Analyzer {
     System.out.println("target variable -L");
     Thread.sleep(sleepTime);
     parseVariables(input, true);
-
-    // Get registers
-    System.out.println("register read");
-    Thread.sleep(sleepTime);
-    parseRegisters(input);
 
     // Get assembly
     System.out.println("disassemble --line");
@@ -577,7 +585,7 @@ public class Analyzer {
   } // parseSourceLine()
   
   
-  private static void parseReturnAddress(BufferedReader input)
+  private static boolean parseReturnAddress(BufferedReader input)
               throws IOException, InterruptedException
   {
     String[] inputLines = getLldbInput(input);
@@ -585,14 +593,18 @@ public class Analyzer {
     for (int n = inputLines.length-1; n >= 0; --n) {
       String line = inputLines[n];
       if (line.startsWith("0x") && line.contains(": 0x")) {
-        String address = line.split(":")[1].trim();
-        bw.write("return_address~!~" +
-                 function            + "|" +
-                 address             +
-                 System.lineSeparator());
-        return;
+        String rowAddress = line.split(":")[0];
+        if (currentFunctionAddress.endsWith(rowAddress.substring(2))) {      
+          String returnAddress = line.split(":")[1].split("\\s+")[1].trim();
+          bw.write("return_address~!~" +
+                   function            + "|" +
+                   returnAddress       +
+                   System.lineSeparator());
+          return true;
+        }
       }
     }
+    return false;
   }
 
 
@@ -633,7 +645,7 @@ public class Analyzer {
     // at random). This puts us in the very awkward position of not being able to
     // regard the backtrace as reliable for indicating genuine changes to the stack.
     // One thing that seems to remain constant in the backtrace even when memory
-    // hacks are messing it up is that the top function remains the same. This
+    // hacks are messing it up is that the top function remains unchanged. This
     // suggests that we can regard the stack as not having changed even if the stack
     // size has changed, as long as the top function remains the same.
     // One scenario this fails on is recursion, so we need to be able to detect
@@ -654,7 +666,33 @@ public class Analyzer {
     if ((backtrace.size() == 0 && currentBacktrace.size() > 0) ||
         !backtrace.get(backtrace.size()-1).equals(topOfStack)) 
     { // Top of stack is different
-      outputStackChange(backtrace, currentBacktrace);
+      if (currentBacktrace.size() > backtrace.size()) {
+        for (int n = backtrace.size(); n < currentBacktrace.size(); ++n) {
+          String printAddress = "--------";
+          if (n == currentBacktrace.size()-1) printAddress = currentFunctionAddress;
+          String f = currentBacktrace.get(n);
+          bw.write("function_invocation~!~" +
+                   eventNumber              + "|" +
+                   lineNumber               + "|" +
+                   f                        + "|" +
+                   printAddress             +
+                   System.lineSeparator());
+        }
+      }
+      else if (backtrace.size() > currentBacktrace.size()) {
+        for (int n = currentBacktrace.size(); n < backtrace.size(); ++n) {
+          bw.write("return~!~" + eventNumber + System.lineSeparator());
+        }
+      }
+      else {
+        bw.write("return~!~" + eventNumber + System.lineSeparator());
+        bw.write("function_invocation~!~" +
+                 eventNumber              + "|" +
+                 lineNumber               + "|" +
+                 topOfStack               + "|" +
+                 currentFunctionAddress   +
+                 System.lineSeparator());
+      }
     }
     else {
       if (backtrace.size() != currentBacktrace.size()) { // Stack size changed
@@ -667,9 +705,29 @@ public class Analyzer {
         for (String s : currentBacktrace) {
           if (s.equals(topOfStack)) ++newQuantity;
         }
-        if (previousQuantity != newQuantity) outputStackChange(backtrace, currentBacktrace);
+        
+        if (previousQuantity > newQuantity) { // now fewer copies than before
+          for (int n = 0; n < previousQuantity - newQuantity; ++n)
+            bw.write("return~!~" + eventNumber + System.lineSeparator());
+        }
+        else if (newQuantity > previousQuantity) { // now more copies than before
+          for (int n = 0; n < newQuantity - previousQuantity; ++n) {
+            String printAddress = "--------";
+            if (n == newQuantity - previousQuantity - 1) printAddress = currentFunctionAddress;
+            bw.write("function_invocation~!~" +
+                     eventNumber              + "|" +
+                     lineNumber               + "|" +
+                     topOfStack               + "|" +
+                     printAddress             +
+                     System.lineSeparator());
+          }
+        }
       }
     }
+    
+    // Remember to update our picture of the stack
+    backtrace.clear();
+    for (String s : currentBacktrace) backtrace.add(s);
 
   } // parseBacktrace()
   
@@ -682,7 +740,8 @@ public class Analyzer {
       bw.write("function_invocation~!~" +
                eventNumber              + "|" +
                lineNumber               + "|" +
-               s                        +
+               s                        + "|" +
+               currentFunctionAddress   +
                System.lineSeparator());
     }
     backtrace.clear();
@@ -789,6 +848,8 @@ public class Analyzer {
 
       String name = splitLine[1];
       String value = splitLine[3];
+      
+      if (name.equals("rbp") || name.equals("ebp")) currentFunctionAddress = value;
 
       if (!registers.keySet().contains(name) || !registers.get(name).equals(value)) {
         registers.put(name, value);
