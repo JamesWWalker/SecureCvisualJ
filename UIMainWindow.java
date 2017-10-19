@@ -147,11 +147,14 @@ public class UIMainWindow {
     menuShowAssemblyCode.selectedProperty().bindBidirectional(coordinator.runFilter.showAssemblyProperty());
     menuShowAssemblyCode.setOnAction(e -> setCustomDetailLevel());
     
-    CheckMenuItem menuShowMemoryLayout = new CheckMenuItem("Memory Layout"); // TODO
+    CheckMenuItem menuShowProgramOutput = new CheckMenuItem("Program Output");
+    menuShowProgramOutput.selectedProperty().bindBidirectional(coordinator.runFilter.showOutputProperty());
+    
+//    CheckMenuItem menuShowMemoryLayout = new CheckMenuItem("Memory Layout"); // TODO
     
     viewElementsMenu.getItems().addAll(menuShowHiddenFunctions,
                                        menuShowRegisters, menuShowProgramSections,
-                                       menuShowAssemblyCode, menuShowMemoryLayout);
+                                       menuShowAssemblyCode, menuShowProgramOutput /*menuShowMemoryLayout*/);
     viewMenu.getItems().add(viewElementsMenu);
     
     // Filters

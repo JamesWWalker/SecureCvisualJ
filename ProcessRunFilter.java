@@ -23,6 +23,11 @@ public class ProcessRunFilter {
   public final void setShowAssembly(boolean value) { showAssembly.set(value); }
   public BooleanProperty showAssemblyProperty() { return showAssembly; }
   
+  private BooleanProperty showOutput = new SimpleBooleanProperty();
+  public final boolean getShowOutput() { return showOutput.get(); }
+  public final void setShowOutput(boolean value) { showOutput.set(value); }
+  public BooleanProperty showOutputProperty() { return showOutput; }
+  
   private ObjectProperty<DetailLevel> detailLevel = new SimpleObjectProperty<>();
   public final DetailLevel getDetailLevel() { return detailLevel.get(); }
   public final void setDetailLevel(DetailLevel value) { detailLevel.set(value); }
@@ -37,6 +42,8 @@ public class ProcessRunFilter {
     detailLevelProperty().addListener((obs, oldv, newv) -> detailLevelChanged());
   }
   
+  
+  public String getInvocation(ProcessRun run) { return run.invocation; }
   
   public void addRegisterFilter(String register) { registersFilter.add(register); }
   public void clearRegisterFilter() { registersFilter.clear(); }
@@ -119,6 +126,12 @@ public class ProcessRunFilter {
   }
   
   
+  public List<String> getOutput(ProcessRun run) {
+    if (showOutput.get()) return run.getOutput();
+    else return null;
+  }
+  
+  
   public List<ActivationRecord> getStack(ProcessRun run) {
     List<ActivationRecord> stack = run.getStack();
     if (!showAllFunctions.get()) {
@@ -182,6 +195,7 @@ public class ProcessRunFilter {
       config += "ShowRegisters:" + showRegisters.get() + System.lineSeparator();
       config += "ShowAllSectionsByDefault:" + showAllSectionsByDefault.get() + System.lineSeparator();
       config += "ShowAssembly:" + showAssembly.get() + System.lineSeparator();
+      config += "ShowOutputs:" + showOutput.get() + System.lineSeparator();
 
       config += outputFilter("FunctionsFilter", functionsFilter);
       config += outputFilter("RegistersFilter", registersFilter);
@@ -216,6 +230,7 @@ public class ProcessRunFilter {
         else if (parameters[0].equals("ShowRegisters")) showRegisters.set(Boolean.parseBoolean(parameters[1]));
         else if (parameters[0].equals("ShowAllSectionsByDefault")) showAllSectionsByDefault.set(Boolean.parseBoolean(parameters[1]));
         else if (parameters[0].equals("ShowAssembly")) showAssembly.set(Boolean.parseBoolean(parameters[1]));
+        else if (parameters[0].equals("ShowOutputs")) showOutput.set(Boolean.parseBoolean(parameters[1]));
         
         else if (parameters[0].equals("FunctionsFilter")) readFilter(functionsFilter, parameters[1].split(","));
         else if (parameters[0].equals("RegistersFilter")) readFilter(registersFilter, parameters[1].split(","));

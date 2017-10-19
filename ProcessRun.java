@@ -17,7 +17,9 @@ public class ProcessRun {
   public final int getIndex() { return index.get(); }
   public final ReadOnlyIntegerProperty indexProperty() { return index.getReadOnlyProperty(); }
   
+  public String invocation = "";
   private HashMap<Integer, String> assembly;
+  private HashMap<Integer, String> outputs;
   private ProcessState current;
   private boolean isNull;
   private ArrayList<ProcessState> runSequence;
@@ -50,6 +52,17 @@ public class ProcessRun {
   public String getAssembly() {
     if (assembly.containsKey(current.sourceLine)) return assembly.get(current.sourceLine);
     else return "";
+  }
+  
+  
+  public List<String> getOutput() {
+    Set<Integer> keys = outputs.keySet();
+    Collections.sort(new ArrayList(keys));
+    List<String> rets = new ArrayList<>();
+    for (Integer i : keys) {
+      if (i <= index.get()) rets.add(outputs.get(i));
+    }
+    return rets;
   }
 
 
@@ -159,6 +172,7 @@ public class ProcessRun {
     index.set(0);
     current = new ProcessState();
     assembly = new HashMap<>();
+    outputs = new HashMap<>();
     sections = new ArrayList<>();
 
     int previousEvent = 0;
@@ -179,7 +193,11 @@ public class ProcessRun {
         String type = typeAndParameters[0];
         String[] parameters = typeAndParameters[1].split("\\|");
 
-        if (!type.equals("assembly") && !type.equals("section") && !type.equals("return_address")) 
+        if (!type.equals("assembly") && 
+            !type.equals("section") && 
+            !type.equals("return_address") &&
+            !type.equals("invocation") &&
+            !type.equals("output"))
           currentEvent = Integer.parseInt(parameters[0]);
 
         if (currentEvent != previousEvent) {
@@ -195,8 +213,10 @@ public class ProcessRun {
           parseVariableAccess(stateToAdd, runningStack, variableTypes, parameters);
         else if (type.equals("register")) stateToAdd.registers.put(parameters[2], parameters[3]);
         else if (type.equals("assembly")) parseAssembly(parameters);
+        else if (type.equals("output")) outputs.put(Integer.parseInt(parameters[0]), parameters[1]);
         else if (type.equals("section")) parseSection(parameters);
-        else if (type.equals("return_address")) parseReturnAddress(runningStack, parameters);
+        else if (type.equals("return_address")) parseReturnAddress(stateToAdd, runningStack, parameters);
+        else if (type.equals("invocation")) invocation = parameters[0];
         else {
           System.err.println("ERROR: Unrecognized event type " + type + ". Terminating parse.");
           return;
@@ -364,7 +384,9 @@ public class ProcessRun {
   }
   
   
-  private void parseReturnAddress(List<ActivationRecord> stack, String[] parameters) 
+  private void parseReturnAddress(ProcessState state,
+                                  List<ActivationRecord> stack, 
+                                  String[] parameters) 
                throws Exception 
   {
     String scope = parameters[0];
@@ -372,6 +394,7 @@ public class ProcessRun {
       String compareFunction = stack.get(n).function;
       if (compareFunction.equals(scope) || compareFunction.startsWith(scope + "{")) {
         stack.get(n).returnAddress = parameters[1];
+        if (parameters.length > 2) state.sourceLine = Integer.parseInt(parameters[2]);
         return;
       }
     }

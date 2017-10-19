@@ -324,6 +324,10 @@ public class Analyzer {
 
       fw = new FileWriter(outputFilename, true);
       bw = new BufferedWriter(fw);
+      
+      String invocation = binary;
+      for (String arg : binaryArguments) binary += " " + arg;
+      bw.write("invocation~!~" + invocation + System.lineSeparator());
 
       InputStreamReader isr = new InputStreamReader(System.in);
       BufferedReader input = new BufferedReader(isr);
@@ -412,7 +416,7 @@ public class Analyzer {
   private static void analyzeLine(BufferedReader input)
               throws IOException, InterruptedException
   {
-    // Get current line number, which function we're in,
+    // Get current line number, which function we're in, scan for program output,
     // and compile list of external function calls
     String resourceZeroed = parseSourceLine(input);
 
@@ -428,24 +432,11 @@ public class Analyzer {
     Thread.sleep(sleepTime);
     parseBacktrace(input);
 
-    // Get return address--could be offset by an arbitrary amount, so keep expanding search
-    // space until it is found. This approach isn't efficient but it's very unlikely that it
-    // will ever be necessary to expand more than a handful of times.
-    if (architecture.equals("x86_64")) {
-      int bytes = 4;
-      while (true) {
-        System.out.println("x/" + bytes + "x $sp");
-        Thread.sleep(sleepTime);
-        if (parseReturnAddress(input)) break;
-        else bytes *= 2;
-        if (bytes >= 512) break;
-      }
-    }
-    else {
-      System.out.println("x/8x $sp");
-      Thread.sleep(sleepTime);
-      parseReturnAddress(input);
-    }
+    // Get return address
+    if (architecture.equals("x86_64")) System.out.println("x/1x $rbp");
+    else System.out.println("x/1x $ebp");
+    Thread.sleep(sleepTime);
+    parseReturnAddress(input);
 
     // Get local vars + args
     System.out.println("frame variable -L");
@@ -480,6 +471,17 @@ public class Analyzer {
 //    pendingFunctions.clear();
     String[] inputLines = getLldbInput(input);
     int index = 0;
+
+    // Program input
+    for (int n = 0; n < inputLines.length; ++n) {
+      String line = inputLines[n];
+      if (line.startsWith("out>")) {
+        bw.write("output~!~"       +
+                 eventNumber       + "|" +
+                 line.substring(4) +
+                 System.lineSeparator());
+      }
+    }
 
     // Function
     for (int n = index; n < inputLines.length; ++n) {
@@ -592,46 +594,21 @@ public class Analyzer {
   } // parseSourceLine()
   
   
-  private static boolean parseReturnAddress(BufferedReader input)
+  private static void parseReturnAddress(BufferedReader input)
               throws IOException, InterruptedException
   {
     String[] inputLines = getLldbInput(input);
     
-    // Retrieved differently in x86_64 vs. i386
-    if (architecture.equals("x86_64")) {
-      for (int n = inputLines.length-1; n >= 0; --n) {
-        String line = inputLines[n];
-        if (line.startsWith("0x") && line.contains(": 0x")) {
-          String rowAddress = line.split(":")[0];
-          if (currentFunctionAddress.endsWith(rowAddress.substring(2))) {      
-            String returnAddress = line.split(":")[1].split("\\s+")[1].trim();
-            bw.write("return_address~!~" +
-                     function            + "|" +
-                     returnAddress       +
-                     System.lineSeparator());
-            return true;
-          }
-        }
+    for (int n = 0; n < inputLines.length; ++n) {
+      String line = inputLines[n];
+      if (line.startsWith("0x") && line.contains(": 0x")) {
+        String returnAddress = line.split(":")[1].trim();
+        bw.write("return_address~!~" +
+                 function            + "|" +
+                 returnAddress       +
+                 System.lineSeparator());
       }
     }
-    else {
-      int row = 0;
-      for (int n = 0; n < inputLines.length; ++n) {
-        String line = inputLines[n];
-        if (line.startsWith("0x") && line.contains(": 0x")) {
-          ++row;
-          if (row == 2) {
-            String returnAddress = line.split(":")[1].split("\\s+")[3].trim();
-            bw.write("return_address~!~" +
-                     function            + "|" +
-                     returnAddress       +
-                     System.lineSeparator());
-            return true;
-          }
-        }
-      }
-    }
-    return false;
   }
 
 

@@ -50,6 +50,33 @@ public class UIProgramAddressSpace {
     
     VBox pasLayout = new VBox();
     
+    // INVOCATION
+    Label invocation = new Label("Invocation: " + 
+      mainWindow.coordinator.runFilter.getInvocation(mainWindow.coordinator.getRun()));
+    invocation.setStyle("-fx-border-color: #444444;");
+    invocation.setStyle("-fx-background-color: #444444;");
+    invocation.setTextFill(Color.web("#ffffff"));
+    invocation.prefWidthProperty().bind(pasLayout.widthProperty());
+    pasLayout.getChildren().add(invocation);
+    
+    // OUTPUT
+    Label outputHeader = new Label("Program Output");
+    outputHeader.setStyle("-fx-border-color: black;");
+    outputHeader.setStyle("-fx-background-color: black;");
+    outputHeader.setTextFill(Color.web("#cccccc"));
+    outputHeader.prefWidthProperty().bind(pasLayout.widthProperty());
+    outputHeader.setOnMouseClicked(e -> {
+      mainWindow.coordinator.runFilter.setShowOutput(
+        !mainWindow.coordinator.runFilter.getShowOutput());
+      mainWindow.setCustomDetailLevel();
+    });
+    pasLayout.getChildren().add(outputHeader);
+    List<String> outputs = mainWindow.coordinator.runFilter.getOutput(mainWindow.coordinator.getRun());
+    if (outputs != null && outputs.size() > 0) {
+      pasLayout.getChildren().add(UIPASOutputTable.createTable(mainWindow,
+        mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), outputs));
+    }
+    
     // REGISTERS
     Label registerHeader = new Label("CPU Registers");
     registerHeader.setStyle("-fx-border-color: black;");
@@ -164,6 +191,56 @@ public class UIProgramAddressSpace {
         mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), 
         localVariables, color));
     }
+    
+    // Heap
+    Label heapHeader = new Label("Heap");
+    heapHeader.setStyle("-fx-border-color: black;");
+    heapHeader.setStyle("-fx-background-color: black;");
+    heapHeader.setTextFill(Color.web("#cccccc"));
+    heapHeader.prefWidthProperty().bind(pasLayout.widthProperty());
+    pasLayout.getChildren().add(heapHeader);
+    
+    List<VariableDelta> varList = new ArrayList<>(variables.values());
+    Collections.sort(varList);
+    
+    GridPane heapTable = new GridPane();
+    
+    int row = 0;
+    for (VariableDelta variable : varList) {
+    
+      long functionAddress = 0;
+      for (ActivationRecord ar : stack) {
+        if (ar.function.equals(variable.scope)) {
+          functionAddress = ar.address;
+          break;
+        }
+      }
+    
+      if (variable.pointsTo >= 0 && variable.pointsTo < 1000000000) { // TODO: this is nonsense pretty sure.
+        Label labelAddress = new Label("0x" + Long.toHexString(variable.pointsTo));
+        Pane addressContainer = new Pane();
+        addressContainer.getChildren().add(labelAddress);
+//        addressContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, valueStandin));
+        heapTable.add(addressContainer, 0, row);
+      
+        Label labelValue = new Label(variable.value);
+        Pane valueContainer = new Pane();
+        valueContainer.getChildren().add(labelValue);
+//      valueContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, valueStandin));
+        heapTable.add(valueContainer, 1, row);
+        
+        if (row % 2 != 0) {
+          addressContainer.setStyle("-fx-background-color: #bbbbbb;");
+          valueContainer.setStyle("-fx-background-color: #bbbbbb;");
+        }
+        
+        ++row;
+      }
+    }
+
+    heapTable.setHgap(10);
+    
+    pasLayout.getChildren().add(heapTable);
     
     AnchorPane.setLeftAnchor(pasLayout, 10.0);
     AnchorPane.setRightAnchor(pasLayout, 10.0);

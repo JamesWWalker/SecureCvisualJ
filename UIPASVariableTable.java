@@ -50,7 +50,15 @@ public class UIPASVariableTable {
     
     int row = 1;
     for (VariableDelta variable : variables) {
-          
+    
+      String pointsToString = "0x" + Long.toHexString(variable.pointsTo);
+      String valueStandin = variable.value;
+      if (mainWindow.coordinator.runFilter.getDetailLevel() != DetailLevel.NOVICE &&
+          variable.pointsTo >= 0 && variable.pointsTo < 1000000000)
+      {
+        valueStandin = "0x" + Long.toHexString(variable.pointsTo);
+      }
+
       Pane colorPane = new Pane();
       colorPane.setStyle("-fx-background-color: " + color + ";");
       table.add(colorPane, 0, row, 1, 1);
@@ -58,31 +66,46 @@ public class UIPASVariableTable {
       Label labelAddress = new Label("0x" + Long.toHexString(variable.address));
       Pane addressContainer = new Pane();
       addressContainer.getChildren().add(labelAddress);
-      addressContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
+      if (variable.pointsTo < 0)
+        addressContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
+      else
+        addressContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
       table.add(addressContainer, 1, row, 1, 1);
       
       Label labelName = new Label(variable.name);
       Pane nameContainer = new Pane();
       nameContainer.getChildren().add(labelName);
-      nameContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
+      if (variable.pointsTo < 0)
+        nameContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
+      else
+        nameContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
       table.add(nameContainer, 2, row, 1, 1);
       
       Label labelType = new Label(variable.type);
       Pane typeContainer = new Pane();
       typeContainer.getChildren().add(labelType);
-      typeContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
+      if (variable.pointsTo < 0)
+        typeContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
+      else
+        typeContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
       table.add(typeContainer, 3, row, 1, 1);
       
       Label labelSize = new Label(variable.size);
       Pane sizeContainer = new Pane();
       sizeContainer.getChildren().add(labelSize);
-      sizeContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
+      if (variable.pointsTo < 0)
+        sizeContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
+      else
+        sizeContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
       table.add(sizeContainer, 4, row, 1, 1);
       
-      Label labelValue = new Label(variable.value);
+      Label labelValue = new Label(valueStandin);
       Pane valueContainer = new Pane();
       valueContainer.getChildren().add(labelValue);
-      valueContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
+      if (variable.pointsTo < 0)
+        valueContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
+      else
+        valueContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
       table.add(valueContainer, 5, row, 1, 1);
       
       if (row % 2 != 0) {
