@@ -34,7 +34,7 @@ public class UIProgramAddressSpace {
       
       GridPane variableTable = UIPASVariableTable.createTable(mainWindow,
         mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), 
-        variables, "#ffffff");
+        variables, "#ffffff", -1, null, null);
       
       AnchorPane.setTopAnchor(variableTable, 10.0);
       AnchorPane.setLeftAnchor(variableTable, 10.0);
@@ -136,7 +136,7 @@ public class UIProgramAddressSpace {
           if (globalVariables.size() > 0) pasLayout.getChildren()
             .add(UIPASVariableTable.createTable(mainWindow,
             mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), 
-            globalVariables, color));
+            globalVariables, color, -1, null, null));
         }
         
         // Read-only globals
@@ -149,7 +149,7 @@ public class UIProgramAddressSpace {
           if (globalVariables.size() > 0) pasLayout.getChildren()
             .add(UIPASVariableTable.createTable(mainWindow,
             mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), 
-            globalVariables, color));
+            globalVariables, color, -1, null, null));
         }
       }
     }
@@ -168,19 +168,19 @@ public class UIProgramAddressSpace {
     
       String color = UIUtils.getNextColor();
       
-      Label arHeader = new Label("0x" + Long.toHexString(ar.address) + ": " + ar.function);
+      Label arHeader = new Label(/*"0x" + Long.toHexString(ar.address) + ": " + */ar.function);
       arHeader.setStyle("-fx-border-color: black;");
       arHeader.setStyle("-fx-background-color: " + color + ";");
       arHeader.prefWidthProperty().bind(pasLayout.widthProperty());
       pasLayout.getChildren().add(arHeader);
       
-      String returnAddressText = "Return Address: ";
-      returnAddressText += ar.returnAddress;
-      Label returnAddressLabel = new Label(returnAddressText);
-      returnAddressLabel.setStyle("-fx-border-color: black;");
-      returnAddressLabel.setStyle("-fx-background-color: " + color + ";");
-      returnAddressLabel.prefWidthProperty().bind(pasLayout.widthProperty());
-      pasLayout.getChildren().add(returnAddressLabel);
+//      String returnAddressText = "Return Address: ";
+//      returnAddressText += ar.returnAddress;
+//      Label returnAddressLabel = new Label(returnAddressText);
+//      returnAddressLabel.setStyle("-fx-border-color: black;");
+//      returnAddressLabel.setStyle("-fx-background-color: " + color + ";");
+//      returnAddressLabel.prefWidthProperty().bind(pasLayout.widthProperty());
+//      pasLayout.getChildren().add(returnAddressLabel);
       
       TreeMap<String, VariableDelta> localVariables = new TreeMap<>();
       for (VariableDelta v : variables.values()) {
@@ -189,10 +189,10 @@ public class UIProgramAddressSpace {
       if (localVariables.size() > 0) pasLayout.getChildren()
         .add(UIPASVariableTable.createTable(mainWindow,
         mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), 
-        localVariables, color));
+        localVariables, color, ar.address, ar.returnAddress, ar.function));
     }
     
-    // Heap
+    // HEAP
     Label heapHeader = new Label("Heap");
     heapHeader.setStyle("-fx-border-color: black;");
     heapHeader.setStyle("-fx-background-color: black;");

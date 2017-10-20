@@ -16,9 +16,21 @@ public class UIPASVariableTable {
   public static GridPane createTable(UIMainWindow mainWindow,
                                      Stage window,
                                      TreeMap<String, VariableDelta> varTree,
-                                     String color) 
+                                     String color,
+                                     long functionAddress,
+                                     String returnAddress,
+                                     String funcName) 
   {
+    VariableDelta returnPlaceholder = null;
+    VariableDelta functionPlaceholder = null;
+    if (returnAddress != null) returnPlaceholder = 
+      new VariableDelta("int", "", "Return Addr", returnAddress, functionAddress+1);
+    if (functionAddress >= 0 && funcName != null) functionPlaceholder = 
+      new VariableDelta("int", "", funcName, "", functionAddress);
+  
     List<VariableDelta> variables = new ArrayList<>(varTree.values());
+    variables.add(returnPlaceholder);
+    variables.add(functionPlaceholder);
     Collections.sort(variables);
   
     GridPane table = new GridPane();
@@ -54,7 +66,7 @@ public class UIPASVariableTable {
       String pointsToString = "0x" + Long.toHexString(variable.pointsTo);
       String valueStandin = variable.value;
       if (mainWindow.coordinator.runFilter.getDetailLevel() != DetailLevel.NOVICE &&
-          variable.pointsTo >= 0 && variable.pointsTo < 1000000000)
+          variable.pointsTo >= 0 && variable.pointsTo < 1000000000) // TODO: Fix this.
       {
         valueStandin = "0x" + Long.toHexString(variable.pointsTo);
       }
@@ -63,7 +75,10 @@ public class UIPASVariableTable {
       colorPane.setStyle("-fx-background-color: " + color + ";");
       table.add(colorPane, 0, row, 1, 1);
       
-      Label labelAddress = new Label("0x" + Long.toHexString(variable.address));
+      Label labelAddress;
+//      if (!variable.name.equals("Return Addr"))
+        labelAddress = new Label("0x" + Long.toHexString(variable.address));
+//      else labelAddress = new Label("");
       Pane addressContainer = new Pane();
       addressContainer.getChildren().add(labelAddress);
       if (variable.pointsTo < 0)
@@ -81,7 +96,10 @@ public class UIPASVariableTable {
         nameContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
       table.add(nameContainer, 2, row, 1, 1);
       
-      Label labelType = new Label(variable.type);
+      Label labelType;
+      if (!variable.name.equals("Return Addr") && !variable.name.equals(funcName))
+        labelType = new Label(variable.type);
+      else labelType = new Label("");
       Pane typeContainer = new Pane();
       typeContainer.getChildren().add(labelType);
       if (variable.pointsTo < 0)
@@ -90,7 +108,10 @@ public class UIPASVariableTable {
         typeContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
       table.add(typeContainer, 3, row, 1, 1);
       
-      Label labelSize = new Label(variable.size);
+      Label labelSize;
+      if (!variable.name.equals("Return Addr") && !variable.name.equals(funcName))
+        labelSize = new Label(variable.type);
+      else labelSize = new Label("");
       Pane sizeContainer = new Pane();
       sizeContainer.getChildren().add(labelSize);
       if (variable.pointsTo < 0)
