@@ -24,9 +24,11 @@ public class UIPASVariableTable {
     VariableDelta returnPlaceholder = null;
     VariableDelta functionPlaceholder = null;
     if (returnAddress != null) returnPlaceholder = 
-      new VariableDelta("int", "", "Return Addr", returnAddress, functionAddress+1);
+      new VariableDelta("int", "", "Return Addr", returnAddress, functionAddress+4);
     if (functionAddress >= 0 && funcName != null) functionPlaceholder = 
       new VariableDelta("int", "", funcName, "", functionAddress);
+      
+    long offsetStart = functionAddress;
   
     List<VariableDelta> variables = new ArrayList<>(varTree.values());
     variables.add(returnPlaceholder);
@@ -35,8 +37,10 @@ public class UIPASVariableTable {
   
     GridPane table = new GridPane();
     
-    ColumnConstraints column = new ColumnConstraints(10); // left column for color-coding
-    table.getColumnConstraints().add(column);
+    ColumnConstraints columnCon = new ColumnConstraints(10); // left column for color-coding
+    table.getColumnConstraints().add(columnCon);
+    
+    boolean showOffsets = mainWindow.coordinator.runFilter.getShowOffsets();
     
     Pane headerColor = new Pane();
     headerColor.setStyle("-fx-background-color: " + color + ";");
@@ -52,16 +56,31 @@ public class UIPASVariableTable {
     headerSize.setStyle("-fx-font-weight: bold;");
     Label headerValue = new Label("Value");
     headerValue.setStyle("-fx-font-weight: bold;");
-    
-    table.add(headerColor, 0, 0, 1, 1);
-    table.add(headerAddress, 1, 0, 1, 1);
-    table.add(headerName, 2, 0, 1, 1);
-    table.add(headerType, 3, 0, 1, 1);
-    table.add(headerSize, 4, 0, 1, 1);
-    table.add(headerValue, 5, 0, 1, 1);
+    Label headerOffset = new Label("Offset");
+    headerOffset.setStyle("-fx-font-weight: bold;");
+
+    if (!showOffsets) {    
+      table.add(headerColor, 0, 0, 1, 1);
+      table.add(headerAddress, 1, 0, 1, 1);
+      table.add(headerName, 2, 0, 1, 1);
+      table.add(headerType, 3, 0, 1, 1);
+      table.add(headerSize, 4, 0, 1, 1);
+      table.add(headerValue, 5, 0, 1, 1);
+    }
+    else {
+      table.add(headerColor, 0, 0, 1, 1);
+      table.add(headerAddress, 1, 0, 1, 1);
+      table.add(headerOffset, 2, 0, 1, 1);
+      table.add(headerName, 3, 0, 1, 1);
+      table.add(headerType, 4, 0, 1, 1);
+      table.add(headerSize, 5, 0, 1, 1);
+      table.add(headerValue, 6, 0, 1, 1);
+    }
     
     int row = 1;
     for (VariableDelta variable : variables) {
+    
+      if (functionAddress < 0 && row == 1) offsetStart = variable.address;
     
       String pointsToString = "0x" + Long.toHexString(variable.pointsTo);
       String valueStandin = variable.value;
@@ -87,6 +106,23 @@ public class UIPASVariableTable {
         addressContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
       table.add(addressContainer, 1, row, 1, 1);
       
+      int column = 2;
+      
+      long offset = offsetStart - variable.address;
+      String offsetStr = Long.toString(offset);
+      if (offset > 0) offsetStr = "+" + offsetStr;
+      Label labelOffset = new Label(offsetStr);
+      Pane offsetContainer = new Pane();
+      if (showOffsets) {
+        offsetContainer.getChildren().add(labelOffset);
+        if (variable.pointsTo < 0)
+          offsetContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
+        else
+          offsetContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
+        table.add(offsetContainer, column, row, 1, 1);
+        ++column;
+      }
+      
       Label labelName = new Label(variable.name);
       Pane nameContainer = new Pane();
       nameContainer.getChildren().add(labelName);
@@ -94,7 +130,9 @@ public class UIPASVariableTable {
         nameContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
       else
         nameContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
-      table.add(nameContainer, 2, row, 1, 1);
+      table.add(nameContainer, column, row, 1, 1);
+      
+      ++column;
       
       Label labelType;
       if (!variable.name.equals("Return Addr") && !variable.name.equals(funcName))
@@ -106,7 +144,9 @@ public class UIPASVariableTable {
         typeContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
       else
         typeContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
-      table.add(typeContainer, 3, row, 1, 1);
+      table.add(typeContainer, column, row, 1, 1);
+      
+      ++column;
       
       Label labelSize;
       if (!variable.name.equals("Return Addr") && !variable.name.equals(funcName))
@@ -118,7 +158,9 @@ public class UIPASVariableTable {
         sizeContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
       else
         sizeContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
-      table.add(sizeContainer, 4, row, 1, 1);
+      table.add(sizeContainer, column, row, 1, 1);
+      
+      ++column;
       
       Label labelValue = new Label(valueStandin);
       Pane valueContainer = new Pane();
@@ -127,10 +169,11 @@ public class UIPASVariableTable {
         valueContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
       else
         valueContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
-      table.add(valueContainer, 5, row, 1, 1);
+      table.add(valueContainer, column, row, 1, 1);
       
       if (row % 2 != 0) {
         addressContainer.setStyle("-fx-background-color: #bbbbbb;");
+        offsetContainer.setStyle("-fx-background-color: #bbbbbb;");
         nameContainer.setStyle("-fx-background-color: #bbbbbb;");
         typeContainer.setStyle("-fx-background-color: #bbbbbb;");
         sizeContainer.setStyle("-fx-background-color: #bbbbbb;");

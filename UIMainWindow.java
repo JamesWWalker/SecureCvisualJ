@@ -150,11 +150,15 @@ public class UIMainWindow {
     CheckMenuItem menuShowProgramOutput = new CheckMenuItem("Program Output");
     menuShowProgramOutput.selectedProperty().bindBidirectional(coordinator.runFilter.showOutputProperty());
     
+    CheckMenuItem menuShowOffsets = new CheckMenuItem("Offsets");
+    menuShowOffsets.selectedProperty().bindBidirectional(coordinator.runFilter.showOffsetsProperty());
+
+    
 //    CheckMenuItem menuShowMemoryLayout = new CheckMenuItem("Memory Layout"); // TODO
     
-    viewElementsMenu.getItems().addAll(menuShowHiddenFunctions,
-                                       menuShowRegisters, menuShowProgramSections,
-                                       menuShowAssemblyCode, menuShowProgramOutput /*menuShowMemoryLayout*/);
+    viewElementsMenu.getItems().addAll(menuShowHiddenFunctions, menuShowRegisters, 
+                                       menuShowProgramSections, menuShowAssemblyCode, 
+                                       menuShowProgramOutput, menuShowOffsets /*menuShowMemoryLayout*/);
     viewMenu.getItems().add(viewElementsMenu);
     
     // Filters
