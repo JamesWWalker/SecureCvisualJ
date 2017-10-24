@@ -326,7 +326,7 @@ public class Analyzer {
       bw = new BufferedWriter(fw);
       
       String invocation = binary;
-      for (String arg : binaryArguments) binary += " " + arg;
+      for (String arg : binaryArguments) invocation += " " + arg;
       bw.write("invocation~!~" + invocation + System.lineSeparator());
 
       InputStreamReader isr = new InputStreamReader(System.in);
@@ -668,7 +668,7 @@ public class Analyzer {
       currentBacktrace.get(currentBacktrace.size()-1) :
       "";
     if ((backtrace.size() == 0 && currentBacktrace.size() > 0) ||
-        !backtrace.get(backtrace.size()-1).equals(topOfStack)) 
+        (backtrace.size() > 1 && !backtrace.get(backtrace.size()-1).equals(topOfStack)))
     { // Top of stack is different
       if (currentBacktrace.size() > backtrace.size()) {
         for (int n = backtrace.size(); n < currentBacktrace.size(); ++n) {
