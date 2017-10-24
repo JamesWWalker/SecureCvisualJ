@@ -54,6 +54,8 @@ public class UIPASVariableTable {
     headerType.setStyle("-fx-font-weight: bold;");
     Label headerSize = new Label("Size");
     headerSize.setStyle("-fx-font-weight: bold;");
+    Label headerPointsTo = new Label("Points To");
+    headerPointsTo.setStyle("-fx-font-weight: bold;");
     Label headerValue = new Label("Value");
     headerValue.setStyle("-fx-font-weight: bold;");
     Label headerOffset = new Label("Offset");
@@ -65,7 +67,8 @@ public class UIPASVariableTable {
       table.add(headerName, 2, 0, 1, 1);
       table.add(headerType, 3, 0, 1, 1);
       table.add(headerSize, 4, 0, 1, 1);
-      table.add(headerValue, 5, 0, 1, 1);
+      table.add(headerPointsTo, 5, 0, 1, 1);
+      table.add(headerValue, 6, 0, 1, 1);
     }
     else {
       table.add(headerColor, 0, 0, 1, 1);
@@ -74,21 +77,14 @@ public class UIPASVariableTable {
       table.add(headerName, 3, 0, 1, 1);
       table.add(headerType, 4, 0, 1, 1);
       table.add(headerSize, 5, 0, 1, 1);
-      table.add(headerValue, 6, 0, 1, 1);
+      table.add(headerPointsTo, 6, 0, 1, 1);
+      table.add(headerValue, 7, 0, 1, 1);
     }
     
     int row = 1;
     for (VariableDelta variable : variables) {
     
       if (functionAddress < 0 && row == 1) offsetStart = variable.address;
-    
-      String pointsToString = "0x" + Long.toHexString(variable.pointsTo);
-      String valueStandin = variable.value;
-      if (mainWindow.coordinator.runFilter.getDetailLevel() != DetailLevel.NOVICE &&
-          variable.pointsTo >= 0 && variable.pointsTo < 1000000000) // TODO: Fix this.
-      {
-        valueStandin = "0x" + Long.toHexString(variable.pointsTo);
-      }
 
       Pane colorPane = new Pane();
       colorPane.setStyle("-fx-background-color: " + color + ";");
@@ -100,10 +96,7 @@ public class UIPASVariableTable {
 //      else labelAddress = new Label("");
       Pane addressContainer = new Pane();
       addressContainer.getChildren().add(labelAddress);
-      if (variable.pointsTo < 0)
-        addressContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
-      else
-        addressContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
+      addressContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
       table.add(addressContainer, 1, row, 1, 1);
       
       int column = 2;
@@ -115,10 +108,7 @@ public class UIPASVariableTable {
       Pane offsetContainer = new Pane();
       if (showOffsets) {
         offsetContainer.getChildren().add(labelOffset);
-        if (variable.pointsTo < 0)
-          offsetContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
-        else
-          offsetContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
+        offsetContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
         table.add(offsetContainer, column, row, 1, 1);
         ++column;
       }
@@ -126,10 +116,7 @@ public class UIPASVariableTable {
       Label labelName = new Label(variable.name);
       Pane nameContainer = new Pane();
       nameContainer.getChildren().add(labelName);
-      if (variable.pointsTo < 0)
-        nameContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
-      else
-        nameContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
+      nameContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
       table.add(nameContainer, column, row, 1, 1);
       
       ++column;
@@ -140,10 +127,7 @@ public class UIPASVariableTable {
       else labelType = new Label("");
       Pane typeContainer = new Pane();
       typeContainer.getChildren().add(labelType);
-      if (variable.pointsTo < 0)
-        typeContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
-      else
-        typeContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
+      typeContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
       table.add(typeContainer, column, row, 1, 1);
       
       ++column;
@@ -154,21 +138,29 @@ public class UIPASVariableTable {
       else labelSize = new Label("");
       Pane sizeContainer = new Pane();
       sizeContainer.getChildren().add(labelSize);
-      if (variable.pointsTo < 0)
-        sizeContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
-      else
-        sizeContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
+      sizeContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
       table.add(sizeContainer, column, row, 1, 1);
       
       ++column;
       
-      Label labelValue = new Label(valueStandin);
+      Label labelPointsTo;
+      if (!variable.name.equals("Return Addr") && !variable.name.equals(funcName) && variable.pointsTo > 0) 
+        labelPointsTo = new Label("0x" + Long.toHexString(variable.pointsTo));
+      else labelPointsTo = new Label("-----");
+      Pane pointsToContainer = new Pane();
+      pointsToContainer.getChildren().add(labelPointsTo);
+      pointsToContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
+      table.add(pointsToContainer, column, row, 1, 1);
+      
+      ++column;
+      
+      Label labelValue;
+      if (variable.pointsTo > 0 && variable.pointsTo < 1000000000)  // TODO: Fix this
+        labelValue = new Label("(In heap)");
+      else labelValue = new Label(variable.value);
       Pane valueContainer = new Pane();
       valueContainer.getChildren().add(labelValue);
-      if (variable.pointsTo < 0)
-        valueContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
-      else
-        valueContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, pointsToString));
+      valueContainer.setOnMouseClicked(e -> displayVariableRepresentation(variable.type, variable.value));
       table.add(valueContainer, column, row, 1, 1);
       
       if (row % 2 != 0) {
