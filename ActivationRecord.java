@@ -5,6 +5,7 @@ public class ActivationRecord implements Comparable<ActivationRecord> {
   public String file;
   public String function;
   public long address;
+  String dynamicLink;
   String returnAddress;
 
 
@@ -15,17 +16,23 @@ public class ActivationRecord implements Comparable<ActivationRecord> {
   }
   
   
-  public ActivationRecord(String fileIn, String functionIn, long addressIn, String returnAddressIn) {
+  public ActivationRecord(String fileIn, 
+                          String functionIn, 
+                          long addressIn,
+                          String dynamicLinkIn,
+                          String returnAddressIn) 
+  {
     file = fileIn;
     function = functionIn;
     address = addressIn;
+    dynamicLink = dynamicLinkIn;
     returnAddress = returnAddressIn;
   }
 
 
   // copy constructor
   public ActivationRecord(ActivationRecord ar) {
-    this(ar.file, ar.function, ar.address, ar.returnAddress);
+    this(ar.file, ar.function, ar.address, ar.dynamicLink, ar.returnAddress);
   }
 
 
@@ -39,6 +46,8 @@ public class ActivationRecord implements Comparable<ActivationRecord> {
     if (file != null ? !file.equals(ar.file) : ar.file != null) return false;
     if (function != null ? !function.equals(ar.function) : ar.function != null) return false;
     if (address != ar.address) return false;
+    if (dynamicLink != null ? !dynamicLink.equals(ar.dynamicLink) 
+      : ar.dynamicLink != null) return false;
     if (returnAddress != null ? !returnAddress.equals(ar.returnAddress) 
       : ar.returnAddress != null) return false;
 
@@ -48,13 +57,13 @@ public class ActivationRecord implements Comparable<ActivationRecord> {
 
   @Override
   public String toString() {
-    return file + "," + function + "," + address + "," + returnAddress;
+    return file + "," + function + "," + address + "," + dynamicLink + "," + returnAddress;
   }
   
   
   @Override
   public int hashCode() {
-    return Objects.hash(file, function, address, returnAddress);
+    return Objects.hash(file, function, address, dynamicLink, returnAddress);
   }
   
   

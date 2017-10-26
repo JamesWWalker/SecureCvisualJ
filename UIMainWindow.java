@@ -34,6 +34,7 @@ public class UIMainWindow {
   private RadioMenuItem menuExpert;
   
   private ScrollPane scrollPanePAS;
+  private ScrollPane scrollPaneSD;
   // TODO: other scrollpanes
   
   
@@ -343,6 +344,10 @@ public class UIMainWindow {
     // Update source code
     setTabContent(SubProgram.toString(SubProgram.SC),
                   UISourceCode.buildSC(scene, sourceLine, assembly));
+                  
+    // Update SD
+    scrollPaneSD = UISensitiveData.buildSD(this, scene);
+    setTabContent(SubProgram.toString(SubProgram.SD), scrollPaneSD);
                   
     // TODO: other tabs
     

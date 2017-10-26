@@ -359,6 +359,7 @@ public class ProcessRun {
 
 
   private void parseAssembly(String[] parameters) throws Exception {
+    if (parameters.length < 2) return;
     int lineNumber = Integer.parseInt(parameters[0]);
     String assemblyLine = parameters[1];
     if (assembly.containsKey(lineNumber)) {
@@ -393,8 +394,9 @@ public class ProcessRun {
     for (int n = stack.size()-1; n >= 0; --n) {
       String compareFunction = stack.get(n).function;
       if (compareFunction.equals(scope) || compareFunction.startsWith(scope + "{")) {
-        stack.get(n).returnAddress = parameters[1];
-        if (parameters.length > 2) state.sourceLine = Integer.parseInt(parameters[2]);
+        stack.get(n).dynamicLink = parameters[1];
+        stack.get(n).returnAddress = parameters[2];
+//        if (parameters.length > 2) state.sourceLine = Integer.parseInt(parameters[2]);
         return;
       }
     }

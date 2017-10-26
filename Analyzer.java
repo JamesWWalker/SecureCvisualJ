@@ -433,8 +433,8 @@ public class Analyzer {
     parseBacktrace(input);
 
     // Get return address
-    if (architecture.equals("x86_64")) System.out.println("x/1x $rbp");
-    else System.out.println("x/1x $ebp");
+    if (architecture.equals("x86_64")) System.out.println("x/2x $rbp");
+    else System.out.println("x/2x $ebp");
     Thread.sleep(sleepTime);
     parseReturnAddress(input);
 
@@ -602,9 +602,12 @@ public class Analyzer {
     for (int n = 0; n < inputLines.length; ++n) {
       String line = inputLines[n];
       if (line.startsWith("0x") && line.contains(": 0x")) {
-        String returnAddress = line.split(":")[1].trim();
+        String[] values = line.split(":")[1].trim().split("\\s+");
+        String dynamicLink = values[0];
+        String returnAddress = values[1];
         bw.write("return_address~!~" +
                  function            + "|" +
+                 dynamicLink         + "|" +
                  returnAddress       +
                  System.lineSeparator());
       }

@@ -18,21 +18,23 @@ public class UIPASVariableTable {
                                      TreeMap<String, VariableDelta> varTree,
                                      String color,
                                      long functionAddress,
-                                     String returnAddress,
-                                     String funcName) 
+                                     String dynamicLink,
+                                     String returnAddress)
   {
     VariableDelta returnPlaceholder = null;
-    VariableDelta functionPlaceholder = null;
+    VariableDelta linkPlaceholder = null;
     if (returnAddress != null) returnPlaceholder = 
       new VariableDelta("int", "", "Return Addr", returnAddress, functionAddress+4);
-    if (functionAddress >= 0 && funcName != null) functionPlaceholder = 
-      new VariableDelta("int", "", funcName, "", functionAddress);
+    if (dynamicLink != null) linkPlaceholder = 
+      new VariableDelta("int", "", "Dynamic Link", dynamicLink, functionAddress);
       
     long offsetStart = functionAddress;
   
     List<VariableDelta> variables = new ArrayList<>(varTree.values());
-    variables.add(returnPlaceholder);
-    variables.add(functionPlaceholder);
+    if (returnPlaceholder != null && linkPlaceholder != null) {
+      variables.add(returnPlaceholder);
+      variables.add(linkPlaceholder);
+    }
     Collections.sort(variables);
   
     GridPane table = new GridPane();
@@ -92,7 +94,7 @@ public class UIPASVariableTable {
       
       Label labelAddress;
 //      if (!variable.name.equals("Return Addr"))
-        labelAddress = new Label("0x" + Long.toHexString(variable.address));
+      labelAddress = new Label("0x" + Long.toHexString(variable.address));
 //      else labelAddress = new Label("");
       Pane addressContainer = new Pane();
       addressContainer.getChildren().add(labelAddress);
@@ -101,7 +103,7 @@ public class UIPASVariableTable {
       
       int column = 2;
       
-      long offset = offsetStart - variable.address;
+      long offset = variable.address - offsetStart;
       String offsetStr = Long.toString(offset);
       if (offset > 0) offsetStr = "+" + offsetStr;
       Label labelOffset = new Label(offsetStr);
@@ -122,7 +124,7 @@ public class UIPASVariableTable {
       ++column;
       
       Label labelType;
-      if (!variable.name.equals("Return Addr") && !variable.name.equals(funcName))
+      if (!variable.name.equals("Return Addr") && !variable.name.equals("Dynamic Link"))
         labelType = new Label(variable.type);
       else labelType = new Label("");
       Pane typeContainer = new Pane();
@@ -133,8 +135,8 @@ public class UIPASVariableTable {
       ++column;
       
       Label labelSize;
-      if (!variable.name.equals("Return Addr") && !variable.name.equals(funcName))
-        labelSize = new Label(variable.type);
+      if (!variable.name.equals("Return Addr") && !variable.name.equals("Dynamic Link"))
+        labelSize = new Label(variable.size);
       else labelSize = new Label("");
       Pane sizeContainer = new Pane();
       sizeContainer.getChildren().add(labelSize);
@@ -144,7 +146,7 @@ public class UIPASVariableTable {
       ++column;
       
       Label labelPointsTo;
-      if (!variable.name.equals("Return Addr") && !variable.name.equals(funcName) && variable.pointsTo > 0) 
+      if (!variable.name.equals("Return Addr") && !variable.name.equals("Dynamic Link") && variable.pointsTo > 0) 
         labelPointsTo = new Label("0x" + Long.toHexString(variable.pointsTo));
       else labelPointsTo = new Label("-----");
       Pane pointsToContainer = new Pane();

@@ -9,6 +9,11 @@ public class UIUtils {
   private static List<String> colorWheel;
   private static int colorWheelIndex = 0;
   
+  public static final int SD_EV_MEMORYLOCKED = 0;
+  public static final int SD_EV_VALUESET = 1;
+  public static final int SD_EV_VALUECLEARED = 2;
+  public static final int SD_EV_MEMORYUNLOCKED = 3;
+  
 
   public static Node getByUserData(Pane parent, Object data) {
     for (Node n : parent.getChildren()) {
