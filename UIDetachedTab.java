@@ -2,6 +2,7 @@ import java.util.*;
 import javafx.application.Application;
 import javafx.beans.binding.*;
 import javafx.beans.property.*;
+import javafx.beans.value.*;
 import javafx.geometry.*;
 import javafx.scene.*;
 import javafx.scene.control.*;
@@ -10,15 +11,16 @@ import javafx.scene.paint.*;
 import javafx.stage.*;
 
 public class UIDetachedTab {
-  
+
   public String id;
+  public StackPane layout;
+  public Scene scene = null;
   public String title;
   public Stage window;
   
   private CoordinatorMaster coordinator;
   private DoubleProperty fontSize = new SimpleDoubleProperty(10);
   private UIMainWindow mainWindow;
-  private StackPane layout;
   
   
   public void setContent(Node content) {
@@ -54,11 +56,19 @@ public class UIDetachedTab {
       window.close(); 
     });
     
-    Scene scene = new Scene(layout, 300, 250);
+    scene = new Scene(layout, 300, 250);
     
-    // font size binding
-    fontSize.bind(scene.widthProperty().add(scene.heightProperty()).divide(50));
-    layout.styleProperty().bind(Bindings.concat("-fx-font-size: ", fontSize.asString(), ";"));
+    // scene size change listeners
+    scene.widthProperty().addListener(new ChangeListener<Number>() {
+      @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
+        UIUtils.calculateFontSize(layout, scene.getWidth(), scene.getHeight());
+      }
+    });
+    scene.heightProperty().addListener(new ChangeListener<Number>() {
+      @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
+        UIUtils.calculateFontSize(layout, scene.getWidth(), scene.getHeight());
+      }
+    });
     
     window.setScene(scene);
     window.show();

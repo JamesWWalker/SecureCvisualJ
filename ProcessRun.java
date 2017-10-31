@@ -25,7 +25,8 @@ public class ProcessRun {
   private ArrayList<ProcessState> runSequence;
   private ArrayList<ProgramSection> sections;
   private HashMap<Integer, ProcessState> seedStates;
-  
+  private HashMap<Integer, SensitiveDataState> sdStates;
+  private SensitiveDataState runningSdState;
   
   
   public ProcessRun() {
@@ -57,9 +58,10 @@ public class ProcessRun {
   
   public List<String> getOutput() {
     Set<Integer> keys = outputs.keySet();
-    Collections.sort(new ArrayList(keys));
+    List<Integer> list = new ArrayList<>(keys);
+    Collections.sort(list);
     List<String> rets = new ArrayList<>();
-    for (Integer i : keys) {
+    for (Integer i : list) {
       if (i <= index.get()) rets.add(outputs.get(i));
     }
     return rets;
@@ -93,6 +95,17 @@ public class ProcessRun {
     ArrayList<ProgramSection> retSections = new ArrayList<>();
     for (ProgramSection section : sections) retSections.add(new ProgramSection(section));
     return retSections;
+  }
+  
+  
+  public SensitiveDataState getSensitiveDataState() {
+    Set<Integer> keys = sdStates.keySet();
+    List<Integer> list = new ArrayList<>(keys);
+    Collections.sort(list);
+    for (int n = list.size()-1; n >=0; --n) {
+      if (n <= index.get()) return sdStates.get(n);
+    }
+    return null;
   }
 
 
@@ -174,6 +187,8 @@ public class ProcessRun {
     assembly = new HashMap<>();
     outputs = new HashMap<>();
     sections = new ArrayList<>();
+    sdStates = new HashMap<>();
+    runningSdState = new SensitiveDataState();
 
     int previousEvent = 0;
     int currentEvent = 0;
@@ -217,6 +232,11 @@ public class ProcessRun {
         else if (type.equals("section")) parseSection(parameters);
         else if (type.equals("return_address")) parseReturnAddress(stateToAdd, runningStack, parameters);
         else if (type.equals("invocation")) invocation = parameters[0];
+        else if (type.equals("sd_corezero")) parseCoreZero(parameters);
+        else if (type.equals("sd_lock")) parseSdLock(parameters);
+        else if (type.equals("sd_unlock")) parseSdUnlock(parameters);
+        else if (type.equals("sd_clear")) parseSdClear(parameters);
+        else if (type.equals("sd_set")) parseSdSet(parameters);
         else {
           System.err.println("ERROR: Unrecognized event type " + type + ". Terminating parse.");
           return;
@@ -371,17 +391,7 @@ public class ProcessRun {
   
   
   private void parseSection(String[] parameters) throws Exception {
-    String[] addressStr = parameters[2].split("-");
-    long address = Long.parseUnsignedLong(addressStr[0].substring(3), 16) -
-                   Long.parseUnsignedLong(addressStr[1].substring(2, addressStr[1].length()-1), 16);
-  
-    sections.add(new ProgramSection(parameters[0],
-                                    parameters[1],
-                                    address,
-                                    Long.parseUnsignedLong(parameters[3].substring(2), 16),
-                                    Long.parseUnsignedLong(parameters[4].substring(2), 16),
-                                    parameters[5],
-                                    parameters[6]));
+    sections.add(new ProgramSection(Arrays.asList(parameters)));
   }
   
   
@@ -401,6 +411,41 @@ public class ProcessRun {
       }
     }
   }
+  
+  
+  private void parseCoreZero(String[] parameters) throws Exception {
+    runningSdState = runningSdState.newInstance();
+    runningSdState.coreSizeZeroed = true;
+    runningSdState.coreSizeZeroedHere = true;
+    sdStates.put(Integer.parseInt(parameters[0]), runningSdState);
+  }
+  
+  
+  private void parseSdLock(String[] parameters) throws Exception {
+//    SensitiveDataVariable var = runningSdState.getVariable(parameters[2], parameters[3]);
+//    if (var == null) 
+  }
+  
+  
+  private void parseSdUnlock(String[] parameters) throws Exception {
+  }
+  
+  
+  private void parseSdClear(String[] parameters) throws Exception {
+  }
+  
+  
+  private void parseSdSet(String[] parameters) throws Exception {
+  }
+  
+  
+  /*
+  parseCoreZero(parameters);
+        else if (type.equals("sd_lock")) parseSdLock(parameters);
+        else if (type.equals("sd_unlock")) parseSdUnlock(parameters);
+        else if (type.equals("sd_clear")) parseSdClear(parameters);
+        else if (type.equals("sd_set")) parseSdSet(parameters);
+  */
   
 
 }

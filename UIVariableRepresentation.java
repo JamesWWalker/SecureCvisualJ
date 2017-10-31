@@ -1,6 +1,7 @@
 import java.math.*;
 import javafx.beans.binding.*;
 import javafx.beans.property.*;
+import javafx.beans.value.*;
 import javafx.geometry.*;
 import javafx.scene.*;
 import javafx.scene.control.*;
@@ -11,6 +12,7 @@ public class UIVariableRepresentation {
 
   private static DoubleProperty fontSize = new SimpleDoubleProperty(16);
   private static VariableRepresentation representation;
+  public static Scene scene = null;
   private static boolean updateInProgress;
   private static Stage window;
   
@@ -132,10 +134,19 @@ public class UIVariableRepresentation {
       cboTopEndianness.getValue().equals(BIG_ENDIAN)));
     grid.add(txtBytesBottom, 0, 4, 3, 1);
     
-    Scene scene = new Scene(grid, 600, 300);
+    scene = new Scene(grid, 600, 300);
     
-    fontSize.bind(scene.widthProperty().add(scene.heightProperty()).divide(50));
-    grid.styleProperty().bind(Bindings.concat("-fx-font-size: ", fontSize.asString(), ";"));
+    // scene size change listeners
+    scene.widthProperty().addListener(new ChangeListener<Number>() {
+      @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
+        UIUtils.calculateFontSize(grid, scene.getWidth(), scene.getHeight());
+      }
+    });
+    scene.heightProperty().addListener(new ChangeListener<Number>() {
+      @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
+        UIUtils.calculateFontSize(grid, scene.getWidth(), scene.getHeight());
+      }
+    });
     
     window.setScene(scene);
     window.showAndWait();

@@ -1,38 +1,23 @@
+import java.util.*;
+
 public class ProgramSection {
-  public String id;
-  public String type;
-  public long address;
-  public long offset;
-  public long size;
-  public String flags;
-  public String name;
+  public List<String> values;
   
-  public ProgramSection(String idIn,
-                        String typeIn,
-                        long addressIn,
-                        long offsetIn,
-                        long sizeIn,
-                        String flagsIn,
-                        String nameIn)
+  public ProgramSection(List<String> valuesIn)
   {
-    id = idIn;
-    type = typeIn;
-    address = addressIn;
-    offset = offsetIn;
-    size = sizeIn;
-    flags = flagsIn;
-    name = nameIn;
+    values = new ArrayList<>();
+    for (String s : valuesIn) values.add(s);
   }
   
   
   // copy constructor
   public ProgramSection(ProgramSection other) {
-    this(other.id, other.type, other.address, other.offset, other.size, other.flags, other.name);
+    this(other.values);
   }
   
   
   @Override
   public String toString() {
-    return name + " (Size: " + size + ")"; // TODO: I can't make head or tail of the address
+    return values.toString();
   }
 }

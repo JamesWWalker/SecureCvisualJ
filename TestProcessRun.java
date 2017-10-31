@@ -359,14 +359,14 @@ public class TestProcessRun {
       filter.setDetailLevel(DetailLevel.ADVANCED);
       ArrayList<ProgramSection> sections = filter.getSections(run);
       
-      if (!sections.stream().anyMatch(s -> s.name.endsWith(".data")))
-        errors += "  SECTION ERROR 1: .data section not found." + System.lineSeparator();
-      if (!sections.stream().anyMatch(s -> s.name.endsWith(".rodata")))
-        errors += "  SECTION ERROR 2: .rodata section not found." + System.lineSeparator();
-      if (!sections.stream().anyMatch(s -> s.name.endsWith(".text")))
-        errors += "  SECTION ERROR 3: .text section not found." + System.lineSeparator();
-      if (sections.stream().anyMatch(s -> s.name.endsWith(".interp")))
-        errors += "  SECTION ERROR 4: .interp section should not be present, but is." + System.lineSeparator();
+//      if (!sections.stream().anyMatch(s -> s.name.endsWith(".data")))
+//        errors += "  SECTION ERROR 1: .data section not found." + System.lineSeparator();
+//      if (!sections.stream().anyMatch(s -> s.name.endsWith(".rodata")))
+//        errors += "  SECTION ERROR 2: .rodata section not found." + System.lineSeparator();
+//      if (!sections.stream().anyMatch(s -> s.name.endsWith(".text")))
+//        errors += "  SECTION ERROR 3: .text section not found." + System.lineSeparator();
+//      if (sections.stream().anyMatch(s -> s.name.endsWith(".interp")))
+//        errors += "  SECTION ERROR 4: .interp section should not be present, but is." + System.lineSeparator();
       
       if (sections.size() != 3)
         errors += "  SECTION ERROR 5: Section size should be [3], but is [" + sections.size() +

@@ -107,7 +107,7 @@ public class UIProgramAddressSpace {
       if (sections.size() == 0) mainWindow.coordinator.runFilter.clearSectionFilter();
       else {
         for (ProgramSection ps : sections)
-          mainWindow.coordinator.runFilter.addSectionFilter(ps.name);
+          mainWindow.coordinator.runFilter.addSectionFilter(ps.values.get(ps.values.size()-1));
       }
       mainWindow.setCustomDetailLevel();
     });
@@ -121,13 +121,13 @@ public class UIProgramAddressSpace {
         labelSection.setStyle("-fx-background-color: " + color + ";");
         labelSection.prefWidthProperty().bind(pasLayout.widthProperty());
         labelSection.setOnMouseClicked(e -> {
-          mainWindow.coordinator.runFilter.addSectionFilter(ps.name);
+          mainWindow.coordinator.runFilter.addSectionFilter(ps.values.get(ps.values.size()-1));
           mainWindow.coordinator.queryProcessRunAndUpdateUI();
         });
         pasLayout.getChildren().add(labelSection);
         
         // Globals
-        if (ps.name.endsWith(".data")) {
+        if (ps.values.get(ps.values.size()-1).endsWith(".data")) {
           TreeMap<String, VariableDelta> globalVariables = new TreeMap<>();
           for (VariableDelta v : variables.values()) {
             if (v.scope.equals(UIUtils.GLOBAL) && !v.type.contains("const")) 
@@ -140,7 +140,7 @@ public class UIProgramAddressSpace {
         }
         
         // Read-only globals
-        if (ps.name.endsWith(".rodata")) {
+        if (ps.values.get(ps.values.size()-1).endsWith(".rodata")) {
           TreeMap<String, VariableDelta> globalVariables = new TreeMap<>();
           for (VariableDelta v : variables.values()) {
             if (v.scope.equals(UIUtils.GLOBAL) && v.type.contains("const")) 

@@ -137,6 +137,11 @@ public class ProcessRunFilter {
   }
   
   
+  public SensitiveDataState getSensitiveDataState(ProcessRun run) {
+    return run.getSensitiveDataState();
+  }
+  
+  
   public List<ActivationRecord> getStack(ProcessRun run) {
     List<ActivationRecord> stack = run.getStack();
     if (!showAllFunctions.get()) {
@@ -177,14 +182,16 @@ public class ProcessRunFilter {
     if (showAllSectionsByDefault.get()) {
       for (int n = sections.size()-1; n >= 0; --n) {
         ProgramSection section = sections.get(n);
-        if (sectionsFilter.stream().anyMatch(s -> section.name.endsWith(s))) sections.remove(n);
+        if (sectionsFilter.stream().anyMatch(s -> section.values.get(section.values.size()-1).
+          endsWith(s))) sections.remove(n);
       }
       return sections;
     } 
     else {
       for (int n = sections.size()-1; n >= 0; --n) {
         ProgramSection section = sections.get(n);
-        if (!sectionsFilter.stream().anyMatch(s -> section.name.endsWith(s))) sections.remove(n);
+        if (!sectionsFilter.stream().anyMatch(s -> section.values.get(section.values.size()-1).
+          endsWith(s))) sections.remove(n);
       }
       return sections;
     }

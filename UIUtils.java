@@ -14,6 +14,8 @@ public class UIUtils {
   public static final int SD_EV_VALUECLEARED = 2;
   public static final int SD_EV_MEMORYUNLOCKED = 3;
   
+  public static double fontSize = 1.0;
+  
 
   public static Node getByUserData(Pane parent, Object data) {
     for (Node n : parent.getChildren()) {
@@ -43,6 +45,12 @@ public class UIUtils {
     ++colorWheelIndex;
     if (colorWheelIndex >= colorWheel.size()) colorWheelIndex = 0;
     return color;
+  }
+  
+  
+  public static void calculateFontSize(Node scene, double windowWidth, double windowHeight) {
+    if (scene != null)
+      scene.setStyle("-fx-font-size: " + ((windowWidth + windowHeight) / 70) * fontSize);
   }
 
 }

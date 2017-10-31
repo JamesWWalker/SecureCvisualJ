@@ -3,9 +3,11 @@ import java.util.*;
 import javafx.application.Application;
 import javafx.beans.binding.*;
 import javafx.beans.property.*;
+import javafx.beans.value.*;
 import javafx.geometry.*;
 import javafx.scene.*;
 import javafx.scene.control.*;
+import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.*;
 import javafx.stage.*;
@@ -163,7 +165,7 @@ public class UIMainWindow {
     viewMenu.getItems().add(viewElementsMenu);
     
     // Filters
-    Menu filtersMenu =new Menu("Filters");
+    Menu filtersMenu = new Menu("Filters");
     MenuItem menuClearRegisterFilters = new MenuItem("Reset Register Filters");
     menuClearRegisterFilters.setOnAction(e -> {
       coordinator.runFilter.clearRegisterFilter();
@@ -178,6 +180,26 @@ public class UIMainWindow {
     
     filtersMenu.getItems().addAll(menuClearRegisterFilters, menuClearSectionFilters);
     viewMenu.getItems().add(filtersMenu);
+
+    MenuItem menuIncreaseFontSize = new MenuItem("Increase Font Size");
+    menuIncreaseFontSize.setOnAction(e -> {
+      if (UIUtils.fontSize < 5.0) UIUtils.fontSize += 0.1;
+      UIUtils.calculateFontSize(tabPane, scene.getWidth(), scene.getHeight());
+      for (UIDetachedTab dt : detachedTabs) 
+        UIUtils.calculateFontSize(dt.layout, dt.scene.getWidth(), dt.scene.getHeight());
+    });
+    menuIncreaseFontSize.setAccelerator(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.CONTROL_DOWN));
+    viewMenu.getItems().add(menuIncreaseFontSize);
+    
+    MenuItem menuDecreaseFontSize = new MenuItem("Decrease Font Size");
+    menuDecreaseFontSize.setOnAction(e -> {
+      if (UIUtils.fontSize > 0.1) UIUtils.fontSize -= 0.1;
+      UIUtils.calculateFontSize(tabPane, scene.getWidth(), scene.getHeight());
+      for (UIDetachedTab dt : detachedTabs) 
+        UIUtils.calculateFontSize(dt.layout, dt.scene.getWidth(), dt.scene.getHeight());
+    });
+    menuDecreaseFontSize.setAccelerator(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN));
+    viewMenu.getItems().add(menuDecreaseFontSize);
 
     // Help menu TODO
     Menu helpMenu = new Menu("Help");
@@ -241,9 +263,17 @@ public class UIMainWindow {
     borderPane.prefHeightProperty().bind(scene.heightProperty());
     borderPane.prefWidthProperty().bind(scene.widthProperty());
     
-    // font size binding
-    fontSize.bind(scene.widthProperty().add(scene.heightProperty()).divide(70));
-    tabPane.styleProperty().bind(Bindings.concat("-fx-font-size: ", fontSize.asString(), ";"));
+    // scene size change listeners
+    scene.widthProperty().addListener(new ChangeListener<Number>() {
+      @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
+        UIUtils.calculateFontSize(tabPane, scene.getWidth(), scene.getHeight());
+      }
+    });
+    scene.heightProperty().addListener(new ChangeListener<Number>() {
+      @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
+        UIUtils.calculateFontSize(tabPane, scene.getWidth(), scene.getHeight());
+      }
+    });
     
     borderPane.setCenter(tabPane);
     borderPane.setTop(menuBar);
@@ -360,6 +390,7 @@ public class UIMainWindow {
     config += "MainWindowY:" + Double.toString(window.getY()) + System.lineSeparator();
     config += "MainWindowWidth:" + Double.toString(window.getWidth()) + System.lineSeparator();
     config += "MainWindowHeight:" + Double.toString(window.getHeight()) + System.lineSeparator();
+    config += "FontSize:" + Double.toString(UIUtils.fontSize) + System.lineSeparator();
     for (UIDetachedTab tab : detachedTabs) config += "DetachedTab:" + tab.title + System.lineSeparator();
     for (UIDetachedTab tab : detachedTabs) config += tab.saveConfig();
     
@@ -376,6 +407,7 @@ public class UIMainWindow {
         else if (parameters[0].equals("MainWindowWidth")) window.setWidth(Double.parseDouble(parameters[1]));
         else if (parameters[0].equals("MainWindowHeight")) window.setHeight(Double.parseDouble(parameters[1]));
         else if (parameters[0].equals("DetachedTab")) detachTab(parameters[1]);
+        else if (parameters[0].equals("FontSize")) UIUtils.fontSize = Double.parseDouble(parameters[1]);
       }
     }
     for (UIDetachedTab tab : detachedTabs) tab.loadConfig(config);
