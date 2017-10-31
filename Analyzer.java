@@ -393,21 +393,37 @@ public class Analyzer {
   {
     String[] inputLines = getLldbInput(input);
 
+    int numberOfDivisions = 0;
     for (int n = 0; n < inputLines.length; ++n) {
       String line = inputLines[n].trim();
-      if (line.startsWith("0x")) {
-        String[] splitLine = line.split("\\s+");
-        // ID, type, file address, file offset, file size, flags, section name
-        if (splitLine.length < 7) continue;
-        bw.write("section~!~" +
-                 splitLine[0]    + "|" + // ID
-                 splitLine[1]    + "|" + // type
-                 splitLine[2]    + "|" + // file address
-                 splitLine[3]    + "|" + // file offset
-                 splitLine[4]    + "|" + // file size
-                 splitLine[5]    + "|" + // flags
-                 splitLine[6]          + // section name
-                 System.lineSeparator());
+      if (line.contains("SectID") || line.contains("Type") || line.contains("Load Address")) {
+        String divisions = inputLines[n+1].trim();
+        String[] divisionsSplit = divisions.split("\\s+");
+        numberOfDivisions = divisionsSplit.length;
+        int c = 0;
+        List<String> headers = new ArrayList<>();
+        for (int d = 0; d < divisionsSplit.length; ++d) {
+          String header = "";
+          for (int h = 0; h < divisionsSplit[d].length(); ++h) {
+            header += line.charAt(c);
+            ++c;
+            if (c >= line.length()) break;
+          }
+          if (!header.trim().isEmpty()) headers.add(header.trim());
+          ++c;
+          if (c >= line.length()) break;
+        }
+        bw.write("section~!~");
+        for (int i = 0; i < headers.size(); ++i) bw.write("|" + headers.get(i));
+        bw.write(System.lineSeparator());
+      }
+      else if (line.startsWith("0x")) {
+        String[] splitLineArr = line.split("\\s+");
+        List<String> splitLine = new ArrayList<>(Arrays.asList(splitLineArr));
+        if (splitLine.size() < numberOfDivisions) splitLine.add(2, " "); // when 'load address' is blank
+        bw.write("section~!~");
+        for (int i = 0; i < splitLine.size(); ++i) bw.write("|" + splitLine.get(i));
+        bw.write(System.lineSeparator());
       }
     }
   }
