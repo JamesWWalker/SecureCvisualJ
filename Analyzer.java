@@ -434,7 +434,7 @@ public class Analyzer {
   {
     // Get current line number, which function we're in, scan for program output,
     // and compile list of external function calls
-    String resourceZeroed = parseSourceLine(input);
+    String additionalOutputs = parseSourceLine(input);
 
     int sleepTime = speedMultiplier * 10;
 
@@ -469,22 +469,28 @@ public class Analyzer {
     Thread.sleep(sleepTime);
     parseAssembly(input);
     
-    // If zeroed resource is core limit, print event
-    if (resourceZeroed != null && coreSizeZeroStructs.contains(resourceZeroed)) {
-      bw.write("sd_corezero~!~" +
-               eventNumber      + "|" +
-               lineNumber       +
-               System.lineSeparator());
+    // Print additional outputs that need to come at the end for events to stay in the right order
+    if (additionalOutputs.contains("*C*")) {
+      additionalOutputs = additionalOutputs.replaceAll("\\*C\\*", "");
+      if (coreSizeZeroStructs.contains(additionalOutputs))
+        bw.write("sd_corezero~!~" +
+                 eventNumber      + "|" +
+                 lineNumber       +
+                 System.lineSeparator());
     }
+    else bw.write(additionalOutputs);
 
   } // analyzeLine()
 
 
-  // Returns resource that has been zeroed out (if any)
+  // Returns additional analysis outputs (core zero, memory locks/unlocks)
   private static String parseSourceLine(BufferedReader input)
               throws IOException, InterruptedException
   {
 //    pendingFunctions.clear();
+
+    String additionalOutputs = "";
+
     String[] inputLines = getLldbInput(input);
     int index = 0;
 
@@ -525,7 +531,7 @@ public class Analyzer {
     if (!sensitiveData.isEmpty()) {
       // Look for mlock/munlock calls
       //String regex = "(\\{|\\}|;|\\s+)mlock\\s*\\(";
-      String regex = "(\\bmlock\\b\\s*\\()|(\\bmunlock\\b\\s*\\()";
+      String regex = "(\\bmlock\\b\\s*\\(\\s*)|(\\bmunlock\\b\\s*\\(\\s*)";
       Pattern pattern = Pattern.compile(regex);
       Matcher matcher = pattern.matcher(sourceLine);
       if (matcher.find()) {
@@ -533,11 +539,14 @@ public class Analyzer {
         String variable = "";
         int idx = matcher.end();
         char c = sourceLine.charAt(idx);
-        while (c != ' ' && c != '\n' && c != ',' && c != '\t') {
+        while (c != ' ' && c != '\n' && c != ',' && c != '\t' && c != '\r') {
           variable += c;
           ++idx;
           c = sourceLine.charAt(idx);
         }
+        
+        variable = variable.replaceAll("\\*", "");
+        variable = variable.replaceAll("&", "");
         
         // Check if it's a tracked variable
         if (sensitiveData.contains(function + "," + variable) ||
@@ -545,17 +554,17 @@ public class Analyzer {
         {
           String eventType = "sd_lock~!~";
           if (sourceLine.contains("munlock")) eventType = "sd_unlock~!~";
-          bw.write(eventType     +
-                   eventNumber   + "|" +
-                   lineNumber    + "|" +
-                   function      + "|" +
-                   variable      +
-                   System.lineSeparator());
+          additionalOutputs += eventType     +
+                               eventNumber   + "|" +
+                               lineNumber    + "|" +
+                               function      + "|" +
+                               variable      +
+                               System.lineSeparator();
         }
       }
       
       // Look for setrlimit calls for zeroing the core size
-      regex = "\\bsetrlimit\\b\\s*\\(";
+      regex = "\\bsetrlimit\\b\\s*\\(\\s*";
       pattern = Pattern.compile(regex);
       matcher = pattern.matcher(sourceLine);
       if (matcher.find()) {
@@ -578,12 +587,12 @@ public class Analyzer {
             ++idx;
             c = sourceLine.charAt(idx);
           }
-          return variable;
+          additionalOutputs +=  "*C*" + variable;
         }
       }
     }
     
-    return null;
+    return additionalOutputs;
     
     // Compile list of external function calls
     // We aren't doing anything with this right now, but we might in the future.

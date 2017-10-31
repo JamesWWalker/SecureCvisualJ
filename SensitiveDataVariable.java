@@ -10,7 +10,7 @@ public class SensitiveDataVariable {
   public boolean valueSet;
   public boolean valueCleared;
   public boolean isSecure;
-  public boolean[] stepsApplied = new boolean[UIUtils.SD_EV_MEMORYUNLOCKED];
+  public boolean[] stepsApplied = new boolean[UIUtils.SD_EV_MEMORYUNLOCKED+1];
   
   public SensitiveDataVariable() { }
   
@@ -19,8 +19,8 @@ public class SensitiveDataVariable {
     name = nameIn;
     memoryLocked = valueSet = valueCleared = false;
     isSecure = true;
-    message = "Declared variable";
-    shortMessage = "Declared";
+//    message = "Declared variable";
+//    shortMessage = "Declared";
     for (int n = 0; n <= UIUtils.SD_EV_MEMORYUNLOCKED; ++n) stepsApplied[n] = false;
   }
   

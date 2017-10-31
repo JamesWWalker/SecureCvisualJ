@@ -422,30 +422,84 @@ public class ProcessRun {
   
   
   private void parseSdLock(String[] parameters) throws Exception {
-//    SensitiveDataVariable var = runningSdState.getVariable(parameters[2], parameters[3]);
-//    if (var == null) 
+    String key = parameters[2] + "," + parameters[3];
+    SensitiveDataVariable var = runningSdState.variables.get(key);
+    if (var == null) var = new SensitiveDataVariable(parameters[2], parameters[3]);
+    else var = var.newInstance();
+    var.memoryLocked = true;
+    var.stepsApplied[UIUtils.SD_EV_MEMORYLOCKED] = true;
+    var.message = "Locked memory";
+    var.shortMessage = "Locked";
+    runningSdState.variables.put(key, var);
+    sdStates.put(Integer.parseInt(parameters[0]), runningSdState);
   }
   
   
   private void parseSdUnlock(String[] parameters) throws Exception {
+    String key = parameters[2] + "," + parameters[3];
+    SensitiveDataVariable var = runningSdState.variables.get(key);
+    if (var == null) var = new SensitiveDataVariable(parameters[2], parameters[3]);
+    else var = var.newInstance();
+    var.stepsApplied[UIUtils.SD_EV_MEMORYUNLOCKED] = true;
+    if (!var.memoryLocked) {
+      var.isSecure = false;
+      var.message = "Unlocked memory of variable that wasn't locked";
+      var.shortMessage = "Unlock w/o lock";
+    }
+    else if (!var.valueCleared) {
+      var.isSecure = false;
+      var.message = "Unlocked memory of variable before clearing its value";
+      var.shortMessage = "Unlock w/o clear";
+    }
+    else {
+      var.message = "Unlocked memory";
+      var.shortMessage = "Unlocked";
+    }
+    var.memoryLocked = false;
+    runningSdState.variables.put(key, var);
+    sdStates.put(Integer.parseInt(parameters[0]), runningSdState);
   }
   
   
   private void parseSdClear(String[] parameters) throws Exception {
+    String key = parameters[2] + "," + parameters[3];
+    SensitiveDataVariable var = runningSdState.variables.get(key);
+    if (var == null) var = new SensitiveDataVariable(parameters[2], parameters[3]);
+    else var = var.newInstance();
+    var.memoryLocked = true;
+    var.stepsApplied[UIUtils.SD_EV_VALUECLEARED] = true;
+    var.message = "Cleared value";
+    var.shortMessage = "Cleared";
+    runningSdState.variables.put(key, var);
+    sdStates.put(Integer.parseInt(parameters[0]), runningSdState);
   }
   
   
   private void parseSdSet(String[] parameters) throws Exception {
+    String key = parameters[2] + "," + parameters[3];
+    SensitiveDataVariable var = runningSdState.variables.get(key);
+    if (var == null) var = new SensitiveDataVariable(parameters[2], parameters[3]);
+    else var = var.newInstance();
+    var.stepsApplied[UIUtils.SD_EV_VALUESET] = true;
+    var.valueCleared = false;
+    if (!runningSdState.coreSizeZeroed) {
+      var.isSecure = false;
+      var.message = "Set value without zeroing core dump";
+      var.shortMessage = "Set w/o zero core";
+    }
+    else if (!var.memoryLocked) {
+      var.isSecure = false;
+      var.message = "Set value without locking memory";
+      var.shortMessage = "Set w/o lock";
+    }
+    else {
+      var.message = "Set value";
+      var.shortMessage = "Set";
+    }
+    var.valueSet = true;
+    runningSdState.variables.put(key, var);
+    sdStates.put(Integer.parseInt(parameters[0]), runningSdState);
   }
-  
-  
-  /*
-  parseCoreZero(parameters);
-        else if (type.equals("sd_lock")) parseSdLock(parameters);
-        else if (type.equals("sd_unlock")) parseSdUnlock(parameters);
-        else if (type.equals("sd_clear")) parseSdClear(parameters);
-        else if (type.equals("sd_set")) parseSdSet(parameters);
-  */
   
 
 }
