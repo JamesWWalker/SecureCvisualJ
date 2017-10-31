@@ -22,11 +22,13 @@ public class ProcessRun {
   private HashMap<Integer, String> outputs;
   private ProcessState current;
   private boolean isNull;
-  private ArrayList<ProcessState> runSequence;
-  private ArrayList<ProgramSection> sections;
-  private HashMap<Integer, ProcessState> seedStates;
-  private HashMap<Integer, SensitiveDataState> sdStates;
+  private List<ProcessState> runSequence;
+  private List<ProgramSection> sections;
+  private Map<Integer, ProcessState> seedStates;
+  private TreeMap<Double, SensitiveDataState> sdStates;
   private SensitiveDataState runningSdState;
+  
+  private double fractionalEvent = 0;
   
   
   public ProcessRun() {
@@ -99,13 +101,32 @@ public class ProcessRun {
   
   
   public SensitiveDataState getSensitiveDataState() {
-    Set<Integer> keys = sdStates.keySet();
-    List<Integer> list = new ArrayList<>(keys);
-    Collections.sort(list);
+    Set<Double> keys = sdStates.keySet();
+    List<Double> list = new ArrayList<>(keys);
+//    Collections.sort(list); // should be unnecessary since I switched to a TreeMap
     for (int n = list.size()-1; n >=0; --n) {
-      if (n <= index.get()) return sdStates.get(n);
+      if (n < index.get() + 1) return sdStates.get(n);
     }
     return null;
+  }
+  
+  
+  // all states up to the current event, that is.
+  public TreeMap<Double, SensitiveDataState> getAllSensitiveDataStates() {
+    TreeMap<Double, SensitiveDataState> ret = new TreeMap<>();
+    for (Double key : sdStates.keySet()) {
+      if (key < index.get() + 1) ret.put(key, sdStates.get(key));
+    }
+    return ret;
+  }
+  
+  
+  public SensitiveDataState getLastSensitiveDataState() {
+    if (sdStates.size() > 0) {
+      List<Double> keys = new ArrayList<>(sdStates.keySet());
+      return sdStates.get(keys.get(keys.size()-1));
+    }
+    else return null;
   }
 
 
@@ -187,7 +208,7 @@ public class ProcessRun {
     assembly = new HashMap<>();
     outputs = new HashMap<>();
     sections = new ArrayList<>();
-    sdStates = new HashMap<>();
+    sdStates = new TreeMap<>();
     runningSdState = new SensitiveDataState();
 
     int previousEvent = 0;
@@ -213,7 +234,10 @@ public class ProcessRun {
             !type.equals("return_address") &&
             !type.equals("invocation") &&
             !type.equals("output"))
+        {
           currentEvent = Integer.parseInt(parameters[0]);
+          if (fractionalEvent > 0.99) fractionalEvent = 0;
+        }
 
         if (currentEvent != previousEvent) {
           previousEvent = currentEvent;
@@ -414,14 +438,17 @@ public class ProcessRun {
   
   
   private void parseCoreZero(String[] parameters) throws Exception {
+    fractionalEvent += 0.001;
     runningSdState = runningSdState.newInstance();
     runningSdState.coreSizeZeroed = true;
     runningSdState.coreSizeZeroedHere = true;
-    sdStates.put(Integer.parseInt(parameters[0]), runningSdState);
+    sdStates.put(Integer.parseInt(parameters[0]) + fractionalEvent, runningSdState);
   }
   
   
   private void parseSdLock(String[] parameters) throws Exception {
+    fractionalEvent += 0.001;
+    runningSdState = runningSdState.newInstance();
     String key = parameters[2] + "," + parameters[3];
     SensitiveDataVariable var = runningSdState.variables.get(key);
     if (var == null) var = new SensitiveDataVariable(parameters[2], parameters[3]);
@@ -431,11 +458,13 @@ public class ProcessRun {
     var.message = "Locked memory";
     var.shortMessage = "Locked";
     runningSdState.variables.put(key, var);
-    sdStates.put(Integer.parseInt(parameters[0]), runningSdState);
+    sdStates.put(Integer.parseInt(parameters[0]) + fractionalEvent, runningSdState);
   }
   
   
   private void parseSdUnlock(String[] parameters) throws Exception {
+    fractionalEvent += 0.001;
+    runningSdState = runningSdState.newInstance();
     String key = parameters[2] + "," + parameters[3];
     SensitiveDataVariable var = runningSdState.variables.get(key);
     if (var == null) var = new SensitiveDataVariable(parameters[2], parameters[3]);
@@ -457,25 +486,29 @@ public class ProcessRun {
     }
     var.memoryLocked = false;
     runningSdState.variables.put(key, var);
-    sdStates.put(Integer.parseInt(parameters[0]), runningSdState);
+    sdStates.put(Integer.parseInt(parameters[0]) + fractionalEvent, runningSdState);
   }
   
   
   private void parseSdClear(String[] parameters) throws Exception {
+    fractionalEvent += 0.001;
+    runningSdState = runningSdState.newInstance();
     String key = parameters[2] + "," + parameters[3];
     SensitiveDataVariable var = runningSdState.variables.get(key);
     if (var == null) var = new SensitiveDataVariable(parameters[2], parameters[3]);
     else var = var.newInstance();
-    var.memoryLocked = true;
+    var.valueCleared = true;
     var.stepsApplied[UIUtils.SD_EV_VALUECLEARED] = true;
     var.message = "Cleared value";
     var.shortMessage = "Cleared";
     runningSdState.variables.put(key, var);
-    sdStates.put(Integer.parseInt(parameters[0]), runningSdState);
+    sdStates.put(Integer.parseInt(parameters[0]) + fractionalEvent, runningSdState);
   }
   
   
   private void parseSdSet(String[] parameters) throws Exception {
+    fractionalEvent += 0.001;
+    runningSdState = runningSdState.newInstance();
     String key = parameters[2] + "," + parameters[3];
     SensitiveDataVariable var = runningSdState.variables.get(key);
     if (var == null) var = new SensitiveDataVariable(parameters[2], parameters[3]);
@@ -498,7 +531,7 @@ public class ProcessRun {
     }
     var.valueSet = true;
     runningSdState.variables.put(key, var);
-    sdStates.put(Integer.parseInt(parameters[0]), runningSdState);
+    sdStates.put(Integer.parseInt(parameters[0]) + fractionalEvent, runningSdState);
   }
   
 

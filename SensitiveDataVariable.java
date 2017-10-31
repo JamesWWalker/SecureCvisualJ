@@ -28,8 +28,8 @@ public class SensitiveDataVariable {
     SensitiveDataVariable var = new SensitiveDataVariable();
     var.scope = scope;
     var.name = name;
-    var.shortMessage = shortMessage;
-    var.message = message;
+    var.shortMessage = "";
+    var.message = "";
     var.memoryLocked = memoryLocked;
     var.valueSet = valueSet;
     var.valueCleared = valueCleared;

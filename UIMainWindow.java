@@ -376,7 +376,10 @@ public class UIMainWindow {
                   UISourceCode.buildSC(scene, sourceLine, assembly));
                   
     // Update SD
-    scrollPaneSD = UISensitiveData.buildSD(this, scene);
+    scrollPaneSD = UISensitiveData.buildSD(this, 
+                                           scene, 
+                                           coordinator.runFilter.getAllSensitiveDataStates(coordinator.getRun()),
+                                           coordinator.runFilter.getLastSensitiveDataState(coordinator.getRun()));
     setTabContent(SubProgram.toString(SubProgram.SD), scrollPaneSD);
                   
     // TODO: other tabs

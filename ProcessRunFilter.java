@@ -142,6 +142,19 @@ public class ProcessRunFilter {
   }
   
   
+  public List<SensitiveDataState> getAllSensitiveDataStates(ProcessRun run) {
+    TreeMap<Double, SensitiveDataState> sdStates = run.getAllSensitiveDataStates();
+    List<SensitiveDataState> ret = new ArrayList<>();
+    for (Double key : sdStates.keySet()) ret.add(sdStates.get(key));
+    return ret;
+  }
+  
+  
+  public SensitiveDataState getLastSensitiveDataState(ProcessRun run) {
+    return run.getLastSensitiveDataState();
+  }
+  
+  
   public List<ActivationRecord> getStack(ProcessRun run) {
     List<ActivationRecord> stack = run.getStack();
     if (!showAllFunctions.get()) {
