@@ -21,6 +21,7 @@ public class UIMainWindow {
   
   public CoordinatorMaster coordinator;
   public List<UIDetachedTab> detachedTabs = new ArrayList<>();
+  public SensitiveDataVariable sdVariableToView = null;
   public Stage window;
   
   private Map<String, Node> contentPool;
@@ -379,7 +380,8 @@ public class UIMainWindow {
     scrollPaneSD = UISensitiveData.buildSD(this, 
                                            scene, 
                                            coordinator.runFilter.getAllSensitiveDataStates(coordinator.getRun()),
-                                           coordinator.runFilter.getLastSensitiveDataState(coordinator.getRun()));
+                                           coordinator.runFilter.getLastSensitiveDataState(coordinator.getRun()),
+                                           sdVariableToView);
     setTabContent(SubProgram.toString(SubProgram.SD), scrollPaneSD);
                   
     // TODO: other tabs

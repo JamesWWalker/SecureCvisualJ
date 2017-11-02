@@ -208,6 +208,20 @@ class Variable {
     return output;
 
   } // print()
+  
+  
+  public Variable elementEndsWith(String searchFor) {
+    if (elements != null) {
+      for (Variable v : elements) {
+        if (v.name.endsWith(searchFor)) return v;
+        else {
+          Variable element = v.elementEndsWith(searchFor);
+          if (element != null) return v;
+        }
+      }
+    }
+    return null;
+  }
 
 
   public ArrayList<Variable> changedValues(Variable compare) {
@@ -832,38 +846,21 @@ public class Analyzer {
           ArrayList<Variable> changedList = variable.changedValues(variables.get(key));
           for (Variable v : changedList) {
             bw.write(v.print(eventNumber, lineNumber, scope)); // output variable data
-            
-            // Sensitive data outputs
-            if (sensitiveData.contains(scope + "," + v.name) ||
-                sensitiveData.contains(GLOBAL + "," + v.name)) 
-            {
-              if (v.value.equals("0") || v.value.equals("\"\""))
-                bw.write("sd_clear~!~" +
-                         eventNumber   + "|" +
-                         lineNumber    + "|" +
-                         scope         + "|" +
-                         v.name        +
-                         System.lineSeparator());
-              else
-                bw.write("sd_set~!~"   +
-                         eventNumber   + "|" +
-                         lineNumber    + "|" +
-                         scope         + "|" +
-                         v.name        +
-                         System.lineSeparator());
-            }
-            
-            // Check for structs that zero out core size
-            if (v.name.endsWith("rlim_max")) {
-              if (v.value.equals("0")) coreSizeZeroStructs.add(v.name.split(":")[0]);
-              else coreSizeZeroStructs.remove(v.name.split(":")[0]);
-            }
+            if (v.value == null || v.value.equals("0") || v.value.equals("\"\""))
+              bw.write("sd_clear~!~" +
+                       eventNumber   + "|" +
+                       lineNumber    + "|" +
+                       scope         + "|" +
+                       v.name        +
+                       System.lineSeparator());
+            sensitiveDataParsing(v, scope);
           }
           if (!changedList.isEmpty()) variables.put(key, variable);
         }
         else {
           variables.put(key, variable);
           bw.write(variable.print(eventNumber, lineNumber, scope));
+          sensitiveDataParsing(variable, scope);
         }
 
       }
@@ -874,6 +871,45 @@ public class Analyzer {
       System.exit(1);
     }
   } // parseVariable()
+  
+  
+  private static void sensitiveDataParsing(Variable v, String scope) throws IOException {
+    // Sensitive data outputs
+    if (sensitiveData.contains(scope + "," + v.name) ||
+                sensitiveData.contains(GLOBAL + "," + v.name)) 
+    {
+      if (v.value == null || v.value.equals("0") || v.value.equals("\"\""))
+//        bw.write("sd_clear~!~" +
+//                 eventNumber   + "|" +
+//                 lineNumber    + "|" +
+//                 scope         + "|" +
+//                 v.name        +
+//                 System.lineSeparator());
+          ;
+      else
+        bw.write("sd_set~!~"   +
+                 eventNumber   + "|" +
+                 lineNumber    + "|" +
+                 scope         + "|" +
+                 v.name        +
+                 System.lineSeparator());
+    }
+
+    // Check for structs that zero out core size
+    if (v.name != null) {
+      if (v.name.endsWith("rlim_max")) {
+        if (v.value.equals("0")) coreSizeZeroStructs.add(v.name.split(":")[0]);
+        else coreSizeZeroStructs.remove(v.name.split(":")[0]);
+      }
+      else {
+        Variable element = v.elementEndsWith("rlim_max");
+        if (element != null) {
+          if (element.value.equals("0")) coreSizeZeroStructs.add(element.name.split(":")[0]);
+          else coreSizeZeroStructs.remove(element.name.split(":")[0]);
+        }
+      }
+    }
+  }
 
 
   private static void parseRegisters(BufferedReader input)
