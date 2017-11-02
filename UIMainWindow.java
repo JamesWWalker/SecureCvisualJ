@@ -26,7 +26,7 @@ public class UIMainWindow {
   
   private Map<String, Node> contentPool;
   private FileChooser fileChooser;
-  private DoubleProperty fontSize = new SimpleDoubleProperty(10);
+  private double fontSize = 1.0;
   private BorderPane layout;
   private Scene scene;
   private TabPane tabPane;
@@ -184,20 +184,16 @@ public class UIMainWindow {
 
     MenuItem menuIncreaseFontSize = new MenuItem("Increase Font Size");
     menuIncreaseFontSize.setOnAction(e -> {
-      if (UIUtils.fontSize < 5.0) UIUtils.fontSize += 0.1;
-      UIUtils.calculateFontSize(tabPane, scene.getWidth(), scene.getHeight());
-      for (UIDetachedTab dt : detachedTabs) 
-        UIUtils.calculateFontSize(dt.layout, dt.scene.getWidth(), dt.scene.getHeight());
+      if (fontSize < 5.0) fontSize += 0.1;
+      tabPane.setStyle("-fx-font-size: " + UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight()));
     });
     menuIncreaseFontSize.setAccelerator(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.CONTROL_DOWN));
     viewMenu.getItems().add(menuIncreaseFontSize);
     
     MenuItem menuDecreaseFontSize = new MenuItem("Decrease Font Size");
     menuDecreaseFontSize.setOnAction(e -> {
-      if (UIUtils.fontSize > 0.1) UIUtils.fontSize -= 0.1;
-      UIUtils.calculateFontSize(tabPane, scene.getWidth(), scene.getHeight());
-      for (UIDetachedTab dt : detachedTabs) 
-        UIUtils.calculateFontSize(dt.layout, dt.scene.getWidth(), dt.scene.getHeight());
+      if (fontSize > 0.1) fontSize -= 0.1;
+      tabPane.setStyle("-fx-font-size: " + UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight()));
     });
     menuDecreaseFontSize.setAccelerator(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN));
     viewMenu.getItems().add(menuDecreaseFontSize);
@@ -267,12 +263,12 @@ public class UIMainWindow {
     // scene size change listeners
     scene.widthProperty().addListener(new ChangeListener<Number>() {
       @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
-        UIUtils.calculateFontSize(tabPane, scene.getWidth(), scene.getHeight());
+        tabPane.setStyle("-fx-font-size: " + UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight()));
       }
     });
     scene.heightProperty().addListener(new ChangeListener<Number>() {
       @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
-        UIUtils.calculateFontSize(tabPane, scene.getWidth(), scene.getHeight());
+        tabPane.setStyle("-fx-font-size: " + UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight()));
       }
     });
     
@@ -395,7 +391,8 @@ public class UIMainWindow {
     config += "MainWindowY:" + Double.toString(window.getY()) + System.lineSeparator();
     config += "MainWindowWidth:" + Double.toString(window.getWidth()) + System.lineSeparator();
     config += "MainWindowHeight:" + Double.toString(window.getHeight()) + System.lineSeparator();
-    config += "FontSize:" + Double.toString(UIUtils.fontSize) + System.lineSeparator();
+    config += "FontSize:" + Double.toString(fontSize) + System.lineSeparator();
+    config += "VarRepFontSize:" + Double.toString(UIVariableRepresentation.fontSize) + System.lineSeparator();
     for (UIDetachedTab tab : detachedTabs) config += "DetachedTab:" + tab.title + System.lineSeparator();
     for (UIDetachedTab tab : detachedTabs) config += tab.saveConfig();
     
@@ -412,7 +409,9 @@ public class UIMainWindow {
         else if (parameters[0].equals("MainWindowWidth")) window.setWidth(Double.parseDouble(parameters[1]));
         else if (parameters[0].equals("MainWindowHeight")) window.setHeight(Double.parseDouble(parameters[1]));
         else if (parameters[0].equals("DetachedTab")) detachTab(parameters[1]);
-        else if (parameters[0].equals("FontSize")) UIUtils.fontSize = Double.parseDouble(parameters[1]);
+        else if (parameters[0].equals("FontSize")) fontSize = Double.parseDouble(parameters[1]);
+        else if (parameters[0].equals("VarRepFontSize")) UIVariableRepresentation.fontSize =
+          Double.parseDouble(parameters[1]);
       }
     }
     for (UIDetachedTab tab : detachedTabs) tab.loadConfig(config);

@@ -6,6 +6,7 @@ import javafx.beans.value.*;
 import javafx.geometry.*;
 import javafx.scene.*;
 import javafx.scene.control.*;
+import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.*;
 import javafx.stage.*;
@@ -13,19 +14,18 @@ import javafx.stage.*;
 public class UIDetachedTab {
 
   public String id;
-  public StackPane layout;
+  public BorderPane layout;
   public Scene scene = null;
   public String title;
   public Stage window;
   
   private CoordinatorMaster coordinator;
-  private DoubleProperty fontSize = new SimpleDoubleProperty(10);
+  private double fontSize = 1.0;
   private UIMainWindow mainWindow;
   
   
   public void setContent(Node content) {
-    layout.getChildren().clear();
-    layout.getChildren().add(content);
+    layout.setCenter(content);
   }
   
 
@@ -42,8 +42,32 @@ public class UIDetachedTab {
     title = titleIn;
     window.setTitle(title);
     
-    layout = new StackPane();
-    layout.getChildren().add(content);
+    // View menu
+    Menu viewMenu = new Menu("View");
+    
+    MenuItem menuIncreaseFontSize = new MenuItem("Increase Font Size");
+    menuIncreaseFontSize.setOnAction(e -> {
+      if (fontSize < 5.0) fontSize += 0.1;
+      layout.setStyle("-fx-font-size: " + UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight()));
+    });
+    menuIncreaseFontSize.setAccelerator(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.CONTROL_DOWN));
+    viewMenu.getItems().add(menuIncreaseFontSize);
+    
+    MenuItem menuDecreaseFontSize = new MenuItem("Decrease Font Size");
+    menuDecreaseFontSize.setOnAction(e -> {
+      if (fontSize > 0.1) fontSize -= 0.1;
+      layout.setStyle("-fx-font-size: " + UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight()));
+    });
+    menuDecreaseFontSize.setAccelerator(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN));
+    viewMenu.getItems().add(menuDecreaseFontSize);
+    
+    //Main menu bar
+    MenuBar menuBar = new MenuBar();
+    menuBar.getMenus().addAll(viewMenu);
+    
+    layout = new BorderPane();
+    layout.setCenter(content);
+    layout.setTop(menuBar);
   }
   
   
@@ -61,12 +85,12 @@ public class UIDetachedTab {
     // scene size change listeners
     scene.widthProperty().addListener(new ChangeListener<Number>() {
       @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
-        UIUtils.calculateFontSize(layout, scene.getWidth(), scene.getHeight());
+        layout.setStyle("-fx-font-size: " + UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight()));
       }
     });
     scene.heightProperty().addListener(new ChangeListener<Number>() {
       @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
-        UIUtils.calculateFontSize(layout, scene.getWidth(), scene.getHeight());
+        layout.setStyle("-fx-font-size: " + UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight()));
       }
     });
     
@@ -81,6 +105,7 @@ public class UIDetachedTab {
     config += title + "Y:" + Double.toString(window.getY()) + System.lineSeparator();
     config += title + "Width:" + Double.toString(window.getWidth()) + System.lineSeparator();
     config += title + "Height:" + Double.toString(window.getHeight()) + System.lineSeparator();
+    config += title + "FontSize:" + Double.toString(fontSize) + System.lineSeparator();
     
     return config;
   }
@@ -94,6 +119,7 @@ public class UIDetachedTab {
         else if (parameters[0].equals(title + "Y")) window.setY(Double.parseDouble(parameters[1]));
         else if (parameters[0].equals(title + "Width")) window.setWidth(Double.parseDouble(parameters[1]));
         else if (parameters[0].equals(title + "Height")) window.setHeight(Double.parseDouble(parameters[1]));
+        else if (parameters[0].equals(title + "FontSize")) fontSize = Double.parseDouble(parameters[1]);
       }
     }
   }

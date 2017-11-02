@@ -5,12 +5,13 @@ import javafx.beans.value.*;
 import javafx.geometry.*;
 import javafx.scene.*;
 import javafx.scene.control.*;
+import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.stage.*;
 
 public class UIVariableRepresentation {
 
-  private static DoubleProperty fontSize = new SimpleDoubleProperty(16);
+  public static double fontSize = 1.0;
   private static VariableRepresentation representation;
   public static Scene scene = null;
   private static boolean updateInProgress;
@@ -40,7 +41,9 @@ public class UIVariableRepresentation {
   
     VariableType type = VariableType.convertFromAnalysis(typeIn);
     representation = new VariableRepresentation(type, value, true);
-                                                        
+    
+    BorderPane container = new BorderPane();
+
     GridPane grid = new GridPane();
     grid.setHgap(15);
     grid.setVgap(15);
@@ -134,17 +137,43 @@ public class UIVariableRepresentation {
       cboTopEndianness.getValue().equals(BIG_ENDIAN)));
     grid.add(txtBytesBottom, 0, 4, 3, 1);
     
-    scene = new Scene(grid, 600, 300);
+    // View menu
+    Menu viewMenu = new Menu("View");
+    
+    MenuItem menuIncreaseFontSize = new MenuItem("Increase Font Size");
+    menuIncreaseFontSize.setOnAction(e -> {
+      if (fontSize < 5.0) fontSize += 0.1;
+      grid.setStyle("-fx-font-size: " + UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight()));
+    });
+    menuIncreaseFontSize.setAccelerator(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.CONTROL_DOWN));
+    viewMenu.getItems().add(menuIncreaseFontSize);
+    
+    MenuItem menuDecreaseFontSize = new MenuItem("Decrease Font Size");
+    menuDecreaseFontSize.setOnAction(e -> {
+      if (fontSize > 0.1) fontSize -= 0.1;
+      grid.setStyle("-fx-font-size: " + UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight()));
+    });
+    menuDecreaseFontSize.setAccelerator(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN));
+    viewMenu.getItems().add(menuDecreaseFontSize);
+    
+    //Main menu bar
+    MenuBar menuBar = new MenuBar();
+    menuBar.getMenus().addAll(viewMenu);
+    
+    container.setTop(menuBar);
+    container.setCenter(grid);
+    
+    scene = new Scene(container, 600, 300);
     
     // scene size change listeners
     scene.widthProperty().addListener(new ChangeListener<Number>() {
       @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
-        UIUtils.calculateFontSize(grid, scene.getWidth(), scene.getHeight());
+        grid.setStyle("-fx-font-size: " + UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight()));
       }
     });
     scene.heightProperty().addListener(new ChangeListener<Number>() {
       @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
-        UIUtils.calculateFontSize(grid, scene.getWidth(), scene.getHeight());
+        grid.setStyle("-fx-font-size: " + UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight()));
       }
     });
     
