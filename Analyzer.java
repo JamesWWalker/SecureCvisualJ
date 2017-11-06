@@ -8,7 +8,7 @@ class Variable {
 
   public String name;
   private String type;
-  private String address;
+  public String address;
   private String pointsTo;
   public String value;
   private ArrayList<Variable> elements;
@@ -644,6 +644,11 @@ public class Analyzer {
         String[] values = line.split(":")[1].trim().split("\\s+");
         String dynamicLink = values[0];
         String returnAddress = values[1];
+        // Sometimes we need to correct for LLDB giving strange output
+        if (dynamicLink.length() >= 18) {
+          returnAddress = dynamicLink.substring(0, 10);
+          dynamicLink = "0x" + dynamicLink.substring(10, 18);
+        }
         bw.write("return_address~!~" +
                  function            + "|" +
                  dynamicLink         + "|" +
@@ -839,6 +844,9 @@ public class Analyzer {
         n = variable.parseVariable(inputLines, n, "");
 
         String scope = "";
+        // Turns out LLDB can't be trusted to tell us if a variable is global, unfortunately.
+        // We'll have to check the variable's address to confirm.
+        if (!variable.address.startsWith("0xf")) global = true;
         scope = global ? GLOBAL : function;
         String key = scope + "," + variable.name;
 
