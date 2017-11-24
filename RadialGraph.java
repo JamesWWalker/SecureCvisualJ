@@ -40,14 +40,14 @@ public class RadialGraph {
   public List<RGNode> nodes = new ArrayList<>();
   public List<Double> scaledXs = new ArrayList<>();
   public List<Double> scaledYs = new ArrayList<>();
-  public List<FunctionCall> callOrder;
+  public List<FunctionCall> callOrder = new ArrayList<>();
   public String currentNode;
   public int selectedNode;
   public double NODE_DIAMETER;
   
   private double SEPARATOR_LENGTH;
-  private List<Double> originalXs;
-  private List<Double> originalYs;
+  private List<Double> originalXs = new ArrayList<>();
+  private List<Double> originalYs = new ArrayList<>();
   private String firstFunctionName;
   
   
@@ -108,7 +108,7 @@ public class RadialGraph {
   * expanding concentric rings, with their angles calculated so that they are
   * about evenly spaced.
   */
-  public void buildGraph(Region region) {
+  public void buildGraph(Canvas canvas) {
     determineNodeDepths();
     
     // populate rings
@@ -180,7 +180,7 @@ public class RadialGraph {
     
     for (RGNode node : nodes) node.collapsed = false;
     allocatePositions();
-    recenter(0, 0, region); 
+    recenter(0, 0, canvas);
     allocateOriginals();
 
   }
@@ -245,12 +245,12 @@ public class RadialGraph {
   *               the graph on
   * \param y      Vertical pixel position in the program window to recenter
   *               the graph on
-  * \param region The program window, which we need to get its width and height
+  * \param canvas The draw area, which we need to get its width and height
   *               for the recentering calculation
   */
-  public void recenter(int x, int y, Region region) {
-    double offsetX = region.getWidth() / 2.0 - x;
-    double offsetY = region.getHeight() / 2.0 - y;
+  public void recenter(int x, int y, Canvas canvas) {
+    double offsetX = canvas.getWidth() / 2.0 - x;
+    double offsetY = canvas.getHeight() / 2.0 - y;
     for (int n = 0; n < nodes.size(); ++n) {
       scaledXs.set(n, scaledXs.get(n) + offsetX);
       scaledYs.set(n, scaledYs.get(n) + offsetY);
@@ -263,17 +263,17 @@ public class RadialGraph {
   * changing the positions of the graph nodes rather than tracking zoom
   * level separately.
   *
-  * \param region The program window, which we need to get its width and height
+  * \param canvas The drawing area, which we need to get its width and height
   *               for the zooming calculation
   */
-  public void zoomIn(Region region) {
+  public void zoomIn(Canvas canvas) {
     // Get every node's offset from the center of the window and
     // multiply it by 1.25 which effectively simulates zooming in
     for (int n = 0; n < nodes.size(); ++n) {
-      double xOffset = scaledXs.get(n) - region.getWidth() / 2.0;
-      double yOffset = scaledYs.get(n) - region.getHeight() / 2.0;
-      scaledXs.set(n, region.getWidth() / 2.0 + (xOffset * 1.25));
-      scaledYs.set(n, region.getHeight() / 2.0 + (yOffset * 1.25));
+      double xOffset = scaledXs.get(n) - canvas.getWidth() / 2.0;
+      double yOffset = scaledYs.get(n) - canvas.getHeight() / 2.0;
+      scaledXs.set(n, canvas.getWidth() / 2.0 + (xOffset * 1.25));
+      scaledYs.set(n, canvas.getHeight() / 2.0 + (yOffset * 1.25));
     }
 
   }
@@ -284,17 +284,17 @@ public class RadialGraph {
   * changing the positions of the graph nodes rather than tracking zoom
   * level separately.
   *
-  * \param region The program window, which we need to get its width and height
+  * \param canvas The drawing area, which we need to get its width and height
   *               for the zooming calculation
   */
-  public void zoomOut(Region region) {
+  public void zoomOut(Canvas canvas) {
     // Get every node's offset from the center of the window and
     // multiply it by 0.8 which effectively simulates zooming out
     for (int n = 0; n < nodes.size(); ++n) {
-      double xOffset = scaledXs.get(n) - region.getWidth() / 2.0;
-      double yOffset = scaledYs.get(n) - region.getHeight() / 2.0;
-      scaledXs.set(n, region.getWidth() / 2.0 + (xOffset * 0.8));
-      scaledYs.set(n, region.getHeight() / 2.0 + (yOffset * 0.8));
+      double xOffset = scaledXs.get(n) - canvas.getWidth() / 2.0;
+      double yOffset = scaledYs.get(n) - canvas.getHeight() / 2.0;
+      scaledXs.set(n, canvas.getWidth() / 2.0 + (xOffset * 0.8));
+      scaledYs.set(n, canvas.getHeight() / 2.0 + (yOffset * 0.8));
     }
   }
   
@@ -447,7 +447,7 @@ public class RadialGraph {
   // *I* = ignore
   // *R* = return
   // otherwise assume it's a function name
-  public void populateCallOrder(List<String> events, Region region) {
+  public void populateCallOrder(List<String> events, Canvas canvas) {
   
     boolean firstCall = true;
     LinkedList<Integer> functionIndices = new LinkedList<>();
@@ -509,7 +509,7 @@ public class RadialGraph {
     
     currentNode = nodes.get(nodes.size()-1).name;
     
-    buildGraph(region);
+    buildGraph(canvas);
     
   } // populateCallOrder()
   

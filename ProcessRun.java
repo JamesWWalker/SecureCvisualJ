@@ -2,6 +2,7 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.*;
 import javafx.beans.property.*;
+import javafx.scene.canvas.*;
 
 public class ProcessRun {
 
@@ -38,13 +39,13 @@ public class ProcessRun {
   }
 
 
-  public ProcessRun(String filename) {
-    loadRun(filename, 100);
+  public ProcessRun(String filename, Canvas canvas) {
+    loadRun(filename, 100, canvas);
   }
 
 
-  public ProcessRun(String filename, int seedDistance) {
-    loadRun(filename, seedDistance);
+  public ProcessRun(String filename, int seedDistance, Canvas canvas) {
+    loadRun(filename, seedDistance, canvas);
   }
 
 
@@ -188,7 +189,7 @@ public class ProcessRun {
   }
 
 
-  public void loadRun(String filename, int seedDistance) {
+  public void loadRun(String filename, int seedDistance, Canvas canvas) {
     List<String> contents = new ArrayList<>();
     try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filename))) {
       String line = null;
@@ -299,8 +300,9 @@ public class ProcessRun {
       setNumberOfEvents(runSequence.size() - 1);
       isNull = false;
       
-      if (runSequence.size() > 0) {
-        // Set up the call graph.
+      // Set up the call graph.
+      if (runSequence.size() > 0 && canvas != null) {
+        
         callGraph = new RadialGraph();
         callGraph.resetGraph();
         
@@ -313,22 +315,25 @@ public class ProcessRun {
         }
         callGraph.populateFunctions(functions);
         
-        // TODO: Call order/event list
+        // Call order/event list
         List<String> events = new ArrayList<>();
         List<ActivationRecord> previous = null;
         for (ProcessState state : runSequence) {
           if (previous != null && state.stack.equals(previous)) events.add("*I*"); // ignore
-          else if (state.stack.size() < previous.size()) {
-            for (int n = 0; n < previous.size() - state.stack.size(); ++n) events.add("*R*"); // return
-          }
-          else if (previous == null || state.stack.size() > previous.size()) {
+          else if (previous != null && state.stack.size() > previous.size()) {
             for (int n = state.stack.size() - (state.stack.size() - previous.size()); n < state.stack.size(); ++n)
               events.add(state.stack.get(n).function); // function call
+          }
+          else if (previous != null && state.stack.size() < previous.size()) {
+            for (int n = 0; n < previous.size() - state.stack.size(); ++n) events.add("*R*"); // return
+          }
+          else if (previous == null) {
+            for (ActivationRecord ar : state.stack) events.add(ar.function); // function call
           }
           else events.add("*I*"); // ignore
           previous = state.stack;
         }
-// TODO: REGION        callGraph.populateCallOrder(events, region);
+        callGraph.populateCallOrder(events, canvas);
       }
 
     } catch (Exception ex) {

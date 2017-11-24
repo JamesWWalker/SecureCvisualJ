@@ -6,6 +6,7 @@ import javafx.beans.property.*;
 import javafx.beans.value.*;
 import javafx.geometry.*;
 import javafx.scene.*;
+import javafx.scene.canvas.*;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
@@ -38,6 +39,7 @@ public class UIMainWindow {
   
   private ScrollPane scrollPanePAS;
   private ScrollPane scrollPaneSD;
+  private Canvas canvasCG;
   // TODO: other scrollpanes
   
   
@@ -71,7 +73,7 @@ public class UIMainWindow {
       File file = fileChooser.showOpenDialog(window);
       if (file != null) {
         String absolutePath = file.getAbsolutePath();
-        coordinator.getRun().loadRun(absolutePath, 100);
+        coordinator.getRun().loadRun(absolutePath, 100, canvasCG);
         // Load source file together with program run
         String possibleSourceFile = absolutePath.substring(0, absolutePath.length() - 13) + ".c";
         try {
@@ -271,6 +273,12 @@ public class UIMainWindow {
         tabPane.setStyle("-fx-font-size: " + UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight()));
       }
     });
+    
+    // Set up canvas for call graph
+    canvasCG = new Canvas(getTabWindow(SubProgram.toString(SubProgram.CG)).getWidth(),
+                          getTabWindow(SubProgram.toString(SubProgram.CG)).getHeight());
+    canvasCG.heightProperty().bind(getTabWindow(SubProgram.toString(SubProgram.CG)).heightProperty());
+    canvasCG.widthProperty().bind(getTabWindow(SubProgram.toString(SubProgram.CG)).widthProperty());
     
     borderPane.setCenter(tabPane);
     borderPane.setTop(menuBar);
