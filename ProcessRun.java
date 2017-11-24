@@ -27,6 +27,7 @@ public class ProcessRun {
   private Map<Integer, ProcessState> seedStates;
   private TreeMap<Double, SensitiveDataState> sdStates;
   private SensitiveDataState runningSdState;
+  private RadialGraph callGraph;
   
   private double fractionalEvent = 0;
   
@@ -297,6 +298,38 @@ public class ProcessRun {
       ProcessState.applyDelta(current, runSequence.get(index.get()));
       setNumberOfEvents(runSequence.size() - 1);
       isNull = false;
+      
+      if (runSequence.size() > 0) {
+        // Set up the call graph.
+        callGraph = new RadialGraph();
+        callGraph.resetGraph();
+        
+        // Function list
+        List<String> functions = new ArrayList<>();
+        for (ProcessState state : runSequence) {
+          for (ActivationRecord ar : state.stack) {
+            if (!functions.contains(ar.function)) functions.add(ar.function);
+          }
+        }
+        callGraph.populateFunctions(functions);
+        
+        // TODO: Call order/event list
+        List<String> events = new ArrayList<>();
+        List<ActivationRecord> previous = null;
+        for (ProcessState state : runSequence) {
+          if (previous != null && state.stack.equals(previous)) events.add("*I*"); // ignore
+          else if (state.stack.size() < previous.size()) {
+            for (int n = 0; n < previous.size() - state.stack.size(); ++n) events.add("*R*"); // return
+          }
+          else if (previous == null || state.stack.size() > previous.size()) {
+            for (int n = state.stack.size() - (state.stack.size() - previous.size()); n < state.stack.size(); ++n)
+              events.add(state.stack.get(n).function); // function call
+          }
+          else events.add("*I*"); // ignore
+          previous = state.stack;
+        }
+// TODO: REGION        callGraph.populateCallOrder(events, region);
+      }
 
     } catch (Exception ex) {
       System.err.println("ERROR: Analysis parsing failure on line: " + line);
