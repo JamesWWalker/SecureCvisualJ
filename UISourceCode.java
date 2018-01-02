@@ -47,6 +47,34 @@ public class UISourceCode {
     return layout;
   }
   
+  
+  public static Pane parseSourceCode(List<String> code) {
+    
+    assemblyDisplay = new TextFlow();
+    assemblyScrollPane = new ScrollPane();
+    layout = new VBox(10);
+    sourceCodeDisplay = new TextFlow();
+    sourceCodeLines = 0;
+    sourceCodeScrollPane = new ScrollPane();
+    previousSourceLine = -1;
+    
+    for (String line : code) {
+      Text sourceLine = new Text(Integer.toString(sourceCodeLines+1) + " " + line + "\n");
+      sourceLine.setFont(Font.font("Monospace", FontWeight.NORMAL, 14));
+      sourceLine.setUserData(new Integer(sourceCodeLines+1));
+      sourceCodeDisplay.getChildren().add(sourceLine);
+      ++sourceCodeLines;
+    }
+    
+    assemblyScrollPane.setMinHeight(70);
+    assemblyScrollPane.setContent(assemblyDisplay);
+    sourceCodeScrollPane.setContent(sourceCodeDisplay);
+    layout.getChildren().addAll(assemblyScrollPane, sourceCodeScrollPane);
+    
+    return layout;
+    
+  }
+  
 
   public static Pane buildSC(Scene scene, int sourceLine, String assembly) {
   

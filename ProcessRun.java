@@ -19,6 +19,7 @@ public class ProcessRun {
   public final ReadOnlyIntegerProperty indexProperty() { return index.getReadOnlyProperty(); }
   
   public String invocation = "";
+  public List<String> cSource;
   private HashMap<Integer, String> assembly;
   private HashMap<Integer, String> outputs;
   private ProcessState current;
@@ -207,6 +208,7 @@ public class ProcessRun {
     runSequence = new ArrayList<>();
     index.set(0);
     current = new ProcessState();
+    cSource = new ArrayList<>();
     assembly = new HashMap<>();
     outputs = new HashMap<>();
     sections = new ArrayList<>();
@@ -229,9 +231,15 @@ public class ProcessRun {
         line = contents.get(n);
         String[] typeAndParameters = line.split("~!~");
         String type = typeAndParameters[0];
-        String[] parameters = typeAndParameters[1].split("\\|");
+        String[] parameters;
+        if (typeAndParameters.length > 1) parameters = typeAndParameters[1].split("\\|");
+        else {
+          parameters = new String[1];
+          parameters[0] = "";
+        }
 
-        if (!type.equals("assembly") && 
+        if (!type.equals("ccode") &&
+            !type.equals("assembly") && 
             !type.equals("section") && 
             !type.equals("return_address") &&
             !type.equals("invocation") &&
@@ -253,6 +261,7 @@ public class ProcessRun {
         else if (type.equals("variable_access")) 
           parseVariableAccess(stateToAdd, runningStack, variableTypes, parameters);
         else if (type.equals("register")) stateToAdd.registers.put(parameters[2], parameters[3]);
+        else if (type.equals("ccode")) parseCCode(parameters);
         else if (type.equals("assembly")) parseAssembly(parameters);
         else if (type.equals("output")) outputs.put(Integer.parseInt(parameters[0]), parameters[1]);
         else if (type.equals("section")) parseSection(parameters);
@@ -438,6 +447,13 @@ public class ProcessRun {
   private String getVariableType(String nameIn, HashMap<String, String> variableTypes) throws Exception {
     String name = nameIn.split(":")[0];
     return variableTypes.containsKey(name) ? variableTypes.get(name).split("\\s+")[0] : "Unknown";
+  }
+  
+  
+  private void parseCCode(String[] parameters) throws Exception {
+    String line = "";
+    if (parameters.length > 0) line = parameters[0];
+    cSource.add(line);
   }
 
 

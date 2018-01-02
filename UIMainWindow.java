@@ -74,14 +74,17 @@ public class UIMainWindow {
       if (file != null) {
         String absolutePath = file.getAbsolutePath();
         coordinator.getRun().loadRun(absolutePath, 100, canvasCG);
-        // Load source file together with program run
-        String possibleSourceFile = absolutePath.substring(0, absolutePath.length() - 13) + ".c";
-        try {
-          Pane sourceCodeLayout = UISourceCode.loadSourceFile(possibleSourceFile);
-          setTabContent(SubProgram.toString(SubProgram.SC), sourceCodeLayout);
-        } catch (IOException ex) {
-          System.err.println("Could not find source file " + possibleSourceFile);
-        }
+        // Parse source
+        Pane sourceCodeLayout = UISourceCode.parseSourceCode(coordinator.getRun().cSource);
+        setTabContent(SubProgram.toString(SubProgram.SC), sourceCodeLayout);
+        // Load source file together with program run -- DISABLED, boss didn't like it
+//        String possibleSourceFile = absolutePath.substring(0, absolutePath.length() - 13) + ".c";
+//        try {
+//          Pane sourceCodeLayout = UISourceCode.loadSourceFile(possibleSourceFile);
+//          setTabContent(SubProgram.toString(SubProgram.SC), sourceCodeLayout);
+//        } catch (IOException ex) {
+//          System.err.println("Could not find source file " + possibleSourceFile);
+//        }
         coordinator.queryProcessRunAndUpdateUI();
       }
     });
