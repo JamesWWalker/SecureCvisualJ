@@ -397,6 +397,7 @@ public class ProcessRun {
   {
     String type = parameters[4];
     if (type.contains("[")) type = type.split("\\[")[0].trim();
+    if (type.contains("*")) type = "pointer";
     String name = parameters[5];
     String scope = parameters[2];
     if (type.equals("null")) type = getVariableType(name, variableTypes);

@@ -94,7 +94,8 @@ public class VariableDelta implements Comparable<VariableDelta> {
   
   
   private void determineSize() {
-    if (type.contains("long long")) size = "8";
+    if (type.contains("pointer")) size = "<address width>";
+    else if (type.contains("long long")) size = "8";
     else if (type.contains("long")) size = "4-8";
     else if (type.contains("int")) size = "4";
     else if (type.contains("short")) size = "2";
