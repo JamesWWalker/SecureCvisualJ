@@ -22,6 +22,7 @@ public class UIProgramAddressSpace {
                                     List<ProgramSection> sections)
   {
     final ScrollPane scrollPane = new ScrollPane();
+    VBox pasLayout = new VBox();
     
     final AnchorPane layout = new AnchorPane();
     layout.setPadding(new Insets(10, 10, 10, 10));
@@ -40,15 +41,20 @@ public class UIProgramAddressSpace {
       AnchorPane.setLeftAnchor(variableTable, 10.0);
       AnchorPane.setRightAnchor(variableTable, 10.0);
       AnchorPane.setBottomAnchor(variableTable, 10.0);
-      layout.getChildren().add(variableTable);
+      AnchorPane.setTopAnchor(pasLayout, 10.0);
+      AnchorPane.setLeftAnchor(pasLayout, 10.0);
+      AnchorPane.setRightAnchor(pasLayout, 10.0);
+      AnchorPane.setBottomAnchor(pasLayout, 10.0);
+      pasLayout.getChildren().add(variableTable);
+      addHeap(pasLayout, variables, stack);
+      layout.getChildren().add(pasLayout);
  
       scrollPane.setContent(layout);
       ((Group) scene.getRoot()).getChildren().add(scrollPane);
 
       return scrollPane;
     }
-    
-    VBox pasLayout = new VBox();
+    // END NOVICE MODE CONSTRUCTION
     
     // INVOCATION
     Label invocation = new Label("Invocation: " + 
@@ -193,6 +199,23 @@ public class UIProgramAddressSpace {
     }
     
     // HEAP
+    addHeap(pasLayout, variables, stack);
+    
+    AnchorPane.setLeftAnchor(pasLayout, 10.0);
+    AnchorPane.setRightAnchor(pasLayout, 10.0);
+    layout.getChildren().add(pasLayout);
+    
+    scrollPane.setContent(layout);
+     ((Group) scene.getRoot()).getChildren().add(scrollPane);
+
+    return scrollPane;
+  }
+  
+  
+  private static void addHeap(VBox pasLayout,
+                              TreeMap<String, VariableDelta> variables,
+                              List<ActivationRecord> stack) 
+  {
     Label heapHeader = new Label("Heap");
     heapHeader.setStyle("-fx-border-color: black;");
     heapHeader.setStyle("-fx-background-color: black;");
@@ -241,15 +264,6 @@ public class UIProgramAddressSpace {
     heapTable.setHgap(10);
     
     pasLayout.getChildren().add(heapTable);
-    
-    AnchorPane.setLeftAnchor(pasLayout, 10.0);
-    AnchorPane.setRightAnchor(pasLayout, 10.0);
-    layout.getChildren().add(pasLayout);
-    
-    scrollPane.setContent(layout);
-     ((Group) scene.getRoot()).getChildren().add(scrollPane);
-
-    return scrollPane;
   }
 
 }
