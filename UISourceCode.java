@@ -100,4 +100,11 @@ public class UISourceCode {
     return layout;
   }
   
+  
+  public static void toggleAssemblyWindow(boolean visible) {
+    assemblyScrollPane.setVisible(visible);
+    if (!visible) assemblyScrollPane.setMinHeight(0);
+    else assemblyScrollPane.setMinHeight(70);
+  }
+  
 }

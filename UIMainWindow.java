@@ -298,6 +298,7 @@ public class UIMainWindow {
     menuExpert.setSelected(false);
     coordinator.runFilter.setDetailLevel(DetailLevel.CUSTOM);
     coordinator.queryProcessRunAndUpdateUI();
+    UISourceCode.toggleAssemblyWindow(coordinator.runFilter.getShowAssembly());
   }
   
   
