@@ -846,7 +846,7 @@ public class Analyzer {
         String scope = "";
         // Turns out LLDB can't be trusted to tell us if a variable is global, unfortunately.
         // We'll have to check the variable's address to confirm.
-        if (!variable.address.startsWith("0xf")) global = true;
+        if (variable.address.charAt(9) != 'f') global = true;
         scope = global ? GLOBAL : function;
         String key = scope + "," + variable.name;
 
