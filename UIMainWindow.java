@@ -139,18 +139,38 @@ public class UIMainWindow {
     
     // View elements
     Menu viewElementsMenu = new Menu("View Elements");
+    
+    CheckMenuItem menuSimplifiedPas = new CheckMenuItem("Simplified PAS");
+    menuSimplifiedPas.selectedProperty().bindBidirectional(coordinator.runFilter.simplifiedPasProperty());
+    menuSimplifiedPas.setOnAction(e -> setCustomDetailLevel());
+    
     CheckMenuItem menuShowHiddenFunctions = new CheckMenuItem("Hidden Functions");
     menuShowHiddenFunctions.selectedProperty().bindBidirectional(coordinator.runFilter.showAllFunctionsProperty());
-    menuShowHiddenFunctions.setOnAction(e -> setCustomDetailLevel());
+    menuShowHiddenFunctions.setOnAction(
+      e -> {
+        if (coordinator.runFilter.getShowAllFunctions()) coordinator.runFilter.setSimplifiedPas(false);
+        setCustomDetailLevel();
+      }
+    );
     
     CheckMenuItem menuShowRegisters = new CheckMenuItem("CPU Registers");
     menuShowRegisters.selectedProperty().bindBidirectional(coordinator.runFilter.showRegistersProperty());
-    menuShowRegisters.setOnAction(e -> setCustomDetailLevel());
+    menuShowRegisters.setOnAction(
+      e -> {
+        if (coordinator.runFilter.getShowRegisters()) coordinator.runFilter.setSimplifiedPas(false);
+        setCustomDetailLevel();
+      }
+    );
     
     CheckMenuItem menuShowProgramSections = new CheckMenuItem("All Program Sections");
     menuShowProgramSections.selectedProperty().bindBidirectional
       (coordinator.runFilter.showAllSectionsByDefaultProperty());
-    menuShowProgramSections.setOnAction(e -> setCustomDetailLevel());
+    menuShowProgramSections.setOnAction(
+      e -> {
+        if (coordinator.runFilter.getShowAllSectionsByDefault()) coordinator.runFilter.setSimplifiedPas(false);
+        setCustomDetailLevel();
+      }
+    );
     
     CheckMenuItem menuShowAssemblyCode = new CheckMenuItem("Assembly Code");
     menuShowAssemblyCode.selectedProperty().bindBidirectional(coordinator.runFilter.showAssemblyProperty());
@@ -165,7 +185,7 @@ public class UIMainWindow {
     
 //    CheckMenuItem menuShowMemoryLayout = new CheckMenuItem("Memory Layout"); // TODO
     
-    viewElementsMenu.getItems().addAll(menuShowHiddenFunctions, menuShowRegisters, 
+    viewElementsMenu.getItems().addAll(menuSimplifiedPas, menuShowHiddenFunctions, menuShowRegisters, 
                                        menuShowProgramSections, menuShowAssemblyCode, 
                                        menuShowProgramOutput, menuShowOffsets /*menuShowMemoryLayout*/);
     viewMenu.getItems().add(viewElementsMenu);

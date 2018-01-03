@@ -33,6 +33,11 @@ public class ProcessRunFilter {
   public final void setShowOffsets(boolean value) { showOffsets.set(value); }
   public BooleanProperty showOffsetsProperty() { return showOffsets; }
   
+  private BooleanProperty simplifiedPas = new SimpleBooleanProperty();
+  public final boolean getSimplifiedPas() { return simplifiedPas.get(); }
+  public final void setSimplifiedPas(boolean value) { simplifiedPas.set(value); }
+  public BooleanProperty simplifiedPasProperty() { return simplifiedPas; }
+  
   private ObjectProperty<DetailLevel> detailLevel = new SimpleObjectProperty<>();
   public final DetailLevel getDetailLevel() { return detailLevel.get(); }
   public final void setDetailLevel(DetailLevel value) { detailLevel.set(value); }
@@ -85,6 +90,7 @@ public class ProcessRunFilter {
           showRegisters.set(false);
           showAllSectionsByDefault.set(false);
           showAssembly.set(false);
+          simplifiedPas.set(true);
           break;
         case INTERMEDIATE:
           showAllFunctions.set(false);
@@ -94,6 +100,7 @@ public class ProcessRunFilter {
           sectionsFilter.add(".text");
           sectionsFilter.add(".data");
           sectionsFilter.add(".rodata");
+          simplifiedPas.set(false);
           break;
         case ADVANCED:
           showAllFunctions.set(true);
@@ -103,12 +110,14 @@ public class ProcessRunFilter {
           sectionsFilter.add(".text");
           sectionsFilter.add(".data");
           sectionsFilter.add(".rodata");
+          simplifiedPas.set(false);
           break;
         case EXPERT:
           showAllFunctions.set(true);
           showRegisters.set(true);
           showAllSectionsByDefault.set(true);
           showAssembly.set(true);
+          simplifiedPas.set(false);
           break;
       }
     }

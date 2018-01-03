@@ -30,32 +30,7 @@ public class UIProgramAddressSpace {
       SubProgram.toString(SubProgram.PAS)).widthProperty());
     layout.prefHeightProperty().bind(mainWindow.getTabWindow(
       SubProgram.toString(SubProgram.PAS)).heightProperty());
-
-    if (detailLevel == DetailLevel.NOVICE) {
       
-      GridPane variableTable = UIPASVariableTable.createTable(mainWindow,
-        mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), 
-        variables, "#ffffff", -1, null, null);
-      
-      AnchorPane.setTopAnchor(variableTable, 10.0);
-      AnchorPane.setLeftAnchor(variableTable, 10.0);
-      AnchorPane.setRightAnchor(variableTable, 10.0);
-      AnchorPane.setBottomAnchor(variableTable, 10.0);
-      AnchorPane.setTopAnchor(pasLayout, 10.0);
-      AnchorPane.setLeftAnchor(pasLayout, 10.0);
-      AnchorPane.setRightAnchor(pasLayout, 10.0);
-      AnchorPane.setBottomAnchor(pasLayout, 10.0);
-      pasLayout.getChildren().add(variableTable);
-      addHeap(pasLayout, variables, stack);
-      layout.getChildren().add(pasLayout);
- 
-      scrollPane.setContent(layout);
-      ((Group) scene.getRoot()).getChildren().add(scrollPane);
-
-      return scrollPane;
-    }
-    // END NOVICE MODE CONSTRUCTION
-    
     // INVOCATION
     Label invocation = new Label("Invocation: " + 
       mainWindow.coordinator.runFilter.getInvocation(mainWindow.coordinator.getRun()));
@@ -82,6 +57,40 @@ public class UIProgramAddressSpace {
       pasLayout.getChildren().add(UIPASOutputTable.createTable(mainWindow,
         mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), outputs));
     }
+
+    // SIMPLIFIED MODE CONSTRUCTION
+    if (mainWindow.coordinator.runFilter.getSimplifiedPas()) {
+      
+      GridPane variableTable = UIPASVariableTable.createTable(mainWindow,
+        mainWindow.getTabWindow(SubProgram.toString(SubProgram.PAS)), 
+        variables, "#ffffff", -1, null, null);
+      
+      AnchorPane.setTopAnchor(variableTable, 10.0);
+      AnchorPane.setLeftAnchor(variableTable, 10.0);
+      AnchorPane.setRightAnchor(variableTable, 10.0);
+      AnchorPane.setBottomAnchor(variableTable, 10.0);
+      AnchorPane.setTopAnchor(pasLayout, 10.0);
+      AnchorPane.setLeftAnchor(pasLayout, 10.0);
+      AnchorPane.setRightAnchor(pasLayout, 10.0);
+      AnchorPane.setBottomAnchor(pasLayout, 10.0);
+      
+      Label lblVariables = new Label("Variables");
+      lblVariables.setStyle("-fx-border-color: #444444;");
+      lblVariables.setStyle("-fx-background-color: #444444;");
+      lblVariables.setTextFill(Color.web("#ffffff"));
+      lblVariables.prefWidthProperty().bind(pasLayout.widthProperty());
+      pasLayout.getChildren().add(lblVariables);
+    
+      pasLayout.getChildren().add(variableTable);
+      addHeap(pasLayout, variables, stack);
+      layout.getChildren().add(pasLayout);
+ 
+      scrollPane.setContent(layout);
+      ((Group) scene.getRoot()).getChildren().add(scrollPane);
+
+      return scrollPane;
+    }
+    // END SIMPLIFIED MODE CONSTRUCTION
     
     // REGISTERS
     Label registerHeader = new Label("CPU Registers");
