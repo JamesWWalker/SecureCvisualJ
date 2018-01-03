@@ -172,6 +172,15 @@ public class UIMainWindow {
       }
     );
     
+    MenuItem menuShowTextData = new MenuItem("Show .text, .(ro)data");
+    menuShowTextData.setOnAction(
+      e -> {
+        coordinator.runFilter.setSimplifiedPas(false);
+        coordinator.runFilter.resetSectionFilter();
+        setCustomDetailLevel();
+      }
+    );
+    
     CheckMenuItem menuShowAssemblyCode = new CheckMenuItem("Assembly Code");
     menuShowAssemblyCode.selectedProperty().bindBidirectional(coordinator.runFilter.showAssemblyProperty());
     menuShowAssemblyCode.setOnAction(e -> setCustomDetailLevel());
@@ -186,7 +195,7 @@ public class UIMainWindow {
 //    CheckMenuItem menuShowMemoryLayout = new CheckMenuItem("Memory Layout"); // TODO
     
     viewElementsMenu.getItems().addAll(menuSimplifiedPas, menuShowHiddenFunctions, menuShowRegisters, 
-                                       menuShowProgramSections, menuShowAssemblyCode, 
+                                       menuShowProgramSections, menuShowTextData, menuShowAssemblyCode, 
                                        menuShowProgramOutput, menuShowOffsets /*menuShowMemoryLayout*/);
     viewMenu.getItems().add(viewElementsMenu);
     

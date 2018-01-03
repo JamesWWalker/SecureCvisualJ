@@ -66,6 +66,8 @@ public class ProcessRunFilter {
     if (getShowAllSectionsByDefault()) sectionsFilter.add(useSection);
     else sectionsFilter.remove(useSection);
   }
+  
+  
   public void clearSectionFilter() {
     sectionsFilter.clear(); 
     if (getDetailLevel() == DetailLevel.INTERMEDIATE || getDetailLevel() == DetailLevel.ADVANCED) {
@@ -73,6 +75,14 @@ public class ProcessRunFilter {
       sectionsFilter.add(".data");
       sectionsFilter.add(".rodata");
     }
+  }
+  
+  
+  public void resetSectionFilter() {
+    sectionsFilter.clear();
+    sectionsFilter.add(".text");
+    sectionsFilter.add(".data");
+    sectionsFilter.add(".rodata");
   }
   
   
