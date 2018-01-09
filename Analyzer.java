@@ -310,11 +310,12 @@ public class Analyzer {
 
       if (args.length < 1) {
         System.err.println("Usage: Analyzer binary [arg:argument_to_binary] [sm:speed_multiplier]" +
-                           " [arch:architecture] [sd:func,variable_to_track]");
+                           " [arch:architecture] [sd:func,variable_to_track] [src:source_file]");
         System.exit(1);
       }
 
       String binary = args[0];
+      String sourceFile = null;
 
       for (int n = 1; n < args.length; ++n) {
         String[] arg = args[n].split(":");
@@ -322,8 +323,9 @@ public class Analyzer {
         else if (arg[0].equals("arch")) architecture = arg[1];
         else if (arg[0].equals("sd")) sensitiveData.add(arg[1]);
         else if (arg[0].equals("arg")) binaryArguments.add(arg[1]);
+        else if (arg[0].equals("src")) sourceFile = arg[1];
       }
-
+      
       // Read list of externally defined functions
 /*      String inputFilename = "./simple-functions.txt";
       BufferedReader br = new BufferedReader(new FileReader(inputFilename));
@@ -342,6 +344,19 @@ public class Analyzer {
       String invocation = binary;
       for (String arg : binaryArguments) invocation += " " + arg;
       bw.write("invocation~!~" + invocation + System.lineSeparator());
+      
+      // If a source file was supplied, add source code to the output file
+      if (sourceFile != null) {
+        File src = new File(sourceFile);
+        try (BufferedReader reader = new BufferedReader(new FileReader(src))) {
+          String line = null;
+          while ((line = reader.readLine()) != null)
+            bw.write("ccode~!~" + line + System.lineSeparator());
+        } catch (IOException ex) {
+          System.err.println(ex);
+          System.exit(1);
+        }
+      }
 
       InputStreamReader isr = new InputStreamReader(System.in);
       BufferedReader input = new BufferedReader(isr);
