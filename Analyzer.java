@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 class Variable {
 
   public String name;
-  private String type;
+  public String type;
   public String address;
   private String pointsTo;
   public String value;
@@ -289,6 +289,7 @@ public class Analyzer {
   static List<String> sensitiveData = new ArrayList<>();
   static List<String> coreSizeZeroStructs = new ArrayList<>();
   static List<String> coreSizeZeroStructsCur = new ArrayList<>();
+  static List<String> ignoreOnce = new ArrayList<>();
 //  static ArrayList<Pair<String, Integer>> pendingFunctions
 //    = new ArrayList<Pair<String, Integer>>(); // for prioritizing call order
 
@@ -866,7 +867,9 @@ public class Analyzer {
         // Turns out LLDB can't be trusted to tell us if a variable is global, unfortunately.
         // We'll have to check the variable's address to confirm.
         global = false;
-        if (architecture.equals("x86_64") && variable.address.charAt(9) != 'f') global = true;
+        if (architecture.equals("x86_64")) {
+          if (!variable.address.contains("ffff")) global = true;
+        }
         else if (variable.address.charAt(2) != 'f') global = true;
         scope = global ? GLOBAL : function;
         String key = scope + "," + variable.name;
@@ -919,13 +922,22 @@ public class Analyzer {
 //                 v.name        +
 //                 System.lineSeparator());
           ;
-      else
-        bw.write("sd_set~!~"   +
-                 eventNumber   + "|" +
-                 lineNumber    + "|" +
-                 scope         + "|" +
-                 v.name        +
-                 System.lineSeparator());
+      else {
+        // Ignore char arrays the 1st time b/c they unavoidably initialize w/ junk data
+        if ((v.type.contains("char") && 
+            (v.type.contains("*")) || v.type.contains("[")) &&
+             !ignoreOnce.contains(scope+v.name))
+        {
+          ignoreOnce.add(scope+v.name);
+        }
+        else
+          bw.write("sd_set~!~"   +
+                   eventNumber   + "|" +
+                   lineNumber    + "|" +
+                   scope         + "|" +
+                   v.name        +
+                   System.lineSeparator());
+      }
     }
 
     // Check for structs that zero out core size
