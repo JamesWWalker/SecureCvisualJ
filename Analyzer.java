@@ -288,6 +288,7 @@ public class Analyzer {
   static List<String> externalFunctions = new ArrayList<>();
   static List<String> sensitiveData = new ArrayList<>();
   static List<String> coreSizeZeroStructs = new ArrayList<>();
+  static List<String> coreSizeZeroStructsCur = new ArrayList<>();
 //  static ArrayList<Pair<String, Integer>> pendingFunctions
 //    = new ArrayList<Pair<String, Integer>>(); // for prioritizing call order
 
@@ -501,11 +502,14 @@ public class Analyzer {
     // Print additional outputs that need to come at the end for events to stay in the right order
     if (additionalOutputs.contains("*C*")) {
       additionalOutputs = additionalOutputs.replaceAll("\\*C\\*", "");
-      if (coreSizeZeroStructs.contains(additionalOutputs))
+      if (coreSizeZeroStructs.contains(additionalOutputs) ||
+          coreSizeZeroStructsCur.contains(additionalOutputs))
+      {
         bw.write("sd_corezero~!~" +
                  eventNumber      + "|" +
                  lineNumber       +
                  System.lineSeparator());
+      }
     }
     else bw.write(additionalOutputs);
 
@@ -871,13 +875,17 @@ public class Analyzer {
           ArrayList<Variable> changedList = variable.changedValues(variables.get(key));
           for (Variable v : changedList) {
             bw.write(v.print(eventNumber, lineNumber, scope)); // output variable data
-            if (v.value == null || v.value.equals("0") || v.value.equals("\"\""))
+            if (((sensitiveData.contains(scope + "," + v.name) ||
+                  sensitiveData.contains(GLOBAL + "," + v.name))) &&
+                (v.value == null || v.value.equals("0") || v.value.equals("\"\"")))
+            {
               bw.write("sd_clear~!~" +
                        eventNumber   + "|" +
                        lineNumber    + "|" +
                        scope         + "|" +
                        v.name        +
                        System.lineSeparator());
+            }
             sensitiveDataParsing(v, scope);
           }
           if (!changedList.isEmpty()) variables.put(key, variable);
@@ -901,7 +909,7 @@ public class Analyzer {
   private static void sensitiveDataParsing(Variable v, String scope) throws IOException {
     // Sensitive data outputs
     if (sensitiveData.contains(scope + "," + v.name) ||
-                sensitiveData.contains(GLOBAL + "," + v.name)) 
+        sensitiveData.contains(GLOBAL + "," + v.name)) 
     {
       if (v.value == null || v.value.equals("0") || v.value.equals("\"\""))
 //        bw.write("sd_clear~!~" +
@@ -926,11 +934,20 @@ public class Analyzer {
         if (v.value.equals("0")) coreSizeZeroStructs.add(v.name.split(":")[0]);
         else coreSizeZeroStructs.remove(v.name.split(":")[0]);
       }
+      else if (v.name.endsWith("rlim_cur")) {
+        if (v.value.equals("0")) coreSizeZeroStructsCur.add(v.name.split(":")[0]);
+        else coreSizeZeroStructsCur.remove(v.name.split(":")[0]);
+      }
       else {
         Variable element = v.elementEndsWith("rlim_max");
         if (element != null) {
           if (element.value.equals("0")) coreSizeZeroStructs.add(element.name.split(":")[0]);
           else coreSizeZeroStructs.remove(element.name.split(":")[0]);
+        }
+        element = v.elementEndsWith("rlim_cur");
+        if (element != null) {
+          if (element.value.equals("0")) coreSizeZeroStructsCur.add(element.name.split(":")[0]);
+          else coreSizeZeroStructsCur.remove(element.name.split(":")[0]);
         }
       }
     }
