@@ -4,12 +4,20 @@ import javafx.beans.property.*;
 import javafx.beans.value.*;
 import javafx.geometry.*;
 import javafx.scene.*;
+import javafx.scene.canvas.*;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
+import javafx.scene.paint.*;
+import javafx.scene.shape.*;
+import javafx.scene.text.*;
 import javafx.stage.*;
 
+
 public class UIVariableRepresentation {
+
+  private static Canvas canvas, canvasBottom;
+  private static GraphicsContext gc, gcBottom;
 
   public static double fontSize = 1.0;
   private static VariableRepresentation representation;
@@ -51,13 +59,16 @@ public class UIVariableRepresentation {
     
     for (int n = 0; n < 3; ++n) {
       ColumnConstraints column = new ColumnConstraints();
-      column.setPercentWidth(33.3);
+      column.setPercentWidth(20.0);
       grid.getColumnConstraints().add(column);
     }
+    ColumnConstraints lastColumn = new ColumnConstraints();
+    lastColumn.setPercentWidth(40.0);
+    grid.getColumnConstraints().add(lastColumn);
     
-    for (int n = 0; n < 7; ++n) {
+    for (int n = 0; n < 8; ++n) {
       RowConstraints row = new RowConstraints();
-      row.setPercentHeight(14.2);
+      row.setPercentHeight(12.5);
       grid.getRowConstraints().add(row);
     }
 
@@ -137,6 +148,31 @@ public class UIVariableRepresentation {
       cboTopEndianness.getValue().equals(BIG_ENDIAN)));
     grid.add(txtBytesBottom, 0, 4, 3, 1);
     
+    // Value "clocks"
+    canvas = new Canvas(240, 240);
+    canvas.widthProperty().bind(window.widthProperty().multiply(0.35));
+    canvas.heightProperty().bind(window.heightProperty().divide(2));
+    gc = canvas.getGraphicsContext2D();
+    canvas.widthProperty().addListener(observable -> drawClock(
+      canvas.getWidth()-10, canvas.getHeight()-80, gc, txtBytesTop.getText(), 
+      VariableType.toString(getTypeFromSelection(cboTopType.getValue()))));
+    canvas.heightProperty().addListener(observable -> drawClock(
+      canvas.getWidth()-10, canvas.getHeight()-80, gc, txtBytesTop.getText(),
+      VariableType.toString(getTypeFromSelection(cboTopType.getValue()))));
+    grid.add(canvas, 3, 0, 1, 4);
+    
+    canvasBottom = new Canvas(240, 240);
+    canvasBottom.widthProperty().bind(window.widthProperty().multiply(0.35));
+    canvasBottom.heightProperty().bind(window.heightProperty().divide(2));
+    gcBottom = canvasBottom.getGraphicsContext2D();
+    canvasBottom.widthProperty().addListener(observable -> drawClock(
+      canvasBottom.getWidth()-10, canvasBottom.getHeight()-80, gcBottom, txtBytesBottom.getText(), 
+      VariableType.toString(getTypeFromSelection(cboBottomType.getValue()))));
+    canvasBottom.heightProperty().addListener(observable -> drawClock(
+      canvasBottom.getWidth()-10, canvasBottom.getHeight()-80, gcBottom, txtBytesBottom.getText(),
+      VariableType.toString(getTypeFromSelection(cboBottomType.getValue()))));
+    grid.add(canvasBottom, 3, 3, 1, 4);
+    
     // View menu
     Menu viewMenu = new Menu("View");
     
@@ -163,7 +199,7 @@ public class UIVariableRepresentation {
     container.setTop(menuBar);
     container.setCenter(grid);
     
-    scene = new Scene(container, 600, 300);
+    scene = new Scene(container, 800, 600);
     
     // scene size change listeners
     scene.widthProperty().addListener(new ChangeListener<Number>() {
@@ -196,6 +232,10 @@ public class UIVariableRepresentation {
     txtValueBottom.setText(representation.getDecimal(
       getTypeFromSelection(cboBottomType.getValue()),
       cboBottomEndianness.getValue().equals(BIG_ENDIAN)));
+    drawClock(canvas.getWidth()-10, canvas.getHeight()-80, gc, txtBytesTop.getText(),
+      VariableType.toString(getTypeFromSelection(cboTopType.getValue())));
+    drawClock(canvasBottom.getWidth()-10, canvasBottom.getHeight()-80, gcBottom, txtBytesBottom.getText(),
+      VariableType.toString(getTypeFromSelection(cboBottomType.getValue())));
     updateInProgress = false;
   }
   
@@ -234,6 +274,106 @@ public class UIVariableRepresentation {
     else if (selection.equals("unsigned long")) return VariableType.UNSIGNED_LONG;
     assert false;
     return VariableType.STRING;
+  }
+  
+  
+  private static String getMaxSizeByType(String type) {
+    if (type.equals("signed char")) return "0x7F=2^8";
+    else if (type.equals("signed short")) return "0x7FFF=2^16-1";
+    else if (type.equals("unsigned short")) return "0xFFFF=2^16";
+    else if (type.equals("signed int")) return "0x7FFFFFFF=2^32-1";
+    else if (type.equals("unsigned int")) return "0xFFFFFFFF=2^32";
+    else if (type.equals("signed long")) return "0x7FFFFFFFFFFFFFFF=2^64-1";
+    else if (type.equals("unsigned long")) return "0xFFFFFFFFFFFFFFFF=2^64";
+    assert false;
+    return "Unknown";
+  }
+  
+  
+  private static String getMinSizeByType(String type) {
+    if (type.equals("signed char")) return "0x00";
+    else if (type.equals("signed short")) return "0x8000=-2^(16-1)";
+    else if (type.equals("unsigned short")) return "0x0000=0";
+    else if (type.equals("signed int")) return "0x80000000=-2^(32-1)";
+    else if (type.equals("unsigned int")) return "0x00000000=0";
+    else if (type.equals("signed long")) return "0x8000000000000000=-2^(64-1)";
+    else if (type.equals("unsigned long")) return "0x0000000000000000=0";
+    assert false;
+    return "Unknown";
+  }
+  
+  
+  private static void drawClock(double width, 
+                                double height, 
+                                GraphicsContext gc, 
+                                String value,
+                                String type) 
+  {
+    BigDecimal min = BigDecimal.ZERO;
+    BigDecimal max = BigDecimal.ZERO;
+    // figure out where we are between min and max values
+    if (type.contains("unsigned")) {
+      min = new BigDecimal("0");
+      if (type.contains("char")) max = new BigDecimal("255");
+      else if (type.contains("short")) max = new BigDecimal("65535");
+      else if (type.contains("int")) max = new BigDecimal("4294967295");
+      else if (type.contains("long")) max = new BigDecimal("18446744073709551615");
+    }
+    else {
+      if (type.contains("char")) {
+        min = new BigDecimal("-128");
+        max = new BigDecimal("127");
+      }
+      else if (type.contains("short")) {
+        min = new BigDecimal("-32768");
+        max = new BigDecimal("32767");
+      }
+      else if (type.contains("int")) {
+        min = new BigDecimal("-2147483648");
+        max = new BigDecimal("2147483647");
+      }
+      else if (type.contains("long")) {
+        min = new BigDecimal("-9223372036854775808");
+        max = new BigDecimal("9223372036854775807");
+      }
+    }
+    BigDecimal val = new BigDecimal(txtValueTop.getText());
+    min = min.abs();
+    max = max.add(min);
+    val = val.add(min);
+    BigDecimal proportion = val.divide(max, 5, RoundingMode.HALF_UP).multiply(new BigDecimal(360));
+    double angle = 360.0 - proportion.doubleValue();
+    
+    // draw
+    gc.clearRect(0, 0, width+10, height+90);
+    
+    gc.setLineWidth(5);
+    
+    gc.setStroke(Color.RED);
+    gc.strokeArc(width*(1.0/4.0), height*(1.0/4.0), width/2.0, height/2.0, 90, 180, ArcType.OPEN);
+    gc.setStroke(Color.BLACK);
+    gc.strokeArc(width*(1.0/4.0), height*(1.0/4.0), width/2.0, height/2.0, 270, 180, ArcType.OPEN);
+    
+    gc.setFont(new Font(12));
+    gc.setStroke(Color.BLUE);
+    gc.setFill(Color.BLUE);
+    gc.fillText(value, width*(1.0/4.0)+20, height/2.0);
+    
+    gc.setStroke(Color.RED);
+    gc.setFill(Color.RED);
+    gc.setTextAlign(TextAlignment.RIGHT);
+    gc.fillText(getMinSizeByType(type), width/2.0-10, height*(7.0/8.0));
+    if (!type.contains("unsigned")) gc.fillText("-1", width/2.0-10, height*(1.0/8.0));
+    
+    gc.setStroke(Color.BLACK);
+    gc.setFill(Color.BLACK);
+    gc.setTextAlign(TextAlignment.LEFT);
+    gc.fillText(getMaxSizeByType(type), width/2.0+10, height*(7.0/8.0));
+    if (!type.contains("unsigned")) gc.fillText("0", width/2.0+10, height*(1.0/8.0));
+    
+    gc.setFill(Color.CYAN);
+    gc.setStroke(Color.CYAN);
+    gc.strokeArc(width*(1.0/4.0), height*(1.0/4.0), width/2.0, height/2.0, angle-5-90, 10, ArcType.OPEN);
   }
 
 }

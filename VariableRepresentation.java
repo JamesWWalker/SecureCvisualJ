@@ -26,19 +26,35 @@ public class VariableRepresentation {
           value = padWithZeroes(2, value);
           break;
         case SIGNED_SHORT:
-          value = Integer.toHexString(Short.parseShort(valueIn) & 0xffff);
+          try {
+            value = Long.toHexString(Long.parseLong(valueIn) & 0xffff).substring(4);
+          } catch (Exception e) {
+            value = Long.toHexString(Long.parseLong(valueIn) & 0xffff);
+          }
           value = padWithZeroes(4, value);
           break;
         case UNSIGNED_SHORT:
-          value = Integer.toHexString(Integer.parseUnsignedInt(valueIn) & 0xffff);
+          try {
+            value = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffff).substring(4);
+          } catch (Exception e) {
+            value = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffff);
+          }
           value = padWithZeroes(4, value);
           break;
         case SIGNED_INT:
-          value = Integer.toHexString(Integer.parseInt(valueIn));
+          try {
+            value = Long.toHexString(Long.parseLong(valueIn) & 0xffffffff).substring(8);
+          } catch (Exception e) {
+            value = Long.toHexString(Long.parseLong(valueIn) & 0xffffffff);
+          }
           value = padWithZeroes(8, value);
           break;
         case UNSIGNED_INT:
-          value = Integer.toHexString(Integer.parseUnsignedInt(valueIn));
+          try {
+            value = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffffffff).substring(8);
+          } catch (Exception e) {
+            value = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffffffff);
+          }
           value = padWithZeroes(8, value);
           break;
         case SIGNED_LONG:
