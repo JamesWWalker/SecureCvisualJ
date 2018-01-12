@@ -353,30 +353,41 @@ public class UIVariableRepresentation {
     
     gc.setLineWidth(5);
     
-    gc.setStroke(Color.RED);
+    gc.setFont(new Font(12));
+    gc.setTextAlign(TextAlignment.LEFT);
+    
+    gc.setFill(Color.rgb(235, 85, 0));
+    gc.fillText("Negative/lower half", 5, 15);
+    
+    gc.setFill(Color.rgb(150, 220, 150));
+    gc.fillText("Positive/upper half", 5, 35);
+    
+    gc.setFill(Color.BLUE);
+    gc.fillText("Current value", 5, 55);
+    
+    gc.setStroke(Color.rgb(235, 85, 0));
     gc.strokeArc(width*(1.0/4.0), height*(1.0/4.0), width/2.0, height/2.0, 90, 180, ArcType.OPEN);
-    gc.setStroke(Color.BLACK);
+    gc.setStroke(Color.rgb(150, 220, 150));
     gc.strokeArc(width*(1.0/4.0), height*(1.0/4.0), width/2.0, height/2.0, 270, 180, ArcType.OPEN);
     
-    gc.setFont(new Font(12));
     gc.setStroke(Color.BLUE);
     gc.setFill(Color.BLUE);
     gc.fillText(value, width*(1.0/4.0)+20, height/2.0);
     
-    gc.setStroke(Color.RED);
-    gc.setFill(Color.RED);
+    gc.setStroke(Color.rgb(235, 85, 0));
+    gc.setFill(Color.rgb(235, 85, 0));
     gc.setTextAlign(TextAlignment.RIGHT);
     gc.fillText(getMinSizeByType(type), width/2.0-10, height*(7.0/8.0));
-    if (!type.contains("unsigned")) gc.fillText("-1", width/2.0-10, height*(1.0/8.0));
+    if (!type.contains("unsigned")) gc.fillText("-1", width/2.0-10, height*(3.0/16.0));
     
-    gc.setStroke(Color.BLACK);
-    gc.setFill(Color.BLACK);
+    gc.setStroke(Color.rgb(150, 220, 150));
+    gc.setFill(Color.rgb(150, 220, 150));
     gc.setTextAlign(TextAlignment.LEFT);
     gc.fillText(getMaxSizeByType(type), width/2.0+10, height*(7.0/8.0));
-    if (!type.contains("unsigned")) gc.fillText("0", width/2.0+10, height*(1.0/8.0));
+    if (!type.contains("unsigned")) gc.fillText("0", width/2.0+10, height*(3.0/16.0));
     
-    gc.setFill(Color.CYAN);
-    gc.setStroke(Color.CYAN);
+    gc.setFill(Color.BLUE);
+    gc.setStroke(Color.BLUE);
     gc.strokeArc(width*(1.0/4.0), height*(1.0/4.0), width/2.0, height/2.0, angle-5-90, 10, ArcType.OPEN);
   }
 
