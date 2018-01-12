@@ -19,42 +19,41 @@ public class VariableRepresentation {
     else if (!valueIn.startsWith("0x") && type != VariableType.STRING) {
       switch (type) {
         case SIGNED_CHAR:
+          value = valueIn.replaceAll("'", "");
+          if (value.startsWith("\\x")) value = value.substring(2);
+          else {
+            value = Long.toHexString(Long.parseLong(value) & 0xff);
+            if (value.length() > 2) value = value.substring(2);
+          }
+          value = padWithZeroes(2, value);
+          break;
         case UNSIGNED_CHAR:
           value = valueIn.replaceAll("'", "");
           if (value.startsWith("\\x")) value = value.substring(2);
-          else value = Integer.toHexString((int)(value.charAt(0)));
+          else {
+            value = Long.toHexString(Long.parseUnsignedLong(value) & 0xff);
+            if (value.length() > 2) value = value.substring(2);
+          }
           value = padWithZeroes(2, value);
           break;
         case SIGNED_SHORT:
-          try {
-            value = Long.toHexString(Long.parseLong(valueIn) & 0xffff).substring(4);
-          } catch (Exception e) {
-            value = Long.toHexString(Long.parseLong(valueIn) & 0xffff);
-          }
+          value = Long.toHexString(Long.parseLong(valueIn) & 0xffff);
+          if (value.length() > 4) value = value.substring(4);
           value = padWithZeroes(4, value);
           break;
         case UNSIGNED_SHORT:
-          try {
-            value = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffff).substring(4);
-          } catch (Exception e) {
-            value = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffff);
-          }
+          value = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffff);
+          if (value.length() > 4) value = value.substring(4);
           value = padWithZeroes(4, value);
           break;
         case SIGNED_INT:
-          try {
-            value = Long.toHexString(Long.parseLong(valueIn) & 0xffffffff).substring(8);
-          } catch (Exception e) {
-            value = Long.toHexString(Long.parseLong(valueIn) & 0xffffffff);
-          }
+          value = Long.toHexString(Long.parseLong(valueIn) & 0xffffffff);
+          if (value.length() > 8) value = value.substring(8);
           value = padWithZeroes(8, value);
           break;
         case UNSIGNED_INT:
-          try {
-            value = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffffffff).substring(8);
-          } catch (Exception e) {
-            value = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffffffff);
-          }
+          value = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffffffff);
+          if (value.length() > 8) value = value.substring(8);
           value = padWithZeroes(8, value);
           break;
         case SIGNED_LONG:
@@ -95,7 +94,7 @@ public class VariableRepresentation {
       case SIGNED_LONG:
         return Long.toString(new BigInteger(hex, 16).longValue());
       case UNSIGNED_CHAR:
-        return "" + (byte)(new BigInteger(hex, 16).intValue());
+        return Integer.toUnsignedString((byte)(new BigInteger(hex, 16).intValue()));
       case UNSIGNED_SHORT:
         return Integer.toUnsignedString((short)(new BigInteger(hex, 16).intValue()));
       case UNSIGNED_INT:

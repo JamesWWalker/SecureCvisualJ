@@ -73,8 +73,8 @@ public class UIVariableRepresentation {
     }
 
     cboTopType = new ComboBox<>();
-    cboTopType.getItems().addAll("char", "signed short", "unsigned short", "signed int",
-      "unsigned int", "signed long", "unsigned long");
+    cboTopType.getItems().addAll("signed char", "unsigned char", "signed short", "unsigned short", 
+      "signed int", "unsigned int", "signed long", "unsigned long");
     cboTopType.getSelectionModel().select(getIndexFromType(type));
     cboTopType.setOnAction(e -> {
       VariableType newType = getTypeFromSelection(cboTopType.getValue());
@@ -127,8 +127,8 @@ public class UIVariableRepresentation {
     grid.add(lblInterpret, 0, 2, 3, 1);
     
     cboBottomType = new ComboBox<>();
-    cboBottomType.getItems().addAll("char", "signed short", "unsigned short", "signed int",
-      "unsigned int", "signed long", "unsigned long");
+    cboBottomType.getItems().addAll("signed char", "unsigned char", "signed short", 
+      "unsigned short", "signed int", "unsigned int", "signed long", "unsigned long");
     cboBottomType.getSelectionModel().select(getIndexFromType(type));
     cboBottomType.setOnAction(e -> updateUI());
     grid.add(cboBottomType, 0, 3, 1, 1);
@@ -243,29 +243,31 @@ public class UIVariableRepresentation {
   private static int getIndexFromType(VariableType type) {
     switch (type) {
       case SIGNED_CHAR:
-      case UNSIGNED_CHAR:
         return 0;
-      case SIGNED_SHORT:
+      case UNSIGNED_CHAR:
         return 1;
-      case UNSIGNED_SHORT:
+      case SIGNED_SHORT:
         return 2;
-      case SIGNED_INT:
+      case UNSIGNED_SHORT:
         return 3;
-      case UNSIGNED_INT:
+      case SIGNED_INT:
         return 4;
-      case SIGNED_LONG:
+      case UNSIGNED_INT:
         return 5;
-      case UNSIGNED_LONG:
+      case SIGNED_LONG:
         return 6;
+      case UNSIGNED_LONG:
+        return 7;
       default:
         assert false;
-        return 0;
+        return 8;
     }
   }
   
   
   private static VariableType getTypeFromSelection(String selection) {
-    if (selection.equals("char")) return VariableType.SIGNED_CHAR;
+    if (selection.equals("signed char")) return VariableType.SIGNED_CHAR;
+    else if (selection.equals("unsigned char")) return VariableType.UNSIGNED_CHAR;
     else if (selection.equals("signed short")) return VariableType.SIGNED_SHORT;
     else if (selection.equals("unsigned short")) return VariableType.UNSIGNED_SHORT;
     else if (selection.equals("signed int")) return VariableType.SIGNED_INT;
@@ -279,6 +281,7 @@ public class UIVariableRepresentation {
   
   private static String getMaxSizeByType(String type) {
     if (type.equals("signed char")) return "0x7F=2^8";
+    else if (type.equals("unsigned char")) return "0xFF=2^8";
     else if (type.equals("signed short")) return "0x7FFF=2^16-1";
     else if (type.equals("unsigned short")) return "0xFFFF=2^16";
     else if (type.equals("signed int")) return "0x7FFFFFFF=2^32-1";
@@ -292,6 +295,7 @@ public class UIVariableRepresentation {
   
   private static String getMinSizeByType(String type) {
     if (type.equals("signed char")) return "0x00";
+    else if (type.equals("unsigned char")) return "0x80=2^(8-1)";
     else if (type.equals("signed short")) return "0x8000=-2^(16-1)";
     else if (type.equals("unsigned short")) return "0x0000=0";
     else if (type.equals("signed int")) return "0x80000000=-2^(32-1)";
