@@ -389,16 +389,19 @@ public class UIVariableRepresentation {
     gc.setFont(new Font(12));
     gc.setTextAlign(TextAlignment.LEFT);
     
-    gc.setFill(Color.rgb(235, 85, 0));
-    gc.fillText("Negative/lower half", 5, 15);
-    
-    gc.setFill(Color.rgb(150, 220, 150));
-    gc.fillText("Positive/upper half", 5, 35);
+    if (!type.contains("unsigned")) {
+      gc.setFill(Color.rgb(235, 85, 0));
+      gc.fillText("Negative", 5, 15);
+      
+      gc.setFill(Color.rgb(150, 220, 150));
+      gc.fillText("Positive", 5, 35);
+    }
     
     gc.setFill(Color.BLUE);
     gc.fillText("Current value", 5, 55);
     
-    gc.setStroke(Color.rgb(235, 85, 0));
+    if (!type.contains("unsigned")) gc.setStroke(Color.rgb(235, 85, 0));
+    else gc.setStroke(Color.rgb(150, 220, 150));
     gc.strokeArc(width*(1.0/4.0), height*(1.0/4.0), width/2.0, height/2.0, 90, 180, ArcType.OPEN);
     gc.setStroke(Color.rgb(150, 220, 150));
     gc.strokeArc(width*(1.0/4.0), height*(1.0/4.0), width/2.0, height/2.0, 270, 180, ArcType.OPEN);
