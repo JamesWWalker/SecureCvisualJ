@@ -104,15 +104,15 @@ public class UIVariableRepresentation {
     txtValueTop = new TextField(value);
     txtValueTop.textProperty().addListener((obs, oldValue, newValue) -> {
       try {
-        if (!newValue.matches("-*\\d*")) {
-          if (!newValue.startsWith("-")) txtValueTop.setText(newValue.replaceAll("[^\\d]", ""));
-          else txtValueTop.setText("-" + newValue.replaceAll("[^\\d]", ""));
-        }
-        representation.setValue(newValue, getTypeFromSelection(cboTopType.getValue()));
+        txtValueTop.setText(newValue);
+        String interpretValue = "0";
+        if (newValue.matches("-*\\d*")) interpretValue = newValue;
+        representation.setValue(interpretValue, getTypeFromSelection(cboTopType.getValue()));
         if (!updateInProgress) updateUI();
       } catch (NumberFormatException ex) {
-        txtValueTop.setText(oldValue);
-        representation.setValue(oldValue, getTypeFromSelection(cboTopType.getValue()));
+        newValue = newValue.replaceAll("[^\\d]", "");
+        txtValueTop.setText(newValue);
+        representation.setValue(newValue, getTypeFromSelection(cboTopType.getValue()));
         if (!updateInProgress) updateUI();
       }
     });
@@ -223,9 +223,9 @@ public class UIVariableRepresentation {
     txtBytesTop.setText(representation.getHex(
       getTypeFromSelection(cboTopType.getValue()),
       cboTopEndianness.getValue().equals(BIG_ENDIAN)));
-    txtValueTop.setText(representation.getDecimal(
-      getTypeFromSelection(cboTopType.getValue()),
-      cboTopEndianness.getValue().equals(BIG_ENDIAN)));
+//    txtValueTop.setText(representation.getDecimal(
+//      getTypeFromSelection(cboTopType.getValue()),
+//      cboTopEndianness.getValue().equals(BIG_ENDIAN)));
     txtBytesBottom.setText(representation.getHex(
       getTypeFromSelection(cboBottomType.getValue()),
       cboBottomEndianness.getValue().equals(BIG_ENDIAN)));

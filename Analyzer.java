@@ -346,6 +346,7 @@ public class Analyzer {
       String invocation = binary;
       for (String arg : binaryArguments) invocation += " " + arg;
       bw.write("invocation~!~" + invocation + System.lineSeparator());
+      bw.write("binary~!~" + binary + System.lineSeparator());
       
       // If a source file was supplied, add source code to the output file
       if (sourceFile != null) {

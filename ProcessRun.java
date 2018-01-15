@@ -200,10 +200,10 @@ public class ProcessRun {
       return;
     }
 
-    String[] decomposedPath = filename.split("/");
-    String fn = decomposedPath[decomposedPath.length-1];
-    programName = fn.contains(".") ? fn.substring(0, fn.lastIndexOf('.')) : fn;
-    programName = programName.substring(0, programName.length()-7); // get rid of -output
+//    String[] decomposedPath = filename.split("/");
+//    String fn = decomposedPath[decomposedPath.length-1];
+//    programName = fn.contains(".") ? fn.substring(0, fn.lastIndexOf('.')) : fn;
+//    programName = programName.substring(0, programName.length()-7); // get rid of -output
 
     runSequence = new ArrayList<>();
     index.set(0);
@@ -238,7 +238,8 @@ public class ProcessRun {
           parameters[0] = "";
         }
 
-        if (!type.equals("ccode") &&
+        if (!type.equals("binary") &&
+            !type.equals("ccode") &&
             !type.equals("assembly") && 
             !type.equals("section") && 
             !type.equals("return_address") &&
@@ -272,6 +273,7 @@ public class ProcessRun {
         else if (type.equals("sd_unlock")) parseSdUnlock(parameters);
         else if (type.equals("sd_clear")) parseSdClear(parameters);
         else if (type.equals("sd_set")) parseSdSet(parameters);
+        else if (type.equals("binary")) programName = parameters[0];
         else {
           System.err.println("ERROR: Unrecognized event type " + type + ". Terminating parse.");
           return;
