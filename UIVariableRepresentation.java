@@ -154,10 +154,12 @@ public class UIVariableRepresentation {
     canvas.heightProperty().bind(window.heightProperty().divide(2));
     gc = canvas.getGraphicsContext2D();
     canvas.widthProperty().addListener(observable -> drawClock(
-      canvas.getWidth()-10, canvas.getHeight()-80, gc, txtBytesTop.getText(), 
+      canvas.getWidth()-10, canvas.getHeight()-80, gc, txtBytesTop.getText(),
+      txtValueTop.getText(),
       VariableType.toString(getTypeFromSelection(cboTopType.getValue()))));
     canvas.heightProperty().addListener(observable -> drawClock(
-      canvas.getWidth()-10, canvas.getHeight()-80, gc, txtBytesTop.getText(),
+      canvas.getWidth()-10, canvas.getHeight()-80,  gc, txtBytesTop.getText(),
+      txtValueTop.getText(),
       VariableType.toString(getTypeFromSelection(cboTopType.getValue()))));
     grid.add(canvas, 3, 0, 1, 4);
     
@@ -166,10 +168,12 @@ public class UIVariableRepresentation {
     canvasBottom.heightProperty().bind(window.heightProperty().divide(2));
     gcBottom = canvasBottom.getGraphicsContext2D();
     canvasBottom.widthProperty().addListener(observable -> drawClock(
-      canvasBottom.getWidth()-10, canvasBottom.getHeight()-80, gcBottom, txtBytesBottom.getText(), 
+      canvasBottom.getWidth()-10, canvasBottom.getHeight()-80, gcBottom, txtBytesBottom.getText(),
+      txtValueBottom.getText(),
       VariableType.toString(getTypeFromSelection(cboBottomType.getValue()))));
     canvasBottom.heightProperty().addListener(observable -> drawClock(
       canvasBottom.getWidth()-10, canvasBottom.getHeight()-80, gcBottom, txtBytesBottom.getText(),
+      txtValueBottom.getText(),
       VariableType.toString(getTypeFromSelection(cboBottomType.getValue()))));
     grid.add(canvasBottom, 3, 3, 1, 4);
     
@@ -232,10 +236,18 @@ public class UIVariableRepresentation {
     txtValueBottom.setText(representation.getDecimal(
       getTypeFromSelection(cboBottomType.getValue()),
       cboBottomEndianness.getValue().equals(BIG_ENDIAN)));
-    drawClock(canvas.getWidth()-10, canvas.getHeight()-80, gc, txtBytesTop.getText(),
-      VariableType.toString(getTypeFromSelection(cboTopType.getValue())));
-    drawClock(canvasBottom.getWidth()-10, canvasBottom.getHeight()-80, gcBottom, txtBytesBottom.getText(),
-      VariableType.toString(getTypeFromSelection(cboBottomType.getValue())));
+    drawClock(canvas.getWidth()-10, 
+              canvas.getHeight()-80, 
+              gc, 
+              txtBytesTop.getText(),
+              txtValueTop.getText(),
+              VariableType.toString(getTypeFromSelection(cboTopType.getValue())));
+    drawClock(canvasBottom.getWidth()-10,
+              canvasBottom.getHeight()-80, 
+              gcBottom, 
+              txtBytesBottom.getText(),
+              txtValueBottom.getText(),
+              VariableType.toString(getTypeFromSelection(cboBottomType.getValue())));
     updateInProgress = false;
   }
   
@@ -311,6 +323,7 @@ public class UIVariableRepresentation {
                                 double height, 
                                 GraphicsContext gc, 
                                 String value,
+                                String decValue,
                                 String type) 
   {
     BigDecimal min = BigDecimal.ZERO;
@@ -341,7 +354,7 @@ public class UIVariableRepresentation {
         max = new BigDecimal("9223372036854775807");
       }
     }
-    BigDecimal val = new BigDecimal(txtValueTop.getText());
+    BigDecimal val = new BigDecimal(decValue);
     min = min.abs();
     max = max.add(min);
     val = val.add(min);
