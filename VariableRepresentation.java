@@ -258,6 +258,94 @@ public class VariableRepresentation {
     }
     return extend.substring(str.length()) + str;
   }
+  
+  
+  public String clampValue(VariableType typeIn, String valueIn) {
+    switch (type) {
+      case UNSIGNED_CHAR:
+        if (Long.parseLong(valueIn) < 0) {
+          setValue(new BigInteger("255").toString(), typeIn);
+          return "255";
+        }
+        if (Long.parseLong(valueIn) > 255) {
+          setValue("0x00", typeIn);
+          return "0";
+        }
+        break;
+      case SIGNED_CHAR:
+        if (Long.parseLong(valueIn) < -128) {
+          setValue(new BigInteger("127").toString(), typeIn);
+          return "127";
+        }
+        if (Long.parseLong(valueIn) > 127) {
+          setValue(new BigInteger("-128").toString(), typeIn);
+          return "-128";
+        }
+        break;
+      case UNSIGNED_SHORT:
+        if (Long.parseLong(valueIn) < 0) {
+          setValue(new BigInteger("65535").toString(), typeIn);
+          return "65535";
+        }
+        if (Long.parseLong(valueIn) > 65535) {
+          setValue("0x00", typeIn);
+          return "0";
+        }
+        break;
+      case SIGNED_SHORT:
+        if (Long.parseLong(valueIn) < -32768) {
+          setValue(new BigInteger("32767").toString(), typeIn);
+          return "32767";
+        }
+        if (Long.parseLong(valueIn) > 32767) {
+          setValue(new BigInteger("-32768").toString(), typeIn);
+          return "-32768";
+        }
+        break;
+      case UNSIGNED_INT:
+        if (Long.parseLong(valueIn) < 0) {
+          setValue(new BigInteger("4294967295").toString(), typeIn);
+          return "4294967295";
+        }
+        if (new BigInteger(valueIn).compareTo(new BigInteger("4294967295")) == 1) {
+          setValue("0x00", typeIn);
+          return "0";
+        }
+        break;
+      case SIGNED_INT:
+        if (Long.parseLong(valueIn) < -2147483648) {
+          setValue(new BigInteger("2147483647").toString(), typeIn);
+          return "2147483647";
+        }
+        if (Long.parseLong(valueIn) > 2147483647) {
+          setValue(new BigInteger("-2147483648").toString(), typeIn);
+          return "-2147483648";
+        }
+        break;
+      case UNSIGNED_LONG:
+        if (new BigInteger(valueIn).compareTo(BigInteger.valueOf(0)) == -1) {
+          setValue(new BigInteger("18446744073709551615").toString(), typeIn);
+          return "18446744073709551615";
+        }
+        else if (new BigInteger(valueIn).compareTo(new BigInteger("18446744073709551615")) == 1) {
+          setValue("0x00", typeIn);
+          return "0";
+        }
+        break;
+      case SIGNED_LONG:
+        if (new BigInteger(valueIn).compareTo(new BigInteger("-9223372036854775808")) == -1) {
+          setValue(new BigInteger("9223372036854775807").toString(), typeIn);
+          return "9223372036854775807";
+        }
+        else if (new BigInteger(valueIn).compareTo(new BigInteger("9223372036854775807")) == 1) {
+          setValue(new BigInteger("-9223372036854775808").toString(), typeIn);
+          return "-9223372036854775808";
+        }
+        break;
+    }
+    setValue(new BigInteger(valueIn).toString(), typeIn);
+    return valueIn;
+  }
 
 }
 

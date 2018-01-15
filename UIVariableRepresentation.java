@@ -123,30 +123,50 @@ public class UIVariableRepresentation {
       cboTopEndianness.getValue().equals(BIG_ENDIAN)));
     grid.add(txtBytesTop, 0, 1, 3, 1);
     
+    Button btnDecrementValue = new Button("Decrement value (-)");
+    btnDecrementValue.setOnAction(e -> {
+      BigInteger biv = new BigInteger(txtValueTop.getText());
+      biv = biv.subtract(BigInteger.ONE);
+      txtValueTop.setText(
+        representation.clampValue(getTypeFromSelection(cboTopType.getValue()), biv.toString()));
+      updateUI();
+    });
+    grid.add(btnDecrementValue, 0, 2, 1, 1);
+    
+    Button btnIncrementValue = new Button("Increment value (+)");
+    btnIncrementValue.setOnAction(e -> {
+      BigInteger biv = new BigInteger(txtValueTop.getText());
+      biv = biv.add(BigInteger.ONE);
+      txtValueTop.setText(
+        representation.clampValue(getTypeFromSelection(cboTopType.getValue()), biv.toString()));
+      updateUI();
+    });
+    grid.add(btnIncrementValue, 1, 2, 1, 1);
+    
     Label lblInterpret = new Label("Interpret As:");
-    grid.add(lblInterpret, 0, 2, 3, 1);
+    grid.add(lblInterpret, 0, 3, 3, 1);
     
     cboBottomType = new ComboBox<>();
     cboBottomType.getItems().addAll("signed char", "unsigned char", "signed short", 
       "unsigned short", "signed int", "unsigned int", "signed long", "unsigned long");
     cboBottomType.getSelectionModel().select(getIndexFromType(type));
     cboBottomType.setOnAction(e -> updateUI());
-    grid.add(cboBottomType, 0, 3, 1, 1);
+    grid.add(cboBottomType, 0, 4, 1, 1);
     
     cboBottomEndianness = new ComboBox<>();
     cboBottomEndianness.getItems().addAll(BIG_ENDIAN, LITTLE_ENDIAN);
     cboBottomEndianness.getSelectionModel().select(0);
     cboBottomEndianness.setOnAction(e -> updateUI());
-    grid.add(cboBottomEndianness, 1, 3, 1, 1);
+    grid.add(cboBottomEndianness, 1, 4, 1, 1);
     
     txtValueBottom = new TextField(value);
     txtValueBottom.setEditable(false);
-    grid.add(txtValueBottom, 2, 3, 1, 1);
+    grid.add(txtValueBottom, 2, 4, 1, 1);
     
     txtBytesBottom = new TextField(representation.getHex(
       getTypeFromSelection(cboTopType.getValue()),
       cboTopEndianness.getValue().equals(BIG_ENDIAN)));
-    grid.add(txtBytesBottom, 0, 4, 3, 1);
+    grid.add(txtBytesBottom, 0, 5, 3, 1);
     
     // Value "clocks"
     canvas = new Canvas(240, 240);
