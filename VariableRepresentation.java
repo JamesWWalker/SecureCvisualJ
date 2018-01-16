@@ -12,65 +12,70 @@ public class VariableRepresentation {
   public String getValue() { return value; }
   
   
-  public void setValue(String valueIn, VariableType typeIn) {
-    type = typeIn;
-    if (valueIn.startsWith("0x") && type == VariableType.STRING)
-      value = "0x" + valueIn.substring(2).toUpperCase();
-    else if (!valueIn.startsWith("0x") && type != VariableType.STRING) {
-      switch (type) {
+  public String typeConversion(String valueIn, VariableType typeIn) {
+    if (valueIn.startsWith("0x") && typeIn == VariableType.STRING)
+      return "0x" + valueIn.substring(2).toUpperCase();
+    else if (!valueIn.startsWith("0x") && typeIn != VariableType.STRING) {
+      switch (typeIn) {
         case SIGNED_CHAR:
-          value = valueIn.replaceAll("'", "");
-          if (value.startsWith("\\x")) value = value.substring(2);
+          valueIn = valueIn.replaceAll("'", "");
+          if (valueIn.startsWith("\\x")) valueIn = valueIn.substring(2);
           else {
-            value = Long.toHexString(Long.parseLong(value) & 0xff);
-            if (value.length() > 2) value = value.substring(2);
+            valueIn = Long.toHexString(Long.parseLong(valueIn) & 0xff);
+            if (valueIn.length() > 2) valueIn = valueIn.substring(2);
           }
-          value = signExtend(2, value);
+          valueIn = signExtend(2, valueIn);
           break;
         case UNSIGNED_CHAR:
-          value = valueIn.replaceAll("'", "");
-          if (value.startsWith("\\x")) value = value.substring(2);
+          valueIn = valueIn.replaceAll("'", "");
+          if (valueIn.startsWith("\\x")) valueIn = valueIn.substring(2);
           else {
-            value = Long.toHexString(Long.parseUnsignedLong(value) & 0xff);
-            if (value.length() > 2) value = value.substring(2);
+            valueIn = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xff);
+            if (valueIn.length() > 2) valueIn = valueIn.substring(2);
           }
-          value = signExtend(2, value);
+          valueIn = signExtend(2, valueIn);
           break;
         case SIGNED_SHORT:
-          value = Long.toHexString(Long.parseLong(valueIn) & 0xffff);
-          if (value.length() > 4) value = value.substring(4);
-          value = signExtend(4, value);
+          valueIn = Long.toHexString(Long.parseLong(valueIn) & 0xffff);
+          if (valueIn.length() > 4) valueIn = valueIn.substring(4);
+          valueIn = signExtend(4, valueIn);
           break;
         case UNSIGNED_SHORT:
-          value = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffff);
-          if (value.length() > 4) value = value.substring(4);
-          value = signExtend(4, value);
+          valueIn = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffff);
+          if (valueIn.length() > 4) valueIn = valueIn.substring(4);
+          valueIn = signExtend(4, valueIn);
           break;
         case SIGNED_INT:
-          value = Long.toHexString(Long.parseLong(valueIn) & 0xffffffff);
-          if (value.length() > 8) value = value.substring(8);
-          value = signExtend(8, value);
+          valueIn = Long.toHexString(Long.parseLong(valueIn) & 0xffffffff);
+          if (valueIn.length() > 8) valueIn = valueIn.substring(8);
+          valueIn = signExtend(8, valueIn);
           break;
         case UNSIGNED_INT:
-          value = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffffffff);
-          if (value.length() > 8) value = value.substring(8);
-          value = signExtend(8, value);
+          valueIn = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffffffff);
+          if (valueIn.length() > 8) valueIn = valueIn.substring(8);
+          valueIn = signExtend(8, valueIn);
           break;
         case SIGNED_LONG:
-          value = Long.toHexString(Long.parseLong(valueIn));
-          value = signExtend(16, value);
+          valueIn = Long.toHexString(Long.parseLong(valueIn));
+          valueIn = signExtend(16, valueIn);
           break;
         case UNSIGNED_LONG:
-          value = Long.toHexString(Long.parseUnsignedLong(valueIn));
-          value = signExtend(16, value);
+          valueIn = Long.toHexString(Long.parseUnsignedLong(valueIn));
+          valueIn = signExtend(16, valueIn);
           break;
         default:
-          value = valueIn;
+          valueIn = valueIn;
           break;
       }
-      value = "0x" + value.toUpperCase();
+      return "0x" + valueIn.toUpperCase();
     }
-    else value = valueIn;
+    else return valueIn;
+  }
+  
+  
+  public void setValue(String valueIn, VariableType typeIn) {
+    type = typeIn;
+    value = typeConversion(valueIn, typeIn);
   }
   
   
@@ -97,7 +102,7 @@ public class VariableRepresentation {
   
   
   // Can't get Java's built-ins to do this consistently, so let's do it manually
-  private BigInteger convertHexToDecimal(String hex, boolean signed) {
+  public BigInteger convertHexToDecimal(String hex, boolean signed) {
     int place = 0;
     BigInteger runningTally = BigInteger.ZERO;
     for (int digit = hex.length()-1; digit >= 0; --digit) {

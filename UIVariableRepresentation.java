@@ -77,17 +77,16 @@ public class UIVariableRepresentation {
       "signed int", "unsigned int", "signed long", "unsigned long");
     cboTopType.getSelectionModel().select(getIndexFromType(type));
     cboTopType.setOnAction(e -> {
+System.err.println("DEBUG: " + getTypeFromSelection(cboTopType.getValue()));
       VariableType newType = getTypeFromSelection(cboTopType.getValue());
-      if (txtValueTop.getText().startsWith("-") &&
-          (newType == VariableType.UNSIGNED_CHAR ||
-           newType == VariableType.UNSIGNED_INT ||
-           newType == VariableType.UNSIGNED_SHORT ||
-           newType == VariableType.UNSIGNED_LONG))
-      {
-        representation.setValue(txtValueTop.getText().substring(1), 
-                                getTypeFromSelection(cboTopType.getValue()));
-      }
-      else representation.setValue(txtValueTop.getText(), getTypeFromSelection(cboTopType.getValue()));
+      BigInteger intermediateValue = new BigInteger(representation.typeConversion(txtBytesTop.getText(),
+        getTypeFromSelection(cboTopType.getValue())).substring(2), 16);
+      BigInteger newValue = representation.convertHexToDecimal(intermediateValue.toString(16),
+        !VariableType.toString(getTypeFromSelection(cboTopType.getValue())).toLowerCase().contains("unsigned"));
+System.err.println("DEBUG2: " + newValue);
+      representation.setValue(newValue.toString(), getTypeFromSelection(cboTopType.getValue()));
+      txtValueTop.setText(newValue.toString());
+//      txtValueTop.setText(newValue.toString());
       updateUI();
     });
     grid.add(cboTopType, 0, 0, 1, 1);
