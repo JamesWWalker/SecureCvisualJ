@@ -92,7 +92,8 @@ public class UISourceCode {
     if (assembly != null) {
       assemblyDisplay.getChildren().clear();
       assemblyText = new Text(assembly);
-      assemblyText.setFont(Font.font("Monospace", FontWeight.NORMAL, 14));
+      assemblyText.setFont(Font.font("Monospace", FontWeight.NORMAL,
+        UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight())));
       assemblyDisplay.getChildren().add(assemblyText);
     }
     
