@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+import javafx.beans.value.*;
 import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -11,41 +12,14 @@ public class UISourceCode {
   
   private static TextFlow assemblyDisplay;
   private static ScrollPane assemblyScrollPane;
+  private static Text assemblyText;
+  private static double fontSize = 1.0;
   private static VBox layout;
   private static int previousSourceLine = -1;
+  private static List<Text> sourceCode = new ArrayList<>();
   private static TextFlow sourceCodeDisplay;
   private static int sourceCodeLines = 0;
   private static ScrollPane sourceCodeScrollPane;
-  
-  
-  public static Pane loadSourceFile(String filename) throws IOException {
-  
-    assemblyDisplay = new TextFlow();
-    assemblyScrollPane = new ScrollPane();
-    layout = new VBox(10);
-    sourceCodeDisplay = new TextFlow();
-    sourceCodeLines = 0;
-    sourceCodeScrollPane = new ScrollPane();
-    previousSourceLine = -1;
-    
-    BufferedReader bufferedReader = new BufferedReader(new FileReader(filename));
-    String line = null;
-    while ((line = bufferedReader.readLine()) != null) {
-      Text sourceLine = new Text(Integer.toString(sourceCodeLines+1) + " " + line + "\n");
-      sourceLine.setFont(Font.font("Monospace", FontWeight.NORMAL, 14));
-      sourceLine.setUserData(new Integer(sourceCodeLines+1));
-      sourceCodeDisplay.getChildren().add(sourceLine);
-      ++sourceCodeLines;
-    }
-    bufferedReader.close();
-    
-    assemblyScrollPane.setMinHeight(70);
-    assemblyScrollPane.setContent(assemblyDisplay);
-    sourceCodeScrollPane.setContent(sourceCodeDisplay);
-    layout.getChildren().addAll(assemblyScrollPane, sourceCodeScrollPane);
-    
-    return layout;
-  }
   
   
   public static Pane parseSourceCode(List<String> code) {
@@ -63,6 +37,7 @@ public class UISourceCode {
       sourceLine.setFont(Font.font("Monospace", FontWeight.NORMAL, 14));
       sourceLine.setUserData(new Integer(sourceCodeLines+1));
       sourceCodeDisplay.getChildren().add(sourceLine);
+      sourceCode.add(sourceLine);
       ++sourceCodeLines;
     }
     
@@ -90,14 +65,58 @@ public class UISourceCode {
       previousSourceLine = sourceLine;
     }
     
+    // scene size change listeners
+    scene.widthProperty().addListener(new ChangeListener<Number>() {
+      @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
+        for (Text text : sourceCode) {
+          text.setFont(new Font("Monospace",
+            UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight())));
+        }
+        assemblyText.setFont(new Font("Monospace",
+          UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight())));
+      }
+    });
+    scene.heightProperty().addListener(new ChangeListener<Number>() {
+      @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
+        for (Text text : sourceCode) {
+          text.setFont(new Font("Monospace",
+            UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight())));
+        }
+        assemblyText.setFont(new Font("Monospace",
+          UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight())));
+      }
+    });
+    
     if (assembly != null) {
       assemblyDisplay.getChildren().clear();
-      Text assemblyText = new Text(assembly);
+      assemblyText = new Text(assembly);
       assemblyText.setFont(Font.font("Monospace", FontWeight.NORMAL, 14));
       assemblyDisplay.getChildren().add(assemblyText);
     }
     
     return layout;
+  }
+  
+  
+  public static void increaseFontSize(Scene scene) {
+    if (fontSize < 5.0) fontSize += 0.1;
+    for (Text text : sourceCode) {
+      text.setFont(new Font("Monospace",
+        UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight())));
+    }
+    assemblyText.setFont(new Font("Monospace",
+      UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight())));
+  }
+  
+  
+  public static void decreaseFontSize(Scene scene) {
+    if (fontSize > 0.1) fontSize -= 0.1;
+    for (Text text : sourceCode) {
+      text.setFont(new Font("Monospace",
+        UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight())));
+    }
+    assemblyText.setFont(new Font("Monospace",
+      UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight())));
   }
   
   

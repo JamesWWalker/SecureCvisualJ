@@ -48,7 +48,8 @@ public class UIDetachedTab {
     MenuItem menuIncreaseFontSize = new MenuItem("Increase Font Size");
     menuIncreaseFontSize.setOnAction(e -> {
       if (fontSize < 5.0) fontSize += 0.1;
-      layout.setStyle("-fx-font-size: " + UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight()));
+      if (title.equals(SubProgram.toString(SubProgram.SC))) UISourceCode.increaseFontSize(scene);
+      else layout.setStyle("-fx-font-size: " + UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight()));
     });
     menuIncreaseFontSize.setAccelerator(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.CONTROL_DOWN));
     viewMenu.getItems().add(menuIncreaseFontSize);
@@ -56,6 +57,7 @@ public class UIDetachedTab {
     MenuItem menuDecreaseFontSize = new MenuItem("Decrease Font Size");
     menuDecreaseFontSize.setOnAction(e -> {
       if (fontSize > 0.1) fontSize -= 0.1;
+      if (title.equals(SubProgram.toString(SubProgram.SC))) UISourceCode.decreaseFontSize(scene);
       layout.setStyle("-fx-font-size: " + UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight()));
     });
     menuDecreaseFontSize.setAccelerator(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN));
