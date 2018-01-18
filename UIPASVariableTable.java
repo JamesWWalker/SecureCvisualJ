@@ -186,6 +186,10 @@ public class UIPASVariableTable {
   
   static void displayVariableRepresentation(String type, String value) {
     if (value.matches("-*\\d*")) UIVariableRepresentation.display(type, value);
+    else if (value.startsWith("'") && value.endsWith("'") && value.length() == 3) {
+      UIVariableRepresentation.display(type, new Integer((int)value.charAt(1)).toString());
+    }
+    else if (value.equals("'\\0'")) UIVariableRepresentation.display(type, "0");
   }
   
 

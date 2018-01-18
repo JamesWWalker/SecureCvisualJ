@@ -509,7 +509,7 @@ public class RadialGraph {
     
     currentNode = nodes.get(nodes.size()-1).name;
     
-    buildGraph(canvas);
+//    buildGraph(canvas);
     
   } // populateCallOrder()
   
