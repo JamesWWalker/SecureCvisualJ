@@ -56,11 +56,13 @@ public class UISourceCode {
     if (sourceCodeLines > 0 && sourceLine > 0 && sourceLine < sourceCodeLines)  {
       if (previousSourceLine >= 0) {
         ((Text)UIUtils.getByUserData(sourceCodeDisplay, previousSourceLine)).
-          setFont(Font.font("Monospace", FontWeight.NORMAL, 14));
+          setFont(Font.font("Monospace", FontWeight.NORMAL,
+          UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight())));
         ((Text)UIUtils.getByUserData(sourceCodeDisplay, previousSourceLine)).setFill(Color.BLACK);
       }
       ((Text)UIUtils.getByUserData(sourceCodeDisplay, sourceLine)).
-        setFont(Font.font("Monospace", FontWeight.BOLD, 14));
+        setFont(Font.font("Monospace", FontWeight.BOLD,
+        UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight())));
       ((Text)UIUtils.getByUserData(sourceCodeDisplay, sourceLine)).setFill(Color.ORANGE);
       previousSourceLine = sourceLine;
     }
