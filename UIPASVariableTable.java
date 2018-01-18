@@ -1,3 +1,4 @@
+import java.math.*;
 import java.util.*;
 import javafx.beans.binding.*;
 import javafx.collections.*;
@@ -188,6 +189,9 @@ public class UIPASVariableTable {
     if (value.matches("-*\\d*")) UIVariableRepresentation.display(type, value);
     else if (value.startsWith("'") && value.endsWith("'") && value.length() == 3) {
       UIVariableRepresentation.display(type, new Integer((int)value.charAt(1)).toString());
+    }
+    else if (value.startsWith("'\\x") && value.endsWith("'") && value.length() == 6) {
+      UIVariableRepresentation.display(type, new BigInteger(value.substring(3, 5), 16).toString());
     }
     else if (value.equals("'\\0'")) UIVariableRepresentation.display(type, "0");
   }

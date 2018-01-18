@@ -238,7 +238,7 @@ public class UIMainWindow {
     Menu helpMenu = new Menu("Help");
     MenuItem menuDocumentation = new MenuItem("Documentation...");
     MenuItem menuAbout = new MenuItem("About...");
-    MenuItem menuVersion = new MenuItem("Alpha v18.01.16");
+    MenuItem menuVersion = new MenuItem("Alpha v18.01.18");
     helpMenu.getItems().addAll(menuDocumentation, menuAbout, menuVersion);
 
     //Main menu bar

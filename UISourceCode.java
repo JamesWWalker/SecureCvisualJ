@@ -53,6 +53,9 @@ public class UISourceCode {
 
   public static Pane buildSC(Scene scene, int sourceLine, String assembly) {
   
+    for (Text text : sourceCode) text.setFont(new Font("Monospace",
+      UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight())));
+  
     if (sourceCodeLines > 0 && sourceLine > 0 && sourceLine < sourceCodeLines)  {
       if (previousSourceLine >= 0) {
         ((Text)UIUtils.getByUserData(sourceCodeDisplay, previousSourceLine)).
