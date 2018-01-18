@@ -27,7 +27,7 @@ public class UISplashScreen extends Application {
       coordinator.exec();
     });
     
-    Label label = new Label("Author: James Walker\n\nThis work has been supported by the National Science Foundation under grants DUE-1245310, DGE-1523017, IIS-1456763, and IIS-1455886.");
+    Label label = new Label("Author: James Walker\n\nThis work has been supported by the National Science Foundation under grants DUE-1245310,  DGE-1522883, DGE-1523017, IIS-1456763, and IIS-1455886.");
     label.setWrapText(true);
     label.setTextAlignment(TextAlignment.CENTER);
     
