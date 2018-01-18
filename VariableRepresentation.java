@@ -102,7 +102,7 @@ public class VariableRepresentation {
   
   
   // Can't get Java's built-ins to do this consistently, so let's do it manually
-  public BigInteger convertHexToDecimal(String hex, boolean signed) {
+  public static BigInteger convertHexToDecimal(String hex, boolean signed) {
     int place = 0;
     BigInteger runningTally = BigInteger.ZERO;
     for (int digit = hex.length()-1; digit >= 0; --digit) {

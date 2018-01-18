@@ -311,11 +311,11 @@ public class UIVariableRepresentation {
   private static String getMaxSizeByType(String type) {
     if (type.equals("signed char")) return "0x7F=2^8";
     else if (type.equals("unsigned char")) return "0xFF=2^8";
-    else if (type.equals("signed short")) return "0x7FFF=2^16-1";
+    else if (type.equals("signed short")) return "0x7FFF=2^(16-1)-1";
     else if (type.equals("unsigned short")) return "0xFFFF=2^16";
-    else if (type.equals("signed int")) return "0x7FFFFFFF=2^32-1";
+    else if (type.equals("signed int")) return "0x7FFFFFFF=2^(32-1)-1";
     else if (type.equals("unsigned int")) return "0xFFFFFFFF=2^32";
-    else if (type.equals("signed long")) return "0x7FFFFFFFFFFFFFFF=2^64-1";
+    else if (type.equals("signed long")) return "0x7FFFFFFFFFFFFFFF=2^(64-1)-1";
     else if (type.equals("unsigned long")) return "0xFFFFFFFFFFFFFFFF=2^64";
     assert false;
     return "Unknown";

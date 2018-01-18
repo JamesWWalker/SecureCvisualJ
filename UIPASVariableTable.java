@@ -191,7 +191,8 @@ public class UIPASVariableTable {
       UIVariableRepresentation.display(type, new Integer((int)value.charAt(1)).toString());
     }
     else if (value.startsWith("'\\x") && value.endsWith("'") && value.length() == 6) {
-      UIVariableRepresentation.display(type, new BigInteger(value.substring(3, 5), 16).toString());
+      UIVariableRepresentation.display(type, VariableRepresentation.convertHexToDecimal(
+        value.substring(3, 5), !type.contains("unsigned")).toString());
     }
     else if (value.equals("'\\0'")) UIVariableRepresentation.display(type, "0");
   }
