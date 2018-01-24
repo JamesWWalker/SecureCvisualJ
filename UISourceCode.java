@@ -110,7 +110,7 @@ public class UISourceCode {
       text.setFont(new Font("Monospace",
         UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight())));
     }
-    assemblyText.setFont(new Font("Monospace",
+	if (assemblyText != null)  assemblyText.setFont(new Font("Monospace",
       UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight())));
   }
   
@@ -121,7 +121,7 @@ public class UISourceCode {
       text.setFont(new Font("Monospace",
         UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight())));
     }
-    assemblyText.setFont(new Font("Monospace",
+	if (assemblyText != null) assemblyText.setFont(new Font("Monospace",
       UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight())));
   }
   
