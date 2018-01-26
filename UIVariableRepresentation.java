@@ -315,8 +315,14 @@ public class UIVariableRepresentation {
     else if (type.equals("unsigned short")) return "0xFFFF=2^16";
     else if (type.equals("signed int")) return "0x7FFFFFFF=2^(32-1)-1";
     else if (type.equals("unsigned int")) return "0xFFFFFFFF=2^32";
-    else if (type.equals("signed long")) return "0x7FFFFFFFFFFFFFFF=2^(64-1)-1";
-    else if (type.equals("unsigned long")) return "0xFFFFFFFFFFFFFFFF=2^64";
+    else if (type.equals("signed long")) {
+      if (UIUtils.architecture == 64) return "0x7FFFFFFFFFFFFFFF=2^(64-1)-1";
+      else if (UIUtils.architecture == 32) return "0x7FFFFFFF=2^(32-1)-1";
+    }
+    else if (type.equals("unsigned long")) {
+      if (UIUtils.architecture == 64) return "0xFFFFFFFFFFFFFFFF=2^64";
+      else if (UIUtils.architecture == 32) return "0xFFFFFFFF=2^32";
+    }
     assert false;
     return "Unknown";
   }
@@ -329,8 +335,14 @@ public class UIVariableRepresentation {
     else if (type.equals("unsigned short")) return "0x0000=0";
     else if (type.equals("signed int")) return "0x80000000=-2^(32-1)";
     else if (type.equals("unsigned int")) return "0x00000000=0";
-    else if (type.equals("signed long")) return "0x8000000000000000=-2^(64-1)";
-    else if (type.equals("unsigned long")) return "0x0000000000000000=0";
+    else if (type.equals("signed long")) {
+      if (UIUtils.architecture == 64) return "0x8000000000000000=-2^(64-1)";
+      else if (UIUtils.architecture == 32) return "0x80000000=-2^(32-1)";
+    }
+    else if (type.equals("unsigned long")) {
+      if (UIUtils.architecture == 64) return "0x0000000000000000=0";
+      else if (UIUtils.architecture == 32) return "0x00000000=0";
+    }
     assert false;
     return "Unknown";
   }
@@ -351,7 +363,10 @@ public class UIVariableRepresentation {
       if (type.contains("char")) max = new BigDecimal("255");
       else if (type.contains("short")) max = new BigDecimal("65535");
       else if (type.contains("int")) max = new BigDecimal("4294967295");
-      else if (type.contains("long")) max = new BigDecimal("18446744073709551615");
+      else if (type.contains("long")) {
+        if (UIUtils.architecture == 64) max = new BigDecimal("18446744073709551615");
+        else if (UIUtils.architecture == 32) max = new BigDecimal("4294967295");
+      }
     }
     else {
       if (type.contains("char")) {
@@ -367,8 +382,14 @@ public class UIVariableRepresentation {
         max = new BigDecimal("2147483647");
       }
       else if (type.contains("long")) {
-        min = new BigDecimal("-9223372036854775808");
-        max = new BigDecimal("9223372036854775807");
+        if (UIUtils.architecture == 64) {
+          min = new BigDecimal("-9223372036854775808");
+          max = new BigDecimal("9223372036854775807");
+        }
+        else if (UIUtils.architecture == 32) {
+          min = new BigDecimal("-2147483648");
+          max = new BigDecimal("2147483647");
+        }
       }
     }
     BigDecimal val = new BigDecimal(decValue);

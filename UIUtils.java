@@ -6,6 +6,8 @@ public class UIUtils {
 
   public static final String GLOBAL = "*G*";
   
+  public static int architecture = 64; // number of bits
+  
   private static List<String> colorWheel;
   private static int colorWheelIndex = 0;
   

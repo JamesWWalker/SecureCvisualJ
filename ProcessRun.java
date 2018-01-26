@@ -244,7 +244,8 @@ public class ProcessRun {
             !type.equals("section") && 
             !type.equals("return_address") &&
             !type.equals("invocation") &&
-            !type.equals("output"))
+            !type.equals("output") &&
+            !type.equals("architecture"))
         {
           currentEvent = Integer.parseInt(parameters[0]);
           if (fractionalEvent > 0.99) fractionalEvent = 0;
@@ -274,6 +275,10 @@ public class ProcessRun {
         else if (type.equals("sd_clear")) parseSdClear(parameters);
         else if (type.equals("sd_set")) parseSdSet(parameters);
         else if (type.equals("binary")) programName = parameters[0];
+        else if (type.equals("architecture")) {
+          if (parameters[0].equals("i386")) UIUtils.architecture = 32;
+          else if (parameters[0].equals("x86_64")) UIUtils.architecture = 64;
+        }
         else {
           System.err.println("ERROR: Unrecognized event type " + type + ". Terminating parse.");
           return;

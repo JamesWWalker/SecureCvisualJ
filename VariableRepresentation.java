@@ -24,7 +24,7 @@ public class VariableRepresentation {
             valueIn = Long.toHexString(Long.parseLong(valueIn) & 0xff);
             if (valueIn.length() > 2) valueIn = valueIn.substring(2);
           }
-          valueIn = signExtend(2, valueIn);
+          valueIn = extend(2, valueIn, new BigInteger(valueIn, 16).compareTo(BigInteger.ZERO) >= 0);
           break;
         case UNSIGNED_CHAR:
           valueIn = valueIn.replaceAll("'", "");
@@ -33,35 +33,49 @@ public class VariableRepresentation {
             valueIn = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xff);
             if (valueIn.length() > 2) valueIn = valueIn.substring(2);
           }
-          valueIn = signExtend(2, valueIn);
+          valueIn = extend(2, valueIn, true);
           break;
         case SIGNED_SHORT:
           valueIn = Long.toHexString(Long.parseLong(valueIn) & 0xffff);
           if (valueIn.length() > 4) valueIn = valueIn.substring(4);
-          valueIn = signExtend(4, valueIn);
+          valueIn = extend(4, valueIn, new BigInteger(valueIn, 16).compareTo(BigInteger.ZERO) >= 0);
           break;
         case UNSIGNED_SHORT:
           valueIn = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffff);
           if (valueIn.length() > 4) valueIn = valueIn.substring(4);
-          valueIn = signExtend(4, valueIn);
+          valueIn = extend(4, valueIn, true);
           break;
         case SIGNED_INT:
           valueIn = Long.toHexString(Long.parseLong(valueIn) & 0xffffffff);
           if (valueIn.length() > 8) valueIn = valueIn.substring(8);
-          valueIn = signExtend(8, valueIn);
+          valueIn = extend(8, valueIn, new BigInteger(valueIn, 16).compareTo(BigInteger.ZERO) >= 0);
           break;
         case UNSIGNED_INT:
           valueIn = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffffffff);
           if (valueIn.length() > 8) valueIn = valueIn.substring(8);
-          valueIn = signExtend(8, valueIn);
+          valueIn = extend(8, valueIn, true);
           break;
         case SIGNED_LONG:
-          valueIn = Long.toHexString(Long.parseLong(valueIn));
-          valueIn = signExtend(16, valueIn);
+          if (UIUtils.architecture == 64) {
+            valueIn = Long.toHexString(Long.parseLong(valueIn));
+            valueIn = extend(16, valueIn, new BigInteger(valueIn, 16).compareTo(BigInteger.ZERO) >= 0);
+          }
+          else if (UIUtils.architecture == 32) {
+            valueIn = Long.toHexString(Long.parseLong(valueIn) & 0xffffffff);
+            if (valueIn.length() > 8) valueIn = valueIn.substring(8);
+            valueIn = extend(8, valueIn, new BigInteger(valueIn, 16).compareTo(BigInteger.ZERO) >= 0);
+          } 
           break;
         case UNSIGNED_LONG:
-          valueIn = Long.toHexString(Long.parseUnsignedLong(valueIn));
-          valueIn = signExtend(16, valueIn);
+          if (UIUtils.architecture == 64) {
+            valueIn = Long.toHexString(Long.parseUnsignedLong(valueIn));
+            valueIn = extend(16, valueIn, true);
+          }
+          else if (UIUtils.architecture == 32) {
+            valueIn = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffffffff);
+            if (valueIn.length() > 8) valueIn = valueIn.substring(8);
+            valueIn = extend(8, valueIn, true);
+          }
           break;
         default:
           valueIn = valueIn;
@@ -200,9 +214,10 @@ public class VariableRepresentation {
       case SIGNED_INT: 
       case UNSIGNED_INT: numZeroes = 32; break;
       case SIGNED_LONG: 
-      case UNSIGNED_LONG: numZeroes = 64; break;
+      case UNSIGNED_LONG: numZeroes = UIUtils.architecture; break;
     }
-    return signExtend(numZeroes, new BigInteger(hex, 16).toString(2));
+    return extend(numZeroes, new BigInteger(hex, 16).toString(2),
+     new BigInteger(hex, 16).compareTo(BigInteger.ZERO) >= 0);
   }
   
   
@@ -213,25 +228,25 @@ public class VariableRepresentation {
       case UNSIGNED_CHAR:
         numDigits = 2;
         if (digits.length() >= numDigits) digits = digits.substring(digits.length()-numDigits);
-        else digits = signExtend(numDigits, digits);
+        else digits = extend(numDigits, digits, new BigInteger(digits, 16).compareTo(BigInteger.ZERO) >= 0);
         break;
       case SIGNED_SHORT:
       case UNSIGNED_SHORT:
         numDigits = 4;
         if (digits.length() >= numDigits) digits = digits.substring(digits.length()-numDigits);
-        else digits = signExtend(numDigits, digits);
+        else digits = extend(numDigits, digits, new BigInteger(digits, 16).compareTo(BigInteger.ZERO) >= 0);
         break;
       case SIGNED_INT:
       case UNSIGNED_INT:
         numDigits = 8;
         if (digits.length() >= numDigits) digits = digits.substring(digits.length()-numDigits);
-        else digits = signExtend(numDigits, digits);
+        else digits = extend(numDigits, digits, new BigInteger(digits, 16).compareTo(BigInteger.ZERO) >= 0);
         break;
       case SIGNED_LONG:
       case UNSIGNED_LONG:
-        numDigits = 16;
+        numDigits = UIUtils.architecture / 4;
         if (digits.length() >= numDigits) digits = digits.substring(digits.length()-numDigits);
-        else digits = signExtend(numDigits, digits);
+        else digits = extend(numDigits, digits, new BigInteger(digits, 16).compareTo(BigInteger.ZERO) >= 0);
         break;        
     }
     return digits;
@@ -248,7 +263,9 @@ public class VariableRepresentation {
   }
   
   
-  private String signExtend(int numDigits, String str) {
+  /*private String signExtend(int numDigits, String str) {
+  System.err.println("DEBUG: " + numDigits + ", " + str);
+  if (str.equals("8")) System.err.println("DEBUG2: " + new BigInteger(str).toString(16));
     boolean leadingOne =
       (str.charAt(0) == '8' || str.charAt(0) == '9' || str.charAt(0) == 'A' ||
        str.charAt(0) == 'B' || str.charAt(0) == 'C' || str.charAt(0) == 'D' ||
@@ -256,6 +273,18 @@ public class VariableRepresentation {
     
     String extend = "";
     if (!leadingOne) {
+      for (int n = 0; n < numDigits; ++n) extend += "0";
+    }
+    else {
+      for (int n = 0; n < numDigits; ++n) extend += "F";
+    }
+    return extend.substring(str.length()) + str;
+  } */
+  
+  
+  private String extend(int numDigits, String str, boolean positive) {
+    String extend = "";
+    if (positive) {
       for (int n = 0; n < numDigits; ++n) extend += "0";
     }
     else {
@@ -328,23 +357,47 @@ public class VariableRepresentation {
         }
         break;
       case UNSIGNED_LONG:
-        if (new BigInteger(valueIn).compareTo(BigInteger.valueOf(0)) == -1) {
-          setValue(new BigInteger("18446744073709551615").toString(), typeIn);
-          return "18446744073709551615";
+        if (UIUtils.architecture == 64) {
+          if (new BigInteger(valueIn).compareTo(BigInteger.valueOf(0)) == -1) {
+            setValue(new BigInteger("18446744073709551615").toString(), typeIn);
+            return "18446744073709551615";
+          }
+          else if (new BigInteger(valueIn).compareTo(new BigInteger("18446744073709551615")) == 1) {
+            setValue("0x00", typeIn);
+            return "0";
+          }
         }
-        else if (new BigInteger(valueIn).compareTo(new BigInteger("18446744073709551615")) == 1) {
-          setValue("0x00", typeIn);
-          return "0";
+        else if (UIUtils.architecture == 32) {
+          if (Long.parseLong(valueIn) < 0) {
+            setValue(new BigInteger("4294967295").toString(), typeIn);
+            return "4294967295";
+          }
+          if (new BigInteger(valueIn).compareTo(new BigInteger("4294967295")) == 1) {
+            setValue("0x00", typeIn);
+            return "0";
+          }
         }
         break;
       case SIGNED_LONG:
-        if (new BigInteger(valueIn).compareTo(new BigInteger("-9223372036854775808")) == -1) {
-          setValue(new BigInteger("9223372036854775807").toString(), typeIn);
-          return "9223372036854775807";
+        if (UIUtils.architecture == 64) {
+          if (new BigInteger(valueIn).compareTo(new BigInteger("-9223372036854775808")) == -1) {
+            setValue(new BigInteger("9223372036854775807").toString(), typeIn);
+            return "9223372036854775807";
+          }
+          else if (new BigInteger(valueIn).compareTo(new BigInteger("9223372036854775807")) == 1) {
+            setValue(new BigInteger("-9223372036854775808").toString(), typeIn);
+            return "-9223372036854775808";
+          }
         }
-        else if (new BigInteger(valueIn).compareTo(new BigInteger("9223372036854775807")) == 1) {
-          setValue(new BigInteger("-9223372036854775808").toString(), typeIn);
-          return "-9223372036854775808";
+        else if (UIUtils.architecture == 32) {
+          if (Long.parseLong(valueIn) < -2147483648) {
+            setValue(new BigInteger("2147483647").toString(), typeIn);
+            return "2147483647";
+          }
+          if (Long.parseLong(valueIn) > 2147483647) {
+            setValue(new BigInteger("-2147483648").toString(), typeIn);
+            return "-2147483648";
+          }
         }
         break;
     }
