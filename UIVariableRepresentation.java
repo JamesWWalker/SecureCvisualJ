@@ -48,7 +48,8 @@ public class UIVariableRepresentation {
     window.initModality(Modality.APPLICATION_MODAL);
   
     VariableType type = VariableType.convertFromAnalysis(typeIn);
-    representation = new VariableRepresentation(type, value, true);
+    representation = new VariableRepresentation(true);
+    representation.setValueFromDecimal(value, type);
     
     BorderPane container = new BorderPane();
 
@@ -77,15 +78,18 @@ public class UIVariableRepresentation {
       "signed int", "unsigned int", "signed long", "unsigned long");
     cboTopType.getSelectionModel().select(getIndexFromType(type));
     cboTopType.setOnAction(e -> {
-      VariableType newType = getTypeFromSelection(cboTopType.getValue());
-      BigInteger intermediateValue = new BigInteger(representation.typeConversion(txtBytesTop.getText(),
-        getTypeFromSelection(cboTopType.getValue())).substring(2), 16);
-      BigInteger newValue = representation.convertHexToDecimal(intermediateValue.toString(16),
-        !VariableType.toString(getTypeFromSelection(cboTopType.getValue())).toLowerCase().contains("unsigned"));
-      representation.setValue(newValue.toString(), getTypeFromSelection(cboTopType.getValue()));
-      txtValueTop.setText(newValue.toString());
-//      txtValueTop.setText(newValue.toString());
-      updateUI();
+      if (!updateInProgress) {
+        updateInProgress = true;
+        VariableType newType = getTypeFromSelection(cboTopType.getValue());
+        representation.setValueFromHex(
+          representation.resizeHex(newType,
+                                   txtBytesTop.getText(),
+                                   txtValueTop.getText().charAt(0) != '-')
+        );
+        txtValueTop.setText(representation.convertHexToDecimal(representation.getValue(), newType));
+        updateInProgress = false;
+        updateUI();
+      }
     });
     grid.add(cboTopType, 0, 0, 1, 1);
     
@@ -93,39 +97,51 @@ public class UIVariableRepresentation {
     cboTopEndianness.getItems().addAll(BIG_ENDIAN, LITTLE_ENDIAN);
     cboTopEndianness.getSelectionModel().select(0);
     cboTopEndianness.setOnAction(e -> {
-      representation.reverseEndianness(cboTopEndianness.getValue().equals(BIG_ENDIAN));
-      updateUI();
+      if (!updateInProgress) {
+        updateInProgress = true;
+        if (representation.isBigEndian != (cboTopEndianness.getValue().equals(BIG_ENDIAN)))
+          representation.reverseEndianness();
+        txtValueTop.setText(representation.convertHexToDecimal(representation.getValue(), 
+                                                               getTypeFromSelection(cboTopType.getValue())));
+        updateInProgress = false;
+        updateUI();
+      }
     });
     grid.add(cboTopEndianness, 1, 0, 1, 1);
     
     txtValueTop = new TextField(value);
     txtValueTop.textProperty().addListener((obs, oldValue, newValue) -> {
-      try {
-        txtValueTop.setText(newValue);
-        String interpretValue = "0";
-        if (newValue.matches("-*\\d*")) interpretValue = newValue;
-        representation.setValue(interpretValue, getTypeFromSelection(cboTopType.getValue()));
-        if (!updateInProgress) updateUI();
-      } catch (NumberFormatException ex) {
-        newValue = newValue.replaceAll("[^\\d]", "");
-        txtValueTop.setText(newValue);
-        representation.setValue(newValue, getTypeFromSelection(cboTopType.getValue()));
-        if (!updateInProgress) updateUI();
+      if (!updateInProgress) {
+        updateInProgress = true;
+        if (newValue.matches("-*\\d+")) {
+          newValue = representation.clampValue(getTypeFromSelection(cboTopType.getValue()), newValue);
+          String newHex = representation.convertDecimalToHex(newValue);
+          representation.setValueFromHex(
+            representation.resizeHex(getTypeFromSelection(cboTopType.getValue()), 
+                                     newHex,
+                                     newValue.charAt(0) != '-')
+          );
+          txtValueTop.setText(newValue);
+          updateInProgress = false;
+          updateUI();
+        }
+        else txtValueTop.setText(oldValue);
+        updateInProgress = false;
       }
+
     });
     grid.add(txtValueTop, 2, 0, 1, 1);
     
-    txtBytesTop = new TextField(representation.getHex(
-      getTypeFromSelection(cboTopType.getValue()),
-      cboTopEndianness.getValue().equals(BIG_ENDIAN)));
+    txtBytesTop = new TextField(representation.getValue(cboTopEndianness.getValue().equals(BIG_ENDIAN)));
     grid.add(txtBytesTop, 0, 1, 3, 1);
     
     Button btnDecrementValue = new Button("Decrement value (-)");
     btnDecrementValue.setOnAction(e -> {
       BigInteger biv = new BigInteger(txtValueTop.getText());
       biv = biv.subtract(BigInteger.ONE);
-      txtValueTop.setText(
-        representation.clampValue(getTypeFromSelection(cboTopType.getValue()), biv.toString()));
+      biv = new BigInteger(representation.clampValue(getTypeFromSelection(cboTopType.getValue()), biv.toString()));
+      representation.setValueFromDecimal(biv.toString(), getTypeFromSelection(cboTopType.getValue()));
+      txtValueTop.setText(biv.toString());
       updateUI();
     });
     grid.add(btnDecrementValue, 0, 2, 1, 1);
@@ -134,8 +150,9 @@ public class UIVariableRepresentation {
     btnIncrementValue.setOnAction(e -> {
       BigInteger biv = new BigInteger(txtValueTop.getText());
       biv = biv.add(BigInteger.ONE);
-      txtValueTop.setText(
-        representation.clampValue(getTypeFromSelection(cboTopType.getValue()), biv.toString()));
+      biv = new BigInteger(representation.clampValue(getTypeFromSelection(cboTopType.getValue()), biv.toString()));
+      representation.setValueFromDecimal(biv.toString(), getTypeFromSelection(cboTopType.getValue()));
+      txtValueTop.setText(biv.toString());
       updateUI();
     });
     grid.add(btnIncrementValue, 1, 2, 1, 1);
@@ -160,9 +177,7 @@ public class UIVariableRepresentation {
     txtValueBottom.setEditable(false);
     grid.add(txtValueBottom, 2, 4, 1, 1);
     
-    txtBytesBottom = new TextField(representation.getHex(
-      getTypeFromSelection(cboTopType.getValue()),
-      cboTopEndianness.getValue().equals(BIG_ENDIAN)));
+    txtBytesBottom = new TextField(representation.getValue(cboTopEndianness.getValue().equals(BIG_ENDIAN)));
     grid.add(txtBytesBottom, 0, 5, 3, 1);
     
     // Value "clocks"
@@ -241,18 +256,24 @@ public class UIVariableRepresentation {
   
   private static void updateUI() {
     updateInProgress = true;
-    txtBytesTop.setText(representation.getHex(
-      getTypeFromSelection(cboTopType.getValue()),
-      cboTopEndianness.getValue().equals(BIG_ENDIAN)));
-//    txtValueTop.setText(representation.getDecimal(
-//      getTypeFromSelection(cboTopType.getValue()),
-//      cboTopEndianness.getValue().equals(BIG_ENDIAN)));
-    txtBytesBottom.setText(representation.getHex(
-      getTypeFromSelection(cboBottomType.getValue()),
-      cboBottomEndianness.getValue().equals(BIG_ENDIAN)));
-    txtValueBottom.setText(representation.getDecimal(
-      getTypeFromSelection(cboBottomType.getValue()),
-      cboBottomEndianness.getValue().equals(BIG_ENDIAN)));
+    txtBytesTop.setText(representation.getValue());
+      
+    // Figure out what bottom hex should be
+    String bottomHex = txtBytesTop.getText();
+    VariableType bottomType = getTypeFromSelection(cboBottomType.getValue());
+    if (!cboBottomEndianness.getValue().equals(cboTopEndianness.getValue())) 
+      bottomHex = representation.reverseBytes(bottomHex);
+    bottomHex = 
+      representation.resizeHex(bottomType, 
+                               bottomHex,
+                               (txtValueTop.getText().charAt(0) != '-') || 
+                               bottomType == VariableType.UNSIGNED_CHAR ||
+                               bottomType == VariableType.UNSIGNED_INT ||
+                               bottomType == VariableType.UNSIGNED_LONG ||
+                               bottomType == VariableType.UNSIGNED_SHORT);
+    txtBytesBottom.setText(bottomHex);
+    txtValueBottom.setText(representation.convertHexToDecimal(
+                            bottomHex, getTypeFromSelection(cboBottomType.getValue())));
     drawClock(canvas.getWidth()-10, 
               canvas.getHeight()-80, 
               gc, 
@@ -426,7 +447,7 @@ public class UIVariableRepresentation {
     
     gc.setStroke(Color.BLUE);
     gc.setFill(Color.BLUE);
-    gc.fillText(value, width*(1.0/4.0)+20, height/2.0);
+    gc.fillText("0x" + value, width*(1.0/4.0)+20, height/2.0);
     
     gc.setStroke(Color.rgb(255, 85, 0));
     gc.setFill(Color.rgb(255, 85, 0));

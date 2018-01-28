@@ -1,122 +1,141 @@
+/*
+Procedure when changing the value in the text box:
+
+-Make sure it's a number. If it isn't, abort.
+-Clamp its value based on the variable type.                          // DONE
+-Calculate the equivalent hex.                                        // DONE
+
+-For bottom part, copy hex verbatim.                                  // DONE
+-Extend or truncate the hex as necessary based on the variable type.  // DONE
+-Then convert the hex back into a decimal number.
+
+-Update everything.
+
+
+
+Procedure when changing the type:
+
+-Extend or truncate the hex as necessary based on the variable type.
+-Then convert the hex back into a decimal number.
+-Update everything.
+*/
+
 import java.math.*;
 import java.util.*;
 
 public class VariableRepresentation {
 
-  String value;
-  VariableType type;
-  public boolean isBigEndian;
-  public long address;
+  private String value; // hex, does NOT have 0x prefix
+  public boolean isBigEndian = true;
   
   
-  public String getValue() { return value; }
-  
-  
-  public String typeConversion(String valueIn, VariableType typeIn) {
-    if (valueIn.startsWith("0x") && typeIn == VariableType.STRING)
-      return "0x" + valueIn.substring(2).toUpperCase();
-    else if (!valueIn.startsWith("0x") && typeIn != VariableType.STRING) {
-      switch (typeIn) {
-        case SIGNED_CHAR:
-          valueIn = valueIn.replaceAll("'", "");
-          if (valueIn.startsWith("\\x")) valueIn = valueIn.substring(2);
-          else {
-            valueIn = Long.toHexString(Long.parseLong(valueIn) & 0xff);
-            if (valueIn.length() > 2) valueIn = valueIn.substring(2);
-          }
-          valueIn = extend(2, valueIn, new BigInteger(valueIn, 16).compareTo(BigInteger.ZERO) >= 0);
-          break;
-        case UNSIGNED_CHAR:
-          valueIn = valueIn.replaceAll("'", "");
-          if (valueIn.startsWith("\\x")) valueIn = valueIn.substring(2);
-          else {
-            valueIn = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xff);
-            if (valueIn.length() > 2) valueIn = valueIn.substring(2);
-          }
-          valueIn = extend(2, valueIn, true);
-          break;
-        case SIGNED_SHORT:
-          valueIn = Long.toHexString(Long.parseLong(valueIn) & 0xffff);
-          if (valueIn.length() > 4) valueIn = valueIn.substring(4);
-          valueIn = extend(4, valueIn, new BigInteger(valueIn, 16).compareTo(BigInteger.ZERO) >= 0);
-          break;
-        case UNSIGNED_SHORT:
-          valueIn = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffff);
-          if (valueIn.length() > 4) valueIn = valueIn.substring(4);
-          valueIn = extend(4, valueIn, true);
-          break;
-        case SIGNED_INT:
-          valueIn = Long.toHexString(Long.parseLong(valueIn) & 0xffffffff);
-          if (valueIn.length() > 8) valueIn = valueIn.substring(8);
-          valueIn = extend(8, valueIn, new BigInteger(valueIn, 16).compareTo(BigInteger.ZERO) >= 0);
-          break;
-        case UNSIGNED_INT:
-          valueIn = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffffffff);
-          if (valueIn.length() > 8) valueIn = valueIn.substring(8);
-          valueIn = extend(8, valueIn, true);
-          break;
-        case SIGNED_LONG:
-          if (UIUtils.architecture == 64) {
-            valueIn = Long.toHexString(Long.parseLong(valueIn));
-            valueIn = extend(16, valueIn, new BigInteger(valueIn, 16).compareTo(BigInteger.ZERO) >= 0);
-          }
-          else if (UIUtils.architecture == 32) {
-            valueIn = Long.toHexString(Long.parseLong(valueIn) & 0xffffffff);
-            if (valueIn.length() > 8) valueIn = valueIn.substring(8);
-            valueIn = extend(8, valueIn, new BigInteger(valueIn, 16).compareTo(BigInteger.ZERO) >= 0);
-          } 
-          break;
-        case UNSIGNED_LONG:
-          if (UIUtils.architecture == 64) {
-            valueIn = Long.toHexString(Long.parseUnsignedLong(valueIn));
-            valueIn = extend(16, valueIn, true);
-          }
-          else if (UIUtils.architecture == 32) {
-            valueIn = Long.toHexString(Long.parseUnsignedLong(valueIn) & 0xffffffff);
-            if (valueIn.length() > 8) valueIn = valueIn.substring(8);
-            valueIn = extend(8, valueIn, true);
-          }
-          break;
-        default:
-          valueIn = valueIn;
-          break;
-      }
-      return "0x" + valueIn.toUpperCase();
-    }
-    else return valueIn;
+  public VariableRepresentation(String hex) {
+    isBigEndian = true;
+    setValueFromHex(hex);
   }
   
   
-  public void setValue(String valueIn, VariableType typeIn) {
-    type = typeIn;
-    value = typeConversion(valueIn, typeIn);
-  }
-  
-  
-  public VariableRepresentation(VariableType typeIn, String valueIn, boolean isBigEndianIn) {
-    setValue(valueIn, typeIn);
+  public VariableRepresentation(String hex, boolean isBigEndianIn) {
     isBigEndian = isBigEndianIn;
+    setValueFromHex(hex);
   }
   
   
-  public String getDecimal(VariableType convertTo, boolean convertToBigEndian) {
-    if (type == VariableType.STRING || convertTo == VariableType.STRING) return value;
-    String hex = getHex(convertTo, convertToBigEndian).substring(2);
-    
-    boolean signed = false;
-    
-    if (convertTo == VariableType.SIGNED_CHAR || convertTo == VariableType.SIGNED_INT ||
-        convertTo == VariableType.SIGNED_LONG || convertTo == VariableType.SIGNED_SHORT)
-    {
-      signed = true;
+  public VariableRepresentation(boolean isBigEndianIn) {
+    isBigEndian = isBigEndianIn;
+    value = "0";
+  }
+  
+  
+  public String getValue(boolean isBigEndianIn) {
+    if (isBigEndianIn == isBigEndian) return value;
+    else return reverseBytes(value);
+  }
+  
+  
+  public String getValue() {
+    return value;
+  }
+  
+  
+  public void reverseEndianness() {
+    setValueFromHex(reverseBytes(value));
+    isBigEndian = !isBigEndian;
+  }
+  
+  
+  public void setValueFromHex(String hex) {
+    if (hex.startsWith("0x")) value = hex.substring(2).toUpperCase();
+    else value = hex;
+  }
+
+
+  public void setValueFromDecimal(String decimal, VariableType typeIn) {
+    String intermediate = convertDecimalToHex(decimal);
+    value = resizeHex(typeIn, intermediate, decimal.charAt(0) != '-').toUpperCase();
+  }
+
+
+  // EXPECTS DECIMAL
+  public String clampValue(VariableType typeIn, String valueIn) {
+    BigInteger valueInDec = new BigInteger(valueIn);
+    switch (typeIn) {
+      case UNSIGNED_CHAR:
+        if (valueInDec.compareTo(BigInteger.ZERO) < 0) return "255";
+        if (valueInDec.compareTo(new BigInteger("255")) > 0) return "0";
+        break;
+      case SIGNED_CHAR:
+        if (valueInDec.compareTo(new BigInteger("-128")) < 0) return "127";
+        if (valueInDec.compareTo(new BigInteger("127")) > 0) return "-128";
+        break;
+      case UNSIGNED_SHORT:
+        if (valueInDec.compareTo(BigInteger.ZERO) < 0) return "65535";
+        if (valueInDec.compareTo(new BigInteger("65535")) > 0) return "0";
+        break;
+      case SIGNED_SHORT:
+        if (valueInDec.compareTo(new BigInteger("-32768")) < 0) return "32767";
+        if (valueInDec.compareTo(new BigInteger("32767")) > 0) return "-32768";
+        break;
+      case UNSIGNED_INT:
+        if (valueInDec.compareTo(BigInteger.ZERO) < 0) return "4294967295";
+        if (valueInDec.compareTo(new BigInteger("4294967295")) > 0) return "0";
+        break;
+      case SIGNED_INT:
+        if (valueInDec.compareTo(new BigInteger("-2147483648")) < 0) return "2147483647";
+        if (valueInDec.compareTo(new BigInteger("2147483647")) > 0) return "-2147483648";
+        break;
+      case UNSIGNED_LONG:
+        if (UIUtils.architecture == 64) {        
+          if (valueInDec.compareTo(BigInteger.ZERO) < 0) return "18446744073709551615";
+          if (valueInDec.compareTo(new BigInteger("18446744073709551615")) > 0) return "0";
+        }
+        else if (UIUtils.architecture == 32) {
+          if (valueInDec.compareTo(BigInteger.ZERO) < 0) return "4294967295";
+          if (valueInDec.compareTo(new BigInteger("4294967295")) > 0) return "0";
+        }
+        break;
+      case SIGNED_LONG:
+        if (UIUtils.architecture == 64) {
+          if (valueInDec.compareTo(new BigInteger("-9223372036854775808")) < 0) return "9223372036854775807";
+          if (valueInDec.compareTo(new BigInteger("9223372036854775807")) > 0) return "-9223372036854775808";
+        }
+        else if (UIUtils.architecture == 32) {
+          if (valueInDec.compareTo(new BigInteger("-2147483648")) < 0) return "2147483647";
+          if (valueInDec.compareTo(new BigInteger("2147483647")) > 0) return "-2147483648";
+        }
+        break;
     }
-    
-    return convertHexToDecimal(hex, signed).toString();
-  }
+    return valueIn;
+  } // clampValue()
+  
   
   
   // Can't get Java's built-ins to do this consistently, so let's do it manually
-  public static BigInteger convertHexToDecimal(String hex, boolean signed) {
+  public static String convertHexToDecimal(String hex, VariableType typeIn) {
+  
+    boolean signed = (typeIn == VariableType.SIGNED_CHAR || typeIn == VariableType.SIGNED_INT ||
+                      typeIn == VariableType.SIGNED_LONG || typeIn == VariableType.SIGNED_SHORT);
+  
     int place = 0;
     BigInteger runningTally = BigInteger.ZERO;
     for (int digit = hex.length()-1; digit >= 0; --digit) {
@@ -176,81 +195,111 @@ public class VariableRepresentation {
         ++place;
       }
     }
-    return runningTally;
+    return runningTally.toString();
   }
   
   
-  public String getHex(VariableType convertTo, boolean convertToBigEndian) {
-    if (type == VariableType.STRING || convertTo == VariableType.STRING) return value;
-    List<String> bytes = divideHexIntoBytes(value.substring(2));
-    if (convertToBigEndian != isBigEndian) Collections.reverse(bytes);
-    String joinedBytes = getBytesByType(String.join("", bytes), convertTo);
+  
+  // Can't get Java's built-ins to do this right for big numbers, so let's do it manually
+  public String convertDecimalToHex(String decimal) {
+  
+    // Convert magnitude to hex
+    BigInteger magnitude = new BigInteger(decimal);
+    if (decimal.charAt(0) == '-') magnitude = new BigInteger(decimal.substring(1));
+      
+    int remainder;
+    String hex = "";
+    char symbols[] = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+ 
+    if (decimal.equals("0")) hex = "0";
+    else {
+      while (magnitude.compareTo(BigInteger.ZERO) > 0)      {
+        remainder = magnitude.mod(new BigInteger("16")).intValue(); 
+        hex = symbols[remainder] + hex; 
+        magnitude = magnitude.divide(new BigInteger("16"));
+      }
+    }
     
-    return "0x" + joinedBytes;
-  }
-  
-  
-  public void reverseEndianness(boolean newEndianness) {
-    if (isBigEndian != newEndianness) {
-      List<String> bytes = divideHexIntoBytes(value.substring(2));
-      Collections.reverse(bytes);
-      String joinedBytes = getBytesByType(String.join("", bytes), type);
-      setValue("0x" + joinedBytes, type);
-      isBigEndian = !isBigEndian;
-    }
-  }
-  
-  
-  public String getBinary(VariableType convertTo, boolean convertToBigEndian) {
-    if (type == VariableType.STRING || convertTo == VariableType.STRING) return value;
-    String hex = getHex(convertTo, convertToBigEndian).substring(2);
+    // Convert hex to binary
+    String binary = "";
+    for (int s = 0; s < hex.length(); ++s) binary += convertHexToBinary(hex.charAt(s));
     
-    int numZeroes = 0;
-    switch (convertTo) {
-      case UNSIGNED_CHAR:
-      case SIGNED_CHAR: numZeroes = 8; break;
-      case SIGNED_SHORT: 
-      case UNSIGNED_SHORT: numZeroes = 16; break;
-      case SIGNED_INT: 
-      case UNSIGNED_INT: numZeroes = 32; break;
-      case SIGNED_LONG: 
-      case UNSIGNED_LONG: numZeroes = UIUtils.architecture; break;
+    // If it's a negative number, take the two's complement
+    String negativeBinary = "";
+    if (decimal.charAt(0) == '-') {
+      for (int s = 0; s < binary.length(); ++s) {
+        if (binary.charAt(s) == '0') negativeBinary += "1";
+        else negativeBinary += "0";
+      }
+      binary = addBinary(negativeBinary, "1");
     }
-    return extend(numZeroes, new BigInteger(hex, 16).toString(2),
-     new BigInteger(hex, 16).compareTo(BigInteger.ZERO) >= 0);
+    
+    // Convert the binary back to hex
+    hex = "";
+    while (true) {
+      hex += convertBinaryToHex(binary.substring(0, 4));
+      if (binary.length() <= 4) break;
+      binary = binary.substring(4, binary.length());
+    }
+     
+    return hex;
   }
   
   
-  private String getBytesByType(String digits, VariableType convertTo) {
-    int numDigits;
-    switch (convertTo) {
-      case SIGNED_CHAR:
-      case UNSIGNED_CHAR:
-        numDigits = 2;
-        if (digits.length() >= numDigits) digits = digits.substring(digits.length()-numDigits);
-        else digits = extend(numDigits, digits, new BigInteger(digits, 16).compareTo(BigInteger.ZERO) >= 0);
-        break;
-      case SIGNED_SHORT:
-      case UNSIGNED_SHORT:
-        numDigits = 4;
-        if (digits.length() >= numDigits) digits = digits.substring(digits.length()-numDigits);
-        else digits = extend(numDigits, digits, new BigInteger(digits, 16).compareTo(BigInteger.ZERO) >= 0);
-        break;
-      case SIGNED_INT:
-      case UNSIGNED_INT:
-        numDigits = 8;
-        if (digits.length() >= numDigits) digits = digits.substring(digits.length()-numDigits);
-        else digits = extend(numDigits, digits, new BigInteger(digits, 16).compareTo(BigInteger.ZERO) >= 0);
-        break;
-      case SIGNED_LONG:
-      case UNSIGNED_LONG:
-        numDigits = UIUtils.architecture / 4;
-        if (digits.length() >= numDigits) digits = digits.substring(digits.length()-numDigits);
-        else digits = extend(numDigits, digits, new BigInteger(digits, 16).compareTo(BigInteger.ZERO) >= 0);
-        break;        
+  
+  private String convertHexToBinary(char digit) {
+    switch (digit) {
+      case '0': return "0000";
+      case '1': return "0001";
+      case '2': return "0010";
+      case '3': return "0011";
+      case '4': return "0100";
+      case '5': return "0101";
+      case '6': return "0110";
+      case '7': return "0111";
+      case '8': return "1000";
+      case '9': return "1001";
+      case 'A': return "1010";
+      case 'B': return "1011";
+      case 'C': return "1100";
+      case 'D': return "1101";
+      case 'E': return "1110";
+      case 'F': return "1111";
     }
-    return digits;
+    return "0000";
   }
+  
+  
+  
+  private char convertBinaryToHex(String binary) {
+    if (binary.equals("0000")) return '0';
+    else if (binary.equals("0001")) return '1';
+    else if (binary.equals("0010")) return '2';
+    else if (binary.equals("0011")) return '3';
+    else if (binary.equals("0100")) return '4';
+    else if (binary.equals("0101")) return '5';
+    else if (binary.equals("0110")) return '6';
+    else if (binary.equals("0111")) return '7';
+    else if (binary.equals("1000")) return '8';
+    else if (binary.equals("1001")) return '9';
+    else if (binary.equals("1010")) return 'A';
+    else if (binary.equals("1011")) return 'B';
+    else if (binary.equals("1100")) return 'C';
+    else if (binary.equals("1101")) return 'D';
+    else if (binary.equals("1110")) return 'E';
+    else if (binary.equals("1111")) return 'F';
+    return '0';
+  }
+  
+  
+  
+  // assumes any necessary resizings have already been done
+  public String reverseBytes(String valueIn) {
+    List<String> bytes = divideHexIntoBytes(valueIn);
+    Collections.reverse(bytes);
+    return String.join("", bytes);
+  }
+  
   
   
   private List<String> divideHexIntoBytes(String hex) {
@@ -263,158 +312,83 @@ public class VariableRepresentation {
   }
   
   
-  /*private String signExtend(int numDigits, String str) {
-  System.err.println("DEBUG: " + numDigits + ", " + str);
-  if (str.equals("8")) System.err.println("DEBUG2: " + new BigInteger(str).toString(16));
-    boolean leadingOne =
-      (str.charAt(0) == '8' || str.charAt(0) == '9' || str.charAt(0) == 'A' ||
-       str.charAt(0) == 'B' || str.charAt(0) == 'C' || str.charAt(0) == 'D' ||
-       str.charAt(0) == 'E' || str.charAt(0) == 'F');
-    
-    String extend = "";
-    if (!leadingOne) {
-      for (int n = 0; n < numDigits; ++n) extend += "0";
-    }
-    else {
-      for (int n = 0; n < numDigits; ++n) extend += "F";
-    }
-    return extend.substring(str.length()) + str;
-  } */
   
+  public String resizeHex(VariableType typeIn, String hex, boolean positive) {
+
+    int numDigits = 8;
   
-  private String extend(int numDigits, String str, boolean positive) {
-    String extend = "";
-    if (positive) {
-      for (int n = 0; n < numDigits; ++n) extend += "0";
-    }
-    else {
-      for (int n = 0; n < numDigits; ++n) extend += "F";
-    }
-    return extend.substring(str.length()) + str;
-  }
-  
-  
-  public String clampValue(VariableType typeIn, String valueIn) {
-    switch (type) {
+    switch (typeIn) {
       case UNSIGNED_CHAR:
-        if (Long.parseLong(valueIn) < 0) {
-          setValue(new BigInteger("255").toString(), typeIn);
-          return "255";
-        }
-        if (Long.parseLong(valueIn) > 255) {
-          setValue("0x00", typeIn);
-          return "0";
-        }
-        break;
       case SIGNED_CHAR:
-        if (Long.parseLong(valueIn) < -128) {
-          setValue(new BigInteger("127").toString(), typeIn);
-          return "127";
-        }
-        if (Long.parseLong(valueIn) > 127) {
-          setValue(new BigInteger("-128").toString(), typeIn);
-          return "-128";
-        }
+        numDigits = 2;
         break;
       case UNSIGNED_SHORT:
-        if (Long.parseLong(valueIn) < 0) {
-          setValue(new BigInteger("65535").toString(), typeIn);
-          return "65535";
-        }
-        if (Long.parseLong(valueIn) > 65535) {
-          setValue("0x00", typeIn);
-          return "0";
-        }
-        break;
       case SIGNED_SHORT:
-        if (Long.parseLong(valueIn) < -32768) {
-          setValue(new BigInteger("32767").toString(), typeIn);
-          return "32767";
-        }
-        if (Long.parseLong(valueIn) > 32767) {
-          setValue(new BigInteger("-32768").toString(), typeIn);
-          return "-32768";
-        }
+        numDigits = 4;
         break;
       case UNSIGNED_INT:
-        if (Long.parseLong(valueIn) < 0) {
-          setValue(new BigInteger("4294967295").toString(), typeIn);
-          return "4294967295";
-        }
-        if (new BigInteger(valueIn).compareTo(new BigInteger("4294967295")) == 1) {
-          setValue("0x00", typeIn);
-          return "0";
-        }
-        break;
       case SIGNED_INT:
-        if (Long.parseLong(valueIn) < -2147483648) {
-          setValue(new BigInteger("2147483647").toString(), typeIn);
-          return "2147483647";
-        }
-        if (Long.parseLong(valueIn) > 2147483647) {
-          setValue(new BigInteger("-2147483648").toString(), typeIn);
-          return "-2147483648";
-        }
+        numDigits = 8;
         break;
       case UNSIGNED_LONG:
-        if (UIUtils.architecture == 64) {
-          if (new BigInteger(valueIn).compareTo(BigInteger.valueOf(0)) == -1) {
-            setValue(new BigInteger("18446744073709551615").toString(), typeIn);
-            return "18446744073709551615";
-          }
-          else if (new BigInteger(valueIn).compareTo(new BigInteger("18446744073709551615")) == 1) {
-            setValue("0x00", typeIn);
-            return "0";
-          }
-        }
-        else if (UIUtils.architecture == 32) {
-          if (Long.parseLong(valueIn) < 0) {
-            setValue(new BigInteger("4294967295").toString(), typeIn);
-            return "4294967295";
-          }
-          if (new BigInteger(valueIn).compareTo(new BigInteger("4294967295")) == 1) {
-            setValue("0x00", typeIn);
-            return "0";
-          }
-        }
-        break;
       case SIGNED_LONG:
-        if (UIUtils.architecture == 64) {
-          if (new BigInteger(valueIn).compareTo(new BigInteger("-9223372036854775808")) == -1) {
-            setValue(new BigInteger("9223372036854775807").toString(), typeIn);
-            return "9223372036854775807";
-          }
-          else if (new BigInteger(valueIn).compareTo(new BigInteger("9223372036854775807")) == 1) {
-            setValue(new BigInteger("-9223372036854775808").toString(), typeIn);
-            return "-9223372036854775808";
-          }
-        }
-        else if (UIUtils.architecture == 32) {
-          if (Long.parseLong(valueIn) < -2147483648) {
-            setValue(new BigInteger("2147483647").toString(), typeIn);
-            return "2147483647";
-          }
-          if (Long.parseLong(valueIn) > 2147483647) {
-            setValue(new BigInteger("-2147483648").toString(), typeIn);
-            return "-2147483648";
-          }
-        }
+        numDigits = UIUtils.architecture / 4;
         break;
     }
-    setValue(new BigInteger(valueIn).toString(), typeIn);
-    return valueIn;
+  
+    String resize = "";
+    
+    if (hex.length() < numDigits) {
+      if (positive) {
+        for (int n = 0; n < numDigits; ++n) resize += "0";
+      }
+      else {
+        for (int n = 0; n < numDigits; ++n) resize += "F";
+      }
+      return resize.substring(hex.length()) + hex;
+    }
+    else if (hex.length() > numDigits) return hex.substring(hex.length() - numDigits);
+    else return hex;
+    
+  } // resizeHex()
+  
+  
+  private String addBinary(String a, String b) {
+        int la = a.length();
+        int lb = b.length();
+        
+        int max = Math.max(la, lb);
+        
+        StringBuilder sum = new StringBuilder("");
+        int carry = 0;
+        
+        for(int i = 0; i < max; i++){
+            int m = getBit(a, la - i - 1);
+            int n = getBit(b, lb - i - 1);
+            int add = m + n + carry;
+            sum.append(add % 2);
+            carry = add / 2;
+        }
+        
+        if(carry == 1)
+            sum.append("1");
+        
+        return sum.reverse().toString();
+        
   }
-
+    
+  private int getBit(String s, int index){
+        if(index < 0 || index >= s.length())
+            return 0;
+        
+        if(s.charAt(index) == '0')
+            return 0;
+        else
+            return 1;
+        
+  }
+  
+  
+  
+  
 }
-
-
-
-/*
-public enum VariableType {
-  SIGNED_CHAR, UNSIGNED_CHAR,
-  SIGNED_SHORT, UNSIGNED_SHORT,
-  SIGNED_INT, UNSIGNED_INT,
-  SIGNED_LONG, UNSIGNED_LONG,
-  STRING; 
-}
-*/
