@@ -75,7 +75,7 @@ public class UIMainWindow {
         String absolutePath = file.getAbsolutePath();
         coordinator.getRun().loadRun(absolutePath, 100, canvasCG);
         // Parse source
-        Pane sourceCodeLayout = UISourceCode.parseSourceCode(coordinator.getRun().cSource);
+        Node sourceCodeLayout = UISourceCode.parseSourceCode(coordinator.getRun().cSource);
         setTabContent(SubProgram.toString(SubProgram.SC), sourceCodeLayout);
         // Load source file together with program run -- DISABLED, boss didn't like it
 //        String possibleSourceFile = absolutePath.substring(0, absolutePath.length() - 13) + ".c";
@@ -236,7 +236,7 @@ public class UIMainWindow {
     Menu helpMenu = new Menu("Help");
     MenuItem menuDocumentation = new MenuItem("Documentation...");
     MenuItem menuAbout = new MenuItem("About...");
-    MenuItem menuVersion = new MenuItem("Alpha v18.01.28");
+    MenuItem menuVersion = new MenuItem("Alpha v18.03.13");
     helpMenu.getItems().addAll(menuDocumentation, menuAbout, menuVersion);
 
     //Main menu bar

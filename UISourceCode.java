@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.*;
 import javafx.beans.value.*;
+import javafx.geometry.*;
 import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -14,7 +15,7 @@ public class UISourceCode {
   private static ScrollPane assemblyScrollPane;
   private static Text assemblyText;
   private static double fontSize = 1.0;
-  private static VBox layout;
+  private static SplitPane layout;
   private static int previousSourceLine = -1;
   private static List<Text> sourceCode = new ArrayList<>();
   private static TextFlow sourceCodeDisplay;
@@ -22,11 +23,11 @@ public class UISourceCode {
   private static ScrollPane sourceCodeScrollPane;
   
   
-  public static Pane parseSourceCode(List<String> code) {
+  public static Node parseSourceCode(List<String> code) {
     
     assemblyDisplay = new TextFlow();
     assemblyScrollPane = new ScrollPane();
-    layout = new VBox(10);
+    layout = new SplitPane();
     sourceCodeDisplay = new TextFlow();
     sourceCodeLines = 0;
     sourceCodeScrollPane = new ScrollPane();
@@ -44,14 +45,16 @@ public class UISourceCode {
     assemblyScrollPane.setMinHeight(70);
     assemblyScrollPane.setContent(assemblyDisplay);
     sourceCodeScrollPane.setContent(sourceCodeDisplay);
-    layout.getChildren().addAll(assemblyScrollPane, sourceCodeScrollPane);
+    layout.getItems().addAll(assemblyScrollPane, sourceCodeScrollPane);
+    layout.setOrientation(Orientation.VERTICAL);
+    layout.setDividerPositions(0.1f, 0.9f);
     
     return layout;
     
   }
   
 
-  public static Pane buildSC(Scene scene, int sourceLine, String assembly) {
+  public static Node buildSC(Scene scene, int sourceLine, String assembly) {
   
     for (Text text : sourceCode) text.setFont(new Font("Monospace",
       UIUtils.calculateFontSize(fontSize, scene.getWidth(), scene.getHeight())));
