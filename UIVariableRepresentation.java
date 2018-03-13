@@ -58,14 +58,23 @@ public class UIVariableRepresentation {
     grid.setVgap(15);
     grid.setPadding(new Insets(10, 10, 10, 10));
     
-    for (int n = 0; n < 3; ++n) {
+    {
       ColumnConstraints column = new ColumnConstraints();
-      column.setPercentWidth(20.0);
+      column.setPercentWidth(25.0);
       grid.getColumnConstraints().add(column);
     }
-    ColumnConstraints lastColumn = new ColumnConstraints();
-    lastColumn.setPercentWidth(40.0);
-    grid.getColumnConstraints().add(lastColumn);
+    
+    {
+      ColumnConstraints column = new ColumnConstraints();
+      column.setPercentWidth(25.0);
+      grid.getColumnConstraints().add(column);
+    }
+    
+    {
+      ColumnConstraints column = new ColumnConstraints();
+      column.setPercentWidth(50.0);
+      grid.getColumnConstraints().add(column);
+    }
     
     for (int n = 0; n < 8; ++n) {
       RowConstraints row = new RowConstraints();
@@ -157,57 +166,58 @@ public class UIVariableRepresentation {
     });
     grid.add(btnIncrementValue, 1, 2, 1, 1);
     
+    // Value lines
+    canvas = new Canvas(500, 80);
+    canvas.widthProperty().bind(window.widthProperty().multiply(0.9));
+    canvas.heightProperty().bind(window.heightProperty().divide(8));
+    gc = canvas.getGraphicsContext2D();
+    canvas.widthProperty().addListener(observable -> drawVisualization(
+      canvas.getWidth(), canvas.getHeight(), gc, txtBytesTop.getText(),
+      txtValueTop.getText(),
+      VariableType.toString(getTypeFromSelection(cboTopType.getValue()))));
+    canvas.heightProperty().addListener(observable -> drawVisualization(
+      canvas.getWidth(), canvas.getHeight(),  gc, txtBytesTop.getText(),
+      txtValueTop.getText(),
+      VariableType.toString(getTypeFromSelection(cboTopType.getValue()))));
+    grid.add(canvas, 0, 3, 3, 1);
+    
+    canvasBottom = new Canvas(500, 80);
+    canvasBottom.widthProperty().bind(window.widthProperty().multiply(0.9));
+    canvasBottom.heightProperty().bind(window.heightProperty().divide(8));
+    gcBottom = canvasBottom.getGraphicsContext2D();
+    canvasBottom.widthProperty().addListener(observable -> drawVisualization(
+      canvasBottom.getWidth(), canvasBottom.getHeight(), gcBottom, txtBytesBottom.getText(),
+      txtValueBottom.getText(),
+      VariableType.toString(getTypeFromSelection(cboBottomType.getValue()))));
+    canvasBottom.heightProperty().addListener(observable -> drawVisualization(
+      canvasBottom.getWidth()-10, canvasBottom.getHeight()-10, gcBottom, txtBytesBottom.getText(),
+      txtValueBottom.getText(),
+      VariableType.toString(getTypeFromSelection(cboBottomType.getValue()))));
+    grid.add(canvasBottom, 0, 4, 3, 1);
+
+    // Bottom part
     Label lblInterpret = new Label("Interpret As:");
-    grid.add(lblInterpret, 0, 3, 3, 1);
+    grid.add(lblInterpret, 0, 5, 3, 1);
     
     cboBottomType = new ComboBox<>();
     cboBottomType.getItems().addAll("signed char", "unsigned char", "signed short", 
       "unsigned short", "signed int", "unsigned int", "signed long", "unsigned long");
     cboBottomType.getSelectionModel().select(getIndexFromType(type));
     cboBottomType.setOnAction(e -> updateUI());
-    grid.add(cboBottomType, 0, 4, 1, 1);
+    grid.add(cboBottomType, 0, 6, 1, 1);
     
     cboBottomEndianness = new ComboBox<>();
     cboBottomEndianness.getItems().addAll(BIG_ENDIAN, LITTLE_ENDIAN);
     cboBottomEndianness.getSelectionModel().select(0);
     cboBottomEndianness.setOnAction(e -> updateUI());
-    grid.add(cboBottomEndianness, 1, 4, 1, 1);
+    grid.add(cboBottomEndianness, 1, 6, 1, 1);
     
     txtValueBottom = new TextField(value);
     txtValueBottom.setEditable(false);
-    grid.add(txtValueBottom, 2, 4, 1, 1);
+    grid.add(txtValueBottom, 2, 6, 1, 1);
     
     txtBytesBottom = new TextField(representation.getValue(cboTopEndianness.getValue().equals(BIG_ENDIAN)));
-    grid.add(txtBytesBottom, 0, 5, 3, 1);
-    
-    // Value "clocks"
-    canvas = new Canvas(240, 240);
-    canvas.widthProperty().bind(window.widthProperty().multiply(0.35));
-    canvas.heightProperty().bind(window.heightProperty().divide(2));
-    gc = canvas.getGraphicsContext2D();
-    canvas.widthProperty().addListener(observable -> drawClock(
-      canvas.getWidth()-10, canvas.getHeight()-80, gc, txtBytesTop.getText(),
-      txtValueTop.getText(),
-      VariableType.toString(getTypeFromSelection(cboTopType.getValue()))));
-    canvas.heightProperty().addListener(observable -> drawClock(
-      canvas.getWidth()-10, canvas.getHeight()-80,  gc, txtBytesTop.getText(),
-      txtValueTop.getText(),
-      VariableType.toString(getTypeFromSelection(cboTopType.getValue()))));
-    grid.add(canvas, 3, 0, 1, 4);
-    
-    canvasBottom = new Canvas(240, 240);
-    canvasBottom.widthProperty().bind(window.widthProperty().multiply(0.35));
-    canvasBottom.heightProperty().bind(window.heightProperty().divide(2));
-    gcBottom = canvasBottom.getGraphicsContext2D();
-    canvasBottom.widthProperty().addListener(observable -> drawClock(
-      canvasBottom.getWidth()-10, canvasBottom.getHeight()-80, gcBottom, txtBytesBottom.getText(),
-      txtValueBottom.getText(),
-      VariableType.toString(getTypeFromSelection(cboBottomType.getValue()))));
-    canvasBottom.heightProperty().addListener(observable -> drawClock(
-      canvasBottom.getWidth()-10, canvasBottom.getHeight()-80, gcBottom, txtBytesBottom.getText(),
-      txtValueBottom.getText(),
-      VariableType.toString(getTypeFromSelection(cboBottomType.getValue()))));
-    grid.add(canvasBottom, 3, 3, 1, 4);
+    grid.add(txtBytesBottom, 0, 7, 3, 1);
     
     // View menu
     Menu viewMenu = new Menu("View");
@@ -274,14 +284,14 @@ public class UIVariableRepresentation {
     txtBytesBottom.setText(bottomHex);
     txtValueBottom.setText(representation.convertHexToDecimal(
                             bottomHex, getTypeFromSelection(cboBottomType.getValue())));
-    drawClock(canvas.getWidth()-10, 
-              canvas.getHeight()-80, 
+    drawVisualization(canvas.getWidth(), 
+              canvas.getHeight(),
               gc, 
               txtBytesTop.getText(),
               txtValueTop.getText(),
               VariableType.toString(getTypeFromSelection(cboTopType.getValue())));
-    drawClock(canvasBottom.getWidth()-10,
-              canvasBottom.getHeight()-80, 
+    drawVisualization(canvasBottom.getWidth(),
+              canvasBottom.getHeight(),
               gcBottom, 
               txtBytesBottom.getText(),
               txtValueBottom.getText(),
@@ -369,12 +379,12 @@ public class UIVariableRepresentation {
   }
   
   
-  private static void drawClock(double width, 
-                                double height, 
-                                GraphicsContext gc, 
-                                String value,
-                                String decValue,
-                                String type) 
+  private static void drawVisualization(double width, 
+                                        double height, 
+                                        GraphicsContext gc, 
+                                        String value,
+                                        String decValue,
+                                        String type) 
   {
     BigDecimal min = BigDecimal.ZERO;
     BigDecimal max = BigDecimal.ZERO;
@@ -417,53 +427,57 @@ public class UIVariableRepresentation {
     min = min.abs();
     max = max.add(min);
     val = val.add(min);
-    BigDecimal proportion = val.divide(max, 5, RoundingMode.HALF_UP).multiply(new BigDecimal(360));
-    double angle = 360.0 - proportion.doubleValue();
+    
+    BigDecimal propIntermediate = val.divide(max, 5, RoundingMode.HALF_UP);
+    double proportion = propIntermediate.doubleValue();
     
     // draw
-    gc.clearRect(0, 0, width+10, height+90);
+    gc.clearRect(0, 0, width, height);
     
     gc.setLineWidth(5);
     
     gc.setFont(Font.font("Sans", FontWeight.BOLD, 12));
     gc.setTextAlign(TextAlignment.LEFT);
     
-    if (!type.contains("unsigned")) {
+/*    if (!type.contains("unsigned")) {
       gc.setFill(Color.rgb(255, 85, 0));
       gc.fillText("Negative", 5, 15);
       
-      gc.setFill(Color.rgb(50, 220, 50));
+      gc.setFill(Color.rgb(30, 180, 30));
       gc.fillText("Positive", 5, 35);
     }
     
     gc.setFill(Color.BLUE);
-    gc.fillText("Current value", 5, 55);
+    gc.fillText("Current value", 5, 55); /* */
     
     if (!type.contains("unsigned")) gc.setStroke(Color.rgb(235, 85, 0));
-    else gc.setStroke(Color.rgb(50, 220, 50));
-    gc.strokeArc(width*(1.0/4.0), height*(1.0/4.0), width/2.0, height/2.0, 90, 180, ArcType.OPEN);
-    gc.setStroke(Color.rgb(50, 220, 50));
-    gc.strokeArc(width*(1.0/4.0), height*(1.0/4.0), width/2.0, height/2.0, 270, 180, ArcType.OPEN);
+    else gc.setStroke(Color.rgb(30, 180, 30));
+    gc.strokeLine(0, height/2.0, width/2.0, height/2.0);
+    gc.setStroke(Color.rgb(30, 180, 30));
+    gc.strokeLine(width/2.0, height/2.0, width, height/2.0);
     
     gc.setStroke(Color.BLUE);
     gc.setFill(Color.BLUE);
-    gc.fillText("0x" + value, width*(1.0/4.0)+20, height/2.0);
+    gc.setTextAlign(TextAlignment.CENTER);
+    gc.fillText("0x" + value, width*proportion, height/2.0-15);
     
     gc.setStroke(Color.rgb(255, 85, 0));
     gc.setFill(Color.rgb(255, 85, 0));
-    gc.setTextAlign(TextAlignment.RIGHT);
-    gc.fillText(getMinSizeByType(type), width/2.0-10, height*(7.0/8.0));
-    if (!type.contains("unsigned")) gc.fillText("-1", width/2.0-10, height*(3.0/16.0));
-    
-    gc.setStroke(Color.rgb(50, 220, 50));
-    gc.setFill(Color.rgb(50, 220, 50));
     gc.setTextAlign(TextAlignment.LEFT);
-    gc.fillText(getMaxSizeByType(type), width/2.0+10, height*(7.0/8.0));
-    if (!type.contains("unsigned")) gc.fillText("0", width/2.0+10, height*(3.0/16.0));
+    gc.fillText(getMinSizeByType(type), 0, height/2.0+15);
+    gc.setTextAlign(TextAlignment.RIGHT);
+    if (!type.contains("unsigned")) gc.fillText("-1", width/2.0-10, height/2.0+15);
+    
+    gc.setStroke(Color.rgb(30, 180, 30));
+    gc.setFill(Color.rgb(30, 180, 30));
+    gc.setTextAlign(TextAlignment.RIGHT);
+    gc.fillText(getMaxSizeByType(type), width, height/2.0+15);
+    gc.setTextAlign(TextAlignment.LEFT);
+    if (!type.contains("unsigned")) gc.fillText("0", width/2.0+10, height/2.0+15);
     
     gc.setFill(Color.BLUE);
     gc.setStroke(Color.BLUE);
-    gc.strokeArc(width*(1.0/4.0), height*(1.0/4.0), width/2.0, height/2.0, angle-5-90, 10, ArcType.OPEN);
+    gc.strokeLine(width*proportion-10, height/2.0, width*proportion+10, height/2.0);
   }
 
 }
