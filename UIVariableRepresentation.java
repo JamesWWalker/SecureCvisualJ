@@ -54,8 +54,8 @@ public class UIVariableRepresentation {
     BorderPane container = new BorderPane();
 
     GridPane grid = new GridPane();
-    grid.setHgap(15);
-    grid.setVgap(15);
+    grid.setHgap(8);
+    grid.setVgap(24);
     grid.setPadding(new Insets(10, 10, 10, 10));
     
     {
@@ -76,11 +76,11 @@ public class UIVariableRepresentation {
       grid.getColumnConstraints().add(column);
     }
     
-    for (int n = 0; n < 8; ++n) {
-      RowConstraints row = new RowConstraints();
-      row.setPercentHeight(12.5);
-      grid.getRowConstraints().add(row);
-    }
+//    for (int n = 0; n < 8; ++n) {
+//      RowConstraints row = new RowConstraints();
+//      row.setPercentHeight(12.5);
+//      grid.getRowConstraints().add(row);
+//    }
 
     cboTopType = new ComboBox<>();
     cboTopType.getItems().addAll("signed char", "unsigned char", "signed short", "unsigned short", 
@@ -142,6 +142,7 @@ public class UIVariableRepresentation {
     grid.add(txtValueTop, 2, 0, 1, 1);
     
     txtBytesTop = new TextField(representation.getValue(cboTopEndianness.getValue().equals(BIG_ENDIAN)));
+    txtBytesTop.setEditable(false);
     grid.add(txtBytesTop, 0, 1, 3, 1);
     
     Button btnDecrementValue = new Button("Decrement value (-)");
@@ -217,6 +218,7 @@ public class UIVariableRepresentation {
     grid.add(txtValueBottom, 2, 6, 1, 1);
     
     txtBytesBottom = new TextField(representation.getValue(cboTopEndianness.getValue().equals(BIG_ENDIAN)));
+    txtBytesBottom.setEditable(false);
     grid.add(txtBytesBottom, 0, 7, 3, 1);
     
     // View menu
