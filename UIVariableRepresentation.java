@@ -434,8 +434,9 @@ public class UIVariableRepresentation {
     
     gc.setStroke(Color.BLUE);
     gc.setFill(Color.BLUE);
-    gc.setTextAlign(TextAlignment.CENTER);
-    gc.fillText("0x" + value, width/2.0, height/2.0-15);
+    if (proportion < 0.5) gc.setTextAlign(TextAlignment.LEFT);
+    else gc.setTextAlign(TextAlignment.RIGHT);
+    gc.fillText("0x" + value, width * proportion, height/2.0-15);
     
     gc.setStroke(Color.rgb(255, 85, 0));
     gc.setFill(Color.rgb(255, 85, 0));
